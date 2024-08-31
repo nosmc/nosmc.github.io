@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Datapack Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAFyGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDYwLCAyMDIwLzA1LzEyLTE2OjA0OjE3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDYtMDVUMTQ6MzM6MzYrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIzLTA2LTA1VDE0OjM0OjI4KzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIzLTA2LTA1VDE0OjM0OjI4KzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOmNiNDRlZjM0LTY4YWMtNGIxZC05ZDk5LTVlM2UzNWU1NmNjZSIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjZkNTQ5NzQ0LTMwYjEtZTk0My04YmM3LWNkYzZhYjg2ZTNlYiIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjI2ZTY0Y2NhLWYxNDItNDQ2ZC1hMjNmLTUxOGVlNTE4NzZmNCI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MjZlNjRjY2EtZjE0Mi00NDZkLWEyM2YtNTE4ZWU1MTg3NmY0IiBzdEV2dDp3aGVuPSIyMDIzLTA2LTA1VDE0OjMzOjM2KzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoTWFjaW50b3NoKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6Y2I0NGVmMzQtNjhhYy00YjFkLTlkOTktNWUzZTM1ZTU2Y2NlIiBzdEV2dDp3aGVuPSIyMDIzLTA2LTA1VDE0OjM0OjI4KzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoTWFjaW50b3NoKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7VQjbNAAADcklEQVRYheWXS2hcVRjHf+fOTGdaq0lfQtPaaK1SSqHVgkixBaEulFIXFSxkUyKCoEhX7kQqiLhyURH0IaKIQkXbhYguREEsxaJt2rSxSU3atHnNdCbJZObec46LmcdNmkky42Qj/uFw7z3f+f7f/3x3zv1GjDH8n2bOJ/jV1hYBhAKTkB5WgfNHVgb+q7Gy1gVEQIwv1jSXghbjXG92HpbtWvGEOfjLXe7Xow+ioTpR6nLOh6IXYOWdbwIwPnolpBj03rn6zzr1JQBaHtjH3Y/upfX+neTaa3s0fQEnBGIMJpbD7Qbvf/oFInD/E/t56NmnuO0T2P7ic9y/ZxfNrS2oKk6dOk1q2rDngBaJwF3bt9Hc3IQbj5NvaQCRv+OaMGSPV8+6p7/h0NEjWOs48N4HfDc7yNmh+L8f4Oqx41ybmuDN7z8iHot5mTFMjY2RG7zKjtFDdO5+nDVbNmEE+t+G/e/CsZE2+s8d5v3d73LX7TspFArcf+9GvR0CMAKFUsj5gV8ZOX+Rka6tZNbd1FjPdWIbcf3YMhMWODv8J/uOH0WA3uFBHCWcjzYWYBUYMegzCT6ZgncugNgKZ3v6MaqIAoqS8x36Dx1kLp8niiLCMCSKIrTgXDcQRfC1SbDKKIe8PzOwTRfuPQBmwYyOSThWpKs1YnzYGGtQVayIOAtD7hhOu5BIhWMFRwCJgkp1KnHmAhZIhBWX1Y0YUGVe83zujnDF2ULrxNGqJvXNuRJFJUtSgvH/mJhHuZ4awSpYs91PpL4AE0GGEU+Ml+lOFUkuNoUIxojI9XZwC5bBJIdnkuQjJedcvy3UV8Iw4Mj0JCcvnSL/yA6m1nRQbGrGpIBQ8T0YiypOhXGTMGzW8kF+Ld8VW9mVE+7b0MnO3o2sSSUr5tZXQhSeOXmcfDBPd3eW/kKRrzpW8+2aDnSqGW2Jk0uliEyRzNg0nXmfbdM+PcWQk5mA3ByMT0/xxoWf+WXVNE+v7+CB9Z1kEimqmV8xIIqi6wooxRDXR5ABYy0aQFcxpDsM2Dk+RdeVAeYihYtXCHZ3suHzV/gzXJjvzFTJr7qE1loym7fQunUrTckk4bU8E319+IMDRI5SymQoZLM0+z75gQHCfB4/DJkZHmJu8ipWNwKwecsW2nt6SCSTBNPTTJw5g+8YcrkcmY0bMUmXfv8yhenpRkaGKf0FanV1XK5Qc+YAAAAASUVORK5CYII=">
+    <style>
+        :root {
+            --background-color-light: #f0f0f0;
+            --background-color-dark: #1a1a1a;
+            --text-color-light: #333;
+            --text-color-dark: #ddd;
+            --panel-background-color-light: #ffffff;
+            --panel-background-color-dark: #2b2b2b;
+            --border-color-light: #ccc;
+            --border-color-dark: #444;
+            --primary-color: #55a630;
+            --primary-color-dark: #407f22;
+            --sent-message-bg: #55a630;
+            --received-message-bg: #4e4e4e;
+            --sent-message-text-color: white;
+            --received-message-text-color: white;
+            --developer-link-color: #0eb0f0;
+            --developer-message-bg: #ff4081;
+            --developer-message-text-color: white;
+            --time-username-spacing: 10px;
+            --footer-link-color: #55a630;
+            --footer-link-hover-color: #407f22;
+            --donate-link-color: #ff4081;
+            --donate-link-hover-color: #e73370;
+            --modal-background-color: rgba(0, 0, 0, 0.6);
+            --modal-content-background: var(--panel-background-color);
+            --accent-color: #ff4081;
+            --accent-color-dark: #c2185b;
+            --shadow-light: 0 8px 20px rgba(0, 0, 0, 0.1);
+            --shadow-dark: 0 8px 20px rgba(0, 0, 0, 0.5);
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            --background-color: var(--background-color-light);
+            --text-color: var(--text-color-light);
+            --panel-background-color: var(--panel-background-color-light);
+            --border-color: var(--border-color-light);
+            --scrollbar-color: #aaa;
+            --language-button-color: var(--primary-color);
+            --shadow: var(--shadow-light);
+        }
+
+        [data-theme="dark"] {
+            --background-color: var(--background-color-dark);
+            --text-color: var(--text-color-dark);
+            --panel-background-color: var(--panel-background-color-dark);
+            --border-color: var(--border-color-dark);
+            --scrollbar-color: #666;
+            --language-button-color: var(--primary-color-dark);
+            --shadow: var(--shadow-dark);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Minecraft', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--panel-background-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-color);
+            border-radius: 5px;
+            border: 2px solid var(--panel-background-color);
+        }
+
+        header, footer {
+            width: 100%;
+            background-color: var(--panel-background-color);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            z-index: 1000;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            top: 0;
+            left: 0;
+        }
+
+        footer {
+            bottom: 0;
+            left: 0;
+            color: var(--text-color);
+        }
+
+        header h1, footer p {
+            color: var(--primary-color);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .home-button, .dropdown-button, .button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            height: 41px;
+        }
+
+        .home-button:hover, .dropdown-button:hover, .button:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .home-button:active, .dropdown-button:active, .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--panel-background-color);
+            min-width: 160px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            border-radius: 8px;
+            top: 100%;
+            left: 0;
+        }
+
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        #theme-switcher, #language-switcher, #login-btn {
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        #theme-switcher:hover, #language-switcher:hover, #login-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .language-button {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            color: var(--language-button-color);
+        }
+
+        main {
+            padding-top: 60px;
+            padding-bottom: 50px;
+        }
+
+        .hero-section {
+            background-image: url('https://i.imgur.com/9fjG7UA.jpeg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .features-section {
+            padding: 5rem 2rem;
+            background-color: var(--background-color);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background-color: var(--panel-background-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .feature-description {
+            color: var(--text-color);
+        }
+
+        .generators-section {
+            padding: 5rem 2rem;
+            background-color: var(--panel-background-color);
+        }
+
+        .generators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .generator-card {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        .generator-card:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .generator-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .generator-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .footer-links a {
+            color: var(--footer-link-color);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a[aria-label="YouTube"] {
+            color: #FF0000;
+        }
+
+        .footer-links a[aria-label="Instagram"] {
+            color: #E1306C;
+        }
+
+        .footer-links a[aria-label="Discord"] {
+            color: #7289DA;
+        }
+
+        .footer-links a:hover {
+            transform: translateY(-2px);
+            text-decoration: underline;
+        }
+
+        #developer-link {
+            font-weight: bold;
+            color: var(--developer-link-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        #developer-link:hover {
+            transform: translateY(-2px);
+            text-decoration: underline;
+        }
+
+        .donate {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: var(--donate-link-color);
+            margin-left: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .donate i {
+            margin-right: 5px;
+        }
+
+        .donate:hover {
+            color: var(--donate-link-hover-color);
+            transform: translateY(-2px);
+        }
+
+        .chat-button {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        #chat-container {
+            width: 400px;
+            height: 500px;
+            position: fixed;
+            bottom: 140px;
+            right: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            display: none;
+            background-color: var(--panel-background-color);
+            z-index: 1002;
+            flex-direction: column;
+        }
+
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: var(--panel-background-color);
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        #chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-messages::-webkit-scrollbar-track {
+            background: var(--panel-background-color);
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-color);
+            border-radius: 10px;
+        }
+
+        #chat-messages li {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        #chat-messages li.sent {
+            text-align: right;
+            align-items: flex-end;
+        }
+
+        #chat-messages li.received {
+            text-align: left;
+            align-items: flex-start;
+        }
+
+        #chat-messages li.developer .message-content {
+            background-color: var(--developer-message-bg);
+            color: var(--developer-message-text-color);
+        }
+
+        #chat-messages li .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            width: 100%;
+        }
+
+        #chat-messages li.sent .message-header {
+            justify-content: flex-end;
+        }
+
+        #chat-messages li.received .message-header {
+            justify-content: flex-start;
+        }
+
+        #chat-messages li img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        #chat-messages li.sent .message-header .time {
+            order: 1;
+            margin-right: var(--time-username-spacing);
+        }
+
+        #chat-messages li.sent .message-header .username {
+            order: 2;
+            margin-right: var(--time-username-spacing);
+        }
+
+        #chat-messages li.sent .message-header img {
+            order: 3;
+            margin-right: 0;
+            margin-left: var(--time-username-spacing);
+        }
+
+        #chat-messages li.received .message-header img {
+            order: 1;
+            margin-right: var(--time-username-spacing);
+        }
+
+        #chat-messages li.received .message-header .username {
+            order: 2;
+            margin-right: var(--time-username-spacing);
+        }
+
+        #chat-messages li.received .message-header .time {
+            order: 3;
+        }
+
+        #chat-messages .message-content {
+            padding: 10px 15px;
+            border-radius: 10px;
+            background-color: var(--received-message-bg);
+            color: var(--received-message-text-color);
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        #chat-messages li.sent .message-content {
+            background-color: var(--sent-message-bg);
+            color: var(--sent-message-text-color);
+            margin-left: auto;
+        }
+
+        #chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: var(--panel-background-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        #chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-right: 10px;
+            background-color: var(--panel-background-color);
+            color: var(--text-color);
+        }
+
+        #chat-input button {
+            padding: 10px 20px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #chat-input button:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-2px);
+        }
+
+        #login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-background-color);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #login-modal-content {
+            background-color: var(--modal-content-background);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #login-modal-content h3 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .login-method-button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .login-method-button:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-2px);
+        }
+
+        .close-modal {
+            margin-top: 20px;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 14px;
+            text-decoration: underline;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+            }
+
+            .features-grid,
+            .generators-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #chat-container {
+                width: 100%;
+                height: 100%;
+                right: 0;
+                bottom: 0;
+                border-radius: 0;
+            }
+
+            .header-right {
+                flex-wrap: wrap;
+            }
+
+            .home-button, .dropdown-button, .button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <header>
+        <h1><i class="fas fa-cogs"></i> <span id="headerTitle">Minecraft Datapack Generator</span></h1>
+        <div class="header-right">
+            <a href="https://noshere.github.io" class="home-button" aria-label="Home">
+                <i class="fas fa-home"></i> <span id="home">Home</span>
+            </a>
+            <div class="dropdown">
+                <button class="dropdown-button" aria-label="Generators"><i class="fas fa-caret-down"></i> <span id="generators">Generators</span></button>
+                <div class="dropdown-content">
+                    <a href="#" data-generator="text"><span id="generatorText">Text</span></a>
+                    <a href="#" data-generator="item"><span id="generatorItem">Item</span></a>
+                    <a href="#" data-generator="entity"><span id="generatorEntity">Entity</span></a>
+                </div>
+            </div>
+            <button class="language-button" id="language-switcher" aria-label="Switch Language">
+                <i class="fas fa-language"></i>
+            </button>
+            <div id="theme-switcher" aria-label="Switch Theme"><i class="fas fa-adjust"></i></div>
+            <div id="login-btn" aria-label="Login"><i class="fas fa-user"></i></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title" id="heroTitle">Welcome to Minecraft Datapack Generator</h1>
+                <p class="hero-description" id="heroDescription">Create custom datapacks for Minecraft with ease. No coding knowledge required!</p>
+                <a href="#generators" class="cta-button" id="getStartedBtn">Get Started</a>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-magic"></i></div>
+                    <h3 class="feature-title" id="feature1Title">Easy to Use</h3>
+                    <p class="feature-description" id="feature1Description">Intuitive interface for creating datapacks without coding knowledge</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-cogs"></i></div>
+                    <h3 class="feature-title" id="feature2Title">Customizable</h3>
+                    <p class="feature-description" id="feature2Description">Tailor your datapacks to fit your specific needs</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-download"></i></div>
+                    <h3 class="feature-title" id="feature3Title">Export</h3>
+                    <p class="feature-description" id="feature3Description">Download your datapacks and use them in Minecraft</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="generators" class="generators-section">
+            <h2 class="section-title" id="generatorsTitle">Available Generators</h2>
+            <div class="generators-grid">
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-font"></i></div>
+                    <h3 class="generator-title" id="textGeneratorTitle">Text Generator</h3>
+                </div>
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-cube"></i></div>
+                    <h3 class="generator-title" id="itemGeneratorTitle">Item Generator</h3>
+                </div>
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-dragon"></i></div>
+                    <h3 class="generator-title" id="entityGeneratorTitle">Entity Generator</h3>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="https://www.youtube.com/@n_os_" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i> <span id="youtube">YouTube</span></a>
+            <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i> <span id="instagram">Instagram</span></a>
+            <a href="https://discord.gg/Pah6vw36Tw" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> <span id="discord">Discord</span></a>
+        </div>
+        <p>
+            <a id="developer-link" href="https://github.com/noshere" target="_blank">&copy; <span id="developedBy">Developed by nos</span></a>
+            <a href="https://donation-link.com" target="_blank" class="donate"><i class="fas fa-heart"></i> <span id="donate">Donate</span></a>
+        </p>
+    </footer>
+
+    <!-- Chat Container -->
+    <div id="chat-container">
+        <h2><i class="fas fa-comments"></i> <span id="chatTitle">Chat</span></h2>
+        <ul id="chat-messages"></ul>
+        <div id="chat-input">
+            <input type="text" id="message-input" placeholder="Type a message..." aria-label="Message Input">
+            <button id="send-button"><span id="sendButtonText">Send</span></button>
+        </div>
+    </div>
+
+    <button class="chat-button" aria-label="Open Chat"><i class="fas fa-comments"></i></button>
+
+    <!-- Login Modal -->
+    <div id="login-modal">
+        <div id="login-modal-content">
+            <h3 id="chooseLoginMethod">Choose a Login Method</h3>
+            <button id="login-google" class="login-method-button">Login with Google</button>
+            <button id="login-github" class="login-method-button">Login with GitHub</button>
+            <div class="close-modal" id="close-login-modal">Cancel</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
+            authDomain: "minecraft-generators.firebaseapp.com",
+            databaseURL: "https://minecraft-generators-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "minecraft-generators",
+            storageBucket: "minecraft-generators.appspot.com",
+            messagingSenderId: "191346462383",
+            appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
+            measurementId: "G-QJT1XPTPDZ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Global variables
+        let currentUser = null;
+        let username = null;
+        let messagesRef = null;
+        const developerUsername = "nos";
+        let currentLanguage = 'en';
+
+        // DOM elements
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const messagesList = document.getElementById('chat-messages');
+        const chatContainer = document.getElementById('chat-container');
+        const chatButton = document.querySelector('.chat-button');
+        const loginButton = document.getElementById('login-btn');
+        const loginModal = document.getElementById('login-modal');
+        const closeLoginModal = document.getElementById('close-login-modal');
+        const googleLoginBtn = document.getElementById('login-google');
+        const githubLoginBtn = document.getElementById('login-github');
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const body = document.body;
+        const languageSwitcher = document.getElementById('language-switcher');
+
+        // Auth Providers
+        const githubProvider = new GithubAuthProvider();
+        const googleProvider = new GoogleAuthProvider();
+
+        // Event Listeners
+        chatButton.addEventListener('click', toggleChat);
+        loginButton.addEventListener('click', handleLoginButtonClick);
+        closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+        googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+        githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', handleMessageInputKeypress);
+        themeSwitcher.addEventListener('click', toggleTheme);
+        languageSwitcher.addEventListener('click', toggleLanguage);
+
+        // Dropdown Menu Redirection
+        document.querySelectorAll('.dropdown-content a').forEach(link => {
+            link.addEventListener('click', handleGeneratorRedirect);
+        });
+
+        // Initialize the page
+        window.addEventListener('DOMContentLoaded', initializePage);
+
+        // Firebase Auth State Change
+        auth.onAuthStateChanged(handleAuthStateChange);
+
+        // Functions
+        function toggleChat() {
+            const isChatOpen = chatContainer.style.display === 'flex';
+            chatContainer.style.display = isChatOpen ? 'none' : 'flex';
+            if (!isChatOpen) {
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+        }
+
+        function handleLoginButtonClick() {
+            if (currentUser) {
+                signOut(auth).then(() => {
+                    currentUser = null;
+                    username = null;
+                    removeMessagesListener();
+                }).catch(error => {
+                    console.error("Error signing out:", error);
+                });
+            } else {
+                loginModal.style.display = 'flex';
+            }
+        }
+
+        function signInWithProvider(provider) {
+            signInWithPopup(auth, provider).then(result => {
+                currentUser = result.user;
+                loginModal.style.display = 'none';
+                checkUsername();
+            }).catch(error => {
+                console.error(`Error during ${provider.providerId} login:`, error);
+            });
+        }
+
+        function handleAuthStateChange(user) {
+            if (user) {
+                currentUser = user;
+                loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+                loginButton.setAttribute('aria-label', 'Logout');
+                checkUsername();
+            } else {
+                loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+                loginButton.setAttribute('aria-label', 'Login');
+                currentUser = null;
+            }
+        }
+
+        function checkUsername() {
+            const userRef = ref(database, `users/${currentUser.uid}`);
+            get(userRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    username = snapshot.val().username;
+                    loadMessages();
+                } else {
+                    const newUsername = prompt(translations[currentLanguage].enterUsername);
+                    if (newUsername) {
+                        saveUsername(newUsername);
+                    }
+                }
+            }).catch(error => {
+                console.error("Error checking username:", error);
+            });
+        }
+
+        function saveUsername(newUsername) {
+            const usernamesRef = ref(database, 'users');
+            const usernameQuery = query(usernamesRef, orderByChild('username'), equalTo(newUsername));
+
+            get(usernameQuery).then(snapshot => {
+                if (snapshot.exists()) {
+                    alert(translations[currentLanguage].usernameExists);
+                } else {
+                    set(ref(database, `users/${currentUser.uid}`), {
+                        username: newUsername
+                    }).then(() => {
+                        username = newUsername;
+                        loadMessages();
+                    }).catch(error => {
+                        console.error("Error saving username:", error);
+                    });
+                }
+            }).catch(error => {
+                console.error("Error checking username uniqueness:", error);
+            });
+        }
+
+        function loadMessages() {
+            if (messagesRef) {
+                return;
+            }
+            messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+            onChildAdded(messagesRef, (snapshot) => {
+                const message = snapshot.val();
+                displayMessage(message);
+            });
+        }
+
+        function removeMessagesListener() {
+            if (messagesRef) {
+                messagesRef = null;
+            }
+        }
+
+        function convertToLocalTime(isoTimestamp) {
+            const date = new Date(isoTimestamp);
+            return date.toLocaleString();
+        }
+
+        function displayMessage(message) {
+            const li = document.createElement('li');
+            li.className = message.sender === username ? 'sent' : 'received';
+
+            if (message.sender === developerUsername) {
+                li.classList.add('developer');
+            }
+
+            const img = document.createElement('img');
+            img.src = message.avatar || 'default-avatar.png';
+            img.alt = message.sender;
+
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+
+            const usernameSpan = document.createElement('span');
+            usernameSpan.className = 'username';
+            usernameSpan.textContent = message.sender;
+
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'time';
+            timeSpan.textContent = convertToLocalTime(message.timestamp);
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = message.content;
+
+            messageHeader.appendChild(usernameSpan);
+            messageHeader.appendChild(timeSpan);
+
+            if (li.className.includes('sent')) {
+                messageHeader.appendChild(img);
+            } else {
+                messageHeader.insertBefore(img, usernameSpan);
+            }
+
+            li.appendChild(messageHeader);
+            li.appendChild(messageContent);
+            messagesList.appendChild(li);
+
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        function sendMessage() {
+            if (username && messageInput.value.trim()) {
+                const timestamp = new Date().toISOString();
+
+                push(ref(database, 'messages'), {
+                    sender: username,
+                    avatar: currentUser.photoURL || "default-avatar.png",
+                    content: messageInput.value,
+                    timestamp: timestamp
+                }).then(() => {
+                    messageInput.value = '';
+                    messageInput.focus();
+                }).catch(error => {
+                    console.error("Error sending message:", error);
+                });
+            }
+        }
+
+        function handleMessageInputKeypress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+                e.preventDefault();
+            }
+        }
+
+        function toggleTheme() {
+            if (body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+            }
+            savePreferences();
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+            translatePage();
+            savePreferences();
+        }
+
+        function savePreferences() {
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+            localStorage.setItem('language', currentLanguage);
+        }
+
+        function loadPreferences() {
+            const savedTheme = localStorage.getItem('theme');
+            const savedLanguage = localStorage.getItem('language');
+
+            if (savedTheme) {
+                body.setAttribute('data-theme', savedTheme);
+            }
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+                translatePage();
+            }
+        }
+
+        function translatePage() {
+            Object.keys(translations).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = translations[key][currentLanguage];
+                }
+            });
+            document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+        }
+
+        function handleGeneratorRedirect(e) {
+            e.preventDefault();
+            const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
+            if (generator) {
+                let targetUrl;
+                switch (generator) {
+                    case 'text':
+                        targetUrl = 'https://noshere.github.io/generator/text';
+                        break;
+                    case 'item':
+                        targetUrl = 'https://noshere.github.io/generator/item';
+                        break;
+                    case 'entity':
+                        targetUrl = 'https://noshere.github.io/generator/entity';
+                        break;
+                    default:
+                        console.error('Unknown generator type:', generator);
+                        return;
+                }
+
+                // Function to check if the link exists
+                function linkExists(url, callback) {
+                    fetch(url, { method: 'HEAD' })
+                        .then(response => callback(response.ok))
+                        .catch(() => callback(false));
+                }
+
+                // Check if the target URL exists
+                linkExists(targetUrl, function(exists) {
+                    if (exists) {
+                        // If the link exists, navigate to the generator page
+                        window.location.href = targetUrl;
+                    } else {
+                        // If the link doesn't exist, redirect to the home page
+                        window.location.href = 'https://noshere.github.io/';
+                    }
+                });
+            }
+        }
+
+        function initializePage() {
+            loadPreferences();
+            translatePage();
+        }
+
+        // Translations
+        const translations = {
+            headerTitle: {
+                en: "Minecraft Datapack Generator",
+                zh: "Minecraft 資料包生成器"
+            },
+            home: {
+                en: "Home",
+                zh: "主頁"
+            },
+            generators: {
+                en: "Generators",
+                zh: "生成器"
+            },
+            generatorText: {
+                en: "Text",
+                zh: "文字"
+            },
+            generatorItem: {
+                en: "Item",
+                zh: "物品"
+            },
+            generatorEntity: {
+                en: "Entity",
+                zh: "實體"
+            },
+            heroTitle: {
+                en: "Welcome to Minecraft Datapack Generator",
+                zh: "歡迎使用 Minecraft 資料包生成器"
+            },
+            heroDescription: {
+                en: "Create custom datapacks for Minecraft with ease. No coding knowledge required!",
+                zh: "輕鬆創建自定義 Minecraft 資料包。無需編碼知識！"
+            },
+            getStartedBtn: {
+                en: "Get Started",
+                zh: "開始使用"
+            },
+            feature1Title: {
+                en: "Easy to Use",
+                zh: "易於使用"
+            },
+            feature1Description: {
+                en: "Intuitive interface for creating datapacks without coding knowledge",
+                zh: "直觀的界面，無需編碼知識即可創建資料包"
+            },
+            feature2Title: {
+                en: "Customizable",
+                zh: "可定制"
+            },
+            feature2Description: {
+                en: "Tailor your datapacks to fit your specific needs",
+                zh: "根據您的具體需求定制資料包"
+            },
+            feature3Title: {
+                en: "Export",
+                zh: "導出"
+            },
+            feature3Description: {
+                en: "Download your datapacks and use them in Minecraft",
+                zh: "下載您的資料包並在 Minecraft 中使用"
+            },
+            generatorsTitle: {
+                en: "Available Generators",
+                zh: "可用生成器"
+            },
+            textGeneratorTitle: {
+                en: "Text Generator",
+                zh: "文本生成器"
+            },
+            itemGeneratorTitle: {
+                en: "Item Generator",
+                zh: "物品生成器"
+            },
+            entityGeneratorTitle: {
+                en: "Entity Generator",
+                zh: "實體生成器"
+            },
+            chatTitle: {
+                en: "Chat",
+                zh: "聊天"
+            },
+            sendButtonText: {
+                en: "Send",
+                zh: "發送"
+            },
+            typeAMessage: {
+                en: "Type a message...",
+                zh: "輸入消息..."
+            },
+            chooseLoginMethod: {
+                en: "Choose a Login Method",
+                zh: "選擇登錄方式"
+            },
+            youtube: {
+                en: "YouTube",
+                zh: "YouTube"
+            },
+            instagram: {
+                en: "Instagram",
+                zh: "Instagram"
+            },
+            discord: {
+                en: "Discord",
+                zh: "Discord"
+            },
+            developedBy: {
+                en: "Developed by nos",
+                zh: "由 nos 開發"
+            },
+            donate: {
+                en: "Donate",
+                zh: "捐贈"
+            },
+            enterUsername: {
+                en: "Please set your username:",
+                zh: "請設置您的用戶名："
+            },
+            usernameExists: {
+                en: "Username already exists. Please choose another one.",
+                zh: "用戶名已存在。請選擇另一個。"
+            }
+        };
+
+        // Add event listeners for generator cards
+        document.querySelectorAll('.generator-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const generatorType = card.querySelector('.generator-title').id.replace('GeneratorTitle', '').toLowerCase();
+                window.location.href = `http://noshere.github.io/generator/${generatorType}.html`;
+            });
+        });
+    </script>
+</body>
+</html>
