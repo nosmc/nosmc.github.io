@@ -404,6 +404,30 @@
                 font-size: 14px;
             }
         }
+
+        #chat-messages li img {
+            width: 20px; /* Adjust avatar size to normal */
+            height: 20px; /* Adjust avatar size to normal */
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        #chat-messages .message-content {
+            padding: 10px 15px;
+            border-radius: 10px;
+            background-color: #55a630; /* Set message background to green */
+            color: white; /* Set message text color to white */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: inline-block; /* Ensure message content has a bounding box */
+            max-width: 80%; /* Limit message width */
+        }
+
+        #chat-messages .message-time {
+            font-size: 0.8em; /* Smaller font size */
+            color: #888; /* Gray color */
+            margin-top: 5px; /* Space between message content and time */
+        }
     </style>
 </head>
 <body data-theme="dark">
