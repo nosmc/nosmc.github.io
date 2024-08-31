@@ -606,7 +606,7 @@
             color: var(--text-color);
         }
 
-        .login-method-button, #set-username-btn {
+        .login-method-button, #setUsernameBtn {
             margin: 10px;
             padding: 10px 20px;
             background-color: var(--primary-color);
@@ -618,7 +618,7 @@
             transition: all 0.3s ease;
         }
 
-        .login-method-button:hover, #set-username-btn:hover {
+        .login-method-button:hover, #setUsernameBtn:hover {
             background-color: var(--primary-color-dark);
             transform: translateY(-2px);
         }
@@ -1130,11 +1130,7 @@
             Object.keys(translations).forEach(key => {
                 const element = document.getElementById(key);
                 if (element) {
-                    if (key === 'setUsernameBtn') {
-                        element.textContent = translations[key][currentLanguage];
-                    } else {
-                        element.textContent = translations[key][currentLanguage];
-                    }
+                    element.textContent = translations[key][currentLanguage];
                 }
             });
             document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
