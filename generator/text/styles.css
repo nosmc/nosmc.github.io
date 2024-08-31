@@ -587,7 +587,7 @@ textarea#json-area,
     transform: translateY(-2px);
 }
 
-#login-modal {
+#login-modal, #username-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -600,19 +600,19 @@ textarea#json-area,
     justify-content: center;
 }
 
-#login-modal-content {
+#login-modal-content, #username-modal-content {
     background-color: var(--modal-content-background);
     padding: 20px;
     border-radius: 10px;
     text-align: center;
 }
 
-#login-modal-content h3 {
+#login-modal-content h3, #username-modal-content h3 {
     margin-bottom: 20px;
     color: var(--text-color);
 }
 
-.login-method-button {
+.login-method-button, #setUsernameBtn {
     margin: 10px;
     padding: 10px 20px;
     background-color: var(--primary-color);
@@ -624,7 +624,7 @@ textarea#json-area,
     transition: all 0.3s ease;
 }
 
-.login-method-button:hover {
+.login-method-button:hover, #setUsernameBtn:hover {
     background-color: var(--primary-color-dark);
     transform: translateY(-2px);
 }
