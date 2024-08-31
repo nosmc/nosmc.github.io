@@ -314,10 +314,6 @@ function translatePage() {
         }
     });
     
-    // Translate login modal buttons
-    document.getElementById('login-google').textContent = translations.loginWithGoogle[currentLanguage];
-    document.getElementById('login-github').textContent = translations.loginWithGitHub[currentLanguage];
-    
     // Translate content type options
     document.getElementById('plainTextOption').textContent = translations.plainText[currentLanguage];
     document.getElementById('translatedTextOption').textContent = translations.translatedText[currentLanguage];
@@ -1358,23 +1354,7 @@ const translations = {
     cancelLogin: {
         en: "Cancel",
         zh: "取消"
-    },
-    chooseLoginMethod: {
-        en: "Choose a Login Method",
-        zh: "選擇登錄方式"
-    },
-    loginWithGoogle: {
-        en: "Login with Google",
-        zh: "使用 Google 登錄"
-    },
-    loginWithGitHub: {
-        en: "Login with GitHub",
-        zh: "使用 GitHub 登錄"
-    },
-    cancel: {
-        en: "Cancel",
-        zh: "取消"
-    },
+    }
 };
 
 // Initialize the page
