@@ -767,15 +767,9 @@
     <div id="login-modal">
         <div id="login-modal-content">
             <h3 id="chooseLoginMethod">Choose a Login Method</h3>
-            <button id="login-google" class="login-method-button">
-                <span id="loginWithGoogle">Login with Google</span>
-            </button>
-            <button id="login-github" class="login-method-button">
-                <span id="loginWithGitHub">Login with GitHub</span>
-            </button>
-            <div class="close-modal" id="close-login-modal">
-                <span id="cancelLogin">Cancel</span>
-            </div>
+            <button id="login-google" class="login-method-button">Login with Google</button>
+            <button id="login-github" class="login-method-button">Login with GitHub</button>
+            <div class="close-modal" id="close-login-modal">Cancel</div>
         </div>
     </div>
 
@@ -789,14 +783,14 @@
 
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBdbD8-paqcwrVKR1Hj8wzgYZwGPPh143o",
-            authDomain: "minecraft-datapack-generator.firebaseapp.com",
-            databaseURL: "https://minecraft-datapack-generator-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "minecraft-datapack-generator",
-            storageBucket: "minecraft-datapack-generator.appspot.com",
-            messagingSenderId: "246827214145",
-            appId: "1:246827214145:web:700de550ed206b4a5b6dc0",
-            measurementId: "G-PFJ02PNK19"
+            apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
+            authDomain: "minecraft-generators.firebaseapp.com",
+            databaseURL: "https://minecraft-generators-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "minecraft-generators",
+            storageBucket: "minecraft-generators.appspot.com",
+            messagingSenderId: "191346462383",
+            appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
+            measurementId: "G-QJT1XPTPDZ"
         };
 
         // Initialize Firebase
@@ -853,11 +847,6 @@
         auth.onAuthStateChanged(handleAuthStateChange);
 
         // Functions
-        function setInitialLanguage() {
-            const browserLang = navigator.language || navigator.userLanguage;
-            currentLanguage = browserLang.startsWith('zh') ? 'zh' : 'en';
-        }
-    
         function toggleChat() {
             const isChatOpen = chatContainer.style.display === 'flex';
             chatContainer.style.display = isChatOpen ? 'none' : 'flex';
@@ -910,20 +899,14 @@
                     username = snapshot.val().username;
                     loadMessages();
                 } else {
-                    promptForUsername();
+                    const newUsername = prompt(translations[currentLanguage].enterUsername);
+                    if (newUsername) {
+                        saveUsername(newUsername);
+                    }
                 }
             }).catch(error => {
                 console.error("Error checking username:", error);
             });
-        }
-
-        function promptForUsername() {
-            const newUsername = prompt(translations[currentLanguage].enterUsername || "Please enter your username:");
-            if (newUsername) {
-                saveUsername(newUsername);
-            } else {
-                promptForUsername(); // Recursively prompt if the user cancels
-            }
         }
 
         function saveUsername(newUsername) {
@@ -933,7 +916,6 @@
             get(usernameQuery).then(snapshot => {
                 if (snapshot.exists()) {
                     alert(translations[currentLanguage].usernameExists);
-                    promptForUsername();
                 } else {
                     set(ref(database, `users/${currentUser.uid}`), {
                         username: newUsername
@@ -1015,11 +997,6 @@
         }
 
         function sendMessage() {
-            if (!currentUser) {
-                alert(translations[currentLanguage].pleaseLoginFirst);
-                return;
-            }
-            
             if (username && messageInput.value.trim()) {
                 const timestamp = new Date().toISOString();
 
@@ -1080,13 +1057,11 @@
         function translatePage() {
             Object.keys(translations).forEach(key => {
                 const element = document.getElementById(key);
-                if (element && translations[key][currentLanguage]) {
+                if (element) {
                     element.textContent = translations[key][currentLanguage];
                 }
             });
-            if (messageInput) {
-                messageInput.placeholder = translations.typeAMessage[currentLanguage] || "Type a message...";
-            }
+            document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
         }
 
         function handleGeneratorRedirect(e) {
@@ -1130,7 +1105,6 @@
         }
 
         function initializePage() {
-            setInitialLanguage();
             loadPreferences();
             translatePage();
         }
@@ -1249,18 +1223,6 @@
                 en: "Donate",
                 zh: "捐贈"
             },
-            chooseLoginMethod: {
-                en: "Choose a Login Method",
-                zh: "選擇登錄方式"
-            },
-            loginWithGoogle: {
-                en: "Login with Google",
-                zh: "使用 Google 登錄"
-            },
-            loginWithGitHub: {
-                en: "Login with GitHub",
-                zh: "使用 GitHub 登錄"
-            },
             enterUsername: {
                 en: "Please set your username:",
                 zh: "請設置您的用戶名："
@@ -1268,10 +1230,6 @@
             usernameExists: {
                 en: "Username already exists. Please choose another one.",
                 zh: "用戶名已存在。請選擇另一個。"
-            },
-            pleaseLoginFirst: {
-                en: "Please login first to send messages.",
-                zh: "請先登錄以發送消息。"
             }
         };
 
