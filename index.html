@@ -596,6 +596,7 @@
             background-color: var(--modal-content-background);
             padding: 20px;
             border-radius: 10px;
+            text-align: center;
         }
 
         #login-modal-content h3, #username-modal-content h3 {
@@ -1334,10 +1335,27 @@
             }
         };
 
+        // Replace the existing code for generator card click events with this:
         document.querySelectorAll('.generator-card').forEach(card => {
             card.addEventListener('click', () => {
-                const generatorType = card.querySelector('.generator-title').id.replace('GeneratorTitle', '').toLowerCase();
-                window.location.href = `http://nosmc.github.io/generator/${generatorType}.html`;
+                let targetUrl;
+                const generatorTitle = card.querySelector('.generator-title').id;
+                
+                switch (generatorTitle) {
+                    case 'textGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/text';
+                        break;
+                    case 'itemGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/item';
+                        break;
+                    case 'entityGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/entity';
+                        break;
+                    default:
+                        targetUrl = 'https://nosmc.github.io/';
+                }
+
+                window.location.href = targetUrl;
             });
         });
     </script>
