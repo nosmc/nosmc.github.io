@@ -421,6 +421,19 @@
             overflow-wrap: break-word;
             display: inline-block; /* Ensure message content has a bounding box */
             max-width: 80%; /* Limit message width */
+            position: relative; /* For pseudo-element positioning */
+        }
+
+        #chat-messages .message-content::after {
+            content: '';
+            position: absolute;
+            bottom: 100%; /* Position above the message */
+            left: 10px; /* Adjust as needed */
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent; /* Create the left triangle */
+            border-right: 10px solid transparent; /* Create the right triangle */
+            border-bottom: 10px solid #55a630; /* Match the background color */
         }
 
         #chat-messages .message-time {
