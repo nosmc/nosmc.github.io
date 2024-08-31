@@ -811,6 +811,9 @@
         const developerUsername = "nos";
         let currentLanguage = 'en';
 
+        // At the top of your script, add this fallback message
+        const FALLBACK_USERNAME_PROMPT = "Please set your username:";
+
         // DOM elements
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
@@ -910,12 +913,20 @@
                 }
             }).catch(error => {
                 console.error("Error checking username:", error);
+                promptForUsername(); // Fallback to prompt even if there's an error
             });
         }
 
         function promptForUsername() {
-            const message = translations[currentLanguage].enterUsername || "Please set your username:";
-            const newUsername = prompt(message);
+            let message;
+            try {
+                message = translations[currentLanguage].enterUsername;
+            } catch (error) {
+                console.warn("Translation not found, using fallback message");
+                message = FALLBACK_USERNAME_PROMPT;
+            }
+
+            const newUsername = prompt(message || FALLBACK_USERNAME_PROMPT);
             if (newUsername) {
                 saveUsername(newUsername);
             } else {
@@ -936,7 +947,14 @@
 
             get(usernameQuery).then(snapshot => {
                 if (snapshot.exists()) {
-                    alert(translations[currentLanguage].usernameExists);
+                    let message;
+                    try {
+                        message = translations[currentLanguage].usernameExists;
+                    } catch (error) {
+                        console.warn("Translation not found, using fallback message");
+                        message = "Username already exists. Please choose another one.";
+                    }
+                    alert(message);
                     promptForUsername(); // Ask for a different username
                 } else {
                     set(ref(database, `users/${currentUser.uid}`), {
@@ -946,10 +964,12 @@
                         loadMessages();
                     }).catch(error => {
                         console.error("Error saving username:", error);
+                        promptForUsername(); // Retry if there's an error
                     });
                 }
             }).catch(error => {
                 console.error("Error checking username uniqueness:", error);
+                promptForUsername(); // Retry if there's an error
             });
         }
 
