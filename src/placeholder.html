@@ -275,6 +275,17 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
         }
 
+        .chat-button .unread-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+        }
+
         #chat-container {
             width: 400px;
             height: 500px;
@@ -314,75 +325,24 @@
         #chat-messages li {
             margin-bottom: 20px;
             display: flex;
-            align-items: flex-start;
             flex-direction: column;
-            width: 100%;
+            max-width: 80%;
         }
 
         #chat-messages li.sent {
-            text-align: right;
+            align-self: flex-end;
             align-items: flex-end;
         }
 
         #chat-messages li.received {
-            text-align: left;
+            align-self: flex-start;
             align-items: flex-start;
         }
 
-        #chat-messages li.developer .message-content {
-            background-color: var(--developer-message-bg);
-            color: var(--developer-message-text-color);
-        }
-
-        #chat-messages li .message-header {
+        #chat-messages .message-header {
             display: flex;
             align-items: center;
             margin-bottom: 5px;
-            width: 100%;
-        }
-
-        #chat-messages li.sent .message-header {
-            justify-content: flex-end;
-        }
-
-        #chat-messages li.received .message-header {
-            justify-content: flex-start;
-        }
-
-        #chat-messages li img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
-        #chat-messages li.sent .message-header .time {
-            order: 1;
-            margin-right: var(--time-username-spacing);
-        }
-
-        #chat-messages li.sent .message-header .username {
-            order: 2;
-            margin-right: var(--time-username-spacing);
-        }
-
-        #chat-messages li.sent .message-header img {
-            order: 3;
-            margin-right: 0;
-            margin-left: var(--time-username-spacing);
-        }
-
-        #chat-messages li.received .message-header img {
-            order: 1;
-            margin-right: var(--time-username-spacing);
-        }
-
-        #chat-messages li.received .message-header .username {
-            order: 2;
-            margin-right: var(--time-username-spacing);
-        }
-
-        #chat-messages li.received .message-header .time {
-            order: 3;
         }
 
         #chat-messages .message-content {
@@ -390,7 +350,6 @@
             border-radius: 10px;
             background-color: var(--received-message-bg);
             color: var(--received-message-text-color);
-            max-width: 100%;
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
@@ -398,7 +357,12 @@
         #chat-messages li.sent .message-content {
             background-color: var(--sent-message-bg);
             color: var(--sent-message-text-color);
-            margin-left: auto;
+        }
+
+        #chat-messages .message-time {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
         }
 
         #chat-input {
@@ -516,17 +480,6 @@
             .home-button, .dropdown-button, .button {
                 padding: 8px 12px;
                 font-size: 14px;
-            }
-
-            .chat-button .unread-dot {
-                position: absolute;
-                top: -5px;
-                right: -5px;
-                width: 10px;
-                height: 10px;
-                background-color: red;
-                border-radius: 50%;
-                display: none;
             }
         }
     </style>
@@ -682,11 +635,6 @@
             usernameModal.style.display = 'none';
             signOut(auth);
         });
-        window.addEventListener('focus', () => {
-            if (isChatOpen) {
-                clearUnreadIndicator();
-            }
-        });
 
         // Dropdown Menu Redirection
         document.querySelectorAll('.dropdown-content a').forEach(link => {
@@ -707,18 +655,6 @@
                 messagesList.scrollTop = messagesList.scrollHeight;
                 clearUnreadIndicator();
             }
-        }
-
-        function showUnreadIndicator() {
-            if (!isChatOpen) {
-                unreadMessages++;
-                document.querySelector('.chat-button .unread-dot').style.display = 'block';
-            }
-        }
-
-        function clearUnreadIndicator() {
-            unreadMessages = 0;
-            document.querySelector('.chat-button .unread-dot').style.display = 'none';
         }
 
         function handleLoginButtonClick() {
@@ -839,15 +775,13 @@
             }
             messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
             
-            // Get the current timestamp when loading messages
             const loadTimestamp = new Date().getTime();
             
             onChildAdded(messagesRef, (snapshot) => {
                 const message = snapshot.val();
                 displayMessage(message);
                 
-                // Only show unread indicator for new messages
-                if (new Date(message.timestamp).getTime() > loadTimestamp) {
+                if (new Date(message.timestamp).getTime() > loadTimestamp && !isChatOpen) {
                     showUnreadIndicator();
                 }
             });
@@ -873,45 +807,38 @@
                 li.classList.add('developer');
             }
 
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+
             const img = document.createElement('img');
             img.src = message.avatar || 'default-avatar.png';
             img.alt = message.sender;
-
-            const messageHeader = document.createElement('div');
-            messageHeader.className = 'message-header';
 
             const usernameSpan = document.createElement('span');
             usernameSpan.className = 'username';
             usernameSpan.textContent = message.sender;
 
-            const timeSpan = document.createElement('span');
-            timeSpan.className = 'time';
-            timeSpan.textContent = convertToLocalTime(message.timestamp);
+            messageHeader.appendChild(img);
+            messageHeader.appendChild(usernameSpan);
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
             messageContent.textContent = message.content;
 
-            messageHeader.appendChild(usernameSpan);
-            messageHeader.appendChild(timeSpan);
-
-            if (li.className.includes('sent')) {
-                messageHeader.appendChild(img);
-            } else {
-                messageHeader.insertBefore(img, usernameSpan);
-            }
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = convertToLocalTime(message.timestamp);
 
             li.appendChild(messageHeader);
             li.appendChild(messageContent);
-            messagesList.appendChild(li);
-
-            messagesList.scrollTop = messagesList.scrollHeight;
+            li.appendChild(messageTime);
 
             messagesList.appendChild(li);
             messagesList.scrollTop = messagesList.scrollHeight;
 
-            showUnreadIndicator();
-
+            if (!isChatOpen) {
+                showUnreadIndicator();
+            }
         }
 
         function sendMessage() {
@@ -942,8 +869,7 @@
         function toggleTheme() {
             if (body.getAttribute('data-theme') === 'light') {
                 body.setAttribute('data-theme', 'dark');
-            } else {
-                body.setAttribute('data-theme', 'light');
+            } else {body.setAttribute('data-theme', 'light');
             }
             savePreferences();
         }
@@ -1023,6 +949,22 @@
             loadPreferences();
             translatePage();
         }
+
+        function showUnreadIndicator() {
+            unreadMessages++;
+            document.querySelector('.chat-button .unread-dot').style.display = 'block';
+        }
+
+        function clearUnreadIndicator() {
+            unreadMessages = 0;
+            document.querySelector('.chat-button .unread-dot').style.display = 'none';
+        }
+
+        window.addEventListener('focus', () => {
+            if (isChatOpen) {
+                clearUnreadIndicator();
+            }
+        });
 
         const translations = {
             headerTitle: {
