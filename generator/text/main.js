@@ -26,6 +26,8 @@ let username = null;
 let messagesRef = null;
 const developerUsername = "nos";
 let currentLanguage = 'en';
+let isSettingUsername = false;
+let hasSetUsername = false;
 let contents = JSON.parse(localStorage.getItem('contents')) || [];
 let dragSrcIndex = null;
 let scrollInterval = null;
@@ -63,6 +65,10 @@ const githubLoginBtn = document.getElementById('login-github');
 const themeSwitcher = document.getElementById('theme-switcher');
 const body = document.body;
 const languageSwitcher = document.getElementById('language-switcher');
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const setUsernameBtn = document.getElementById('setUsernameBtn');
+const closeUsernameModal = document.getElementById('close-username-modal');
 
 // Auth Providers
 const githubProvider = new GithubAuthProvider();
@@ -85,6 +91,11 @@ document.getElementById('add-content-btn').addEventListener('click', () => {
 document.getElementById('copy-json-btn').addEventListener('click', copyJsonToClipboard);
 document.getElementById('clear-all-btn').addEventListener('click', clearAll);
 document.getElementById('indentation').addEventListener('change', updateOutputAndPreview);
+setUsernameBtn.addEventListener('click', handleSetUsername);
+closeUsernameModal.addEventListener('click', () => {
+    usernameModal.style.display = 'none';
+    signOut(auth);
+});
 
 // Dropdown Menu Redirection
 document.querySelectorAll('.dropdown-content a').forEach(link => {
@@ -111,6 +122,7 @@ function handleLoginButtonClick() {
         signOut(auth).then(() => {
             currentUser = null;
             username = null;
+            hasSetUsername = false;
             removeMessagesListener();
         }).catch(error => {
             console.error("Error signing out:", error);
@@ -135,29 +147,52 @@ function handleAuthStateChange(user) {
         currentUser = user;
         loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
         loginButton.setAttribute('aria-label', 'Logout');
-        checkUsername();
+        if (!hasSetUsername) {
+            checkUsername();
+        }
     } else {
         loginButton.innerHTML = `<i class="fas fa-user"></i>`;
         loginButton.setAttribute('aria-label', 'Login');
         currentUser = null;
+        username = null;
+        hasSetUsername = false;
+        removeMessagesListener();
     }
 }
 
 function checkUsername() {
+    if (isSettingUsername || hasSetUsername) return;
+    
+    isSettingUsername = true;
     const userRef = ref(database, `users/${currentUser.uid}`);
     get(userRef).then(snapshot => {
         if (snapshot.exists()) {
             username = snapshot.val().username;
+            hasSetUsername = true;
             loadMessages();
         } else {
-            const newUsername = prompt(translations[currentLanguage].enterUsername);
-            if (newUsername) {
-                saveUsername(newUsername);
-            }
+            showUsernameModal();
         }
     }).catch(error => {
         console.error("Error checking username:", error);
+        showUsernameModal();
+    }).finally(() => {
+        isSettingUsername = false;
     });
+}
+
+function showUsernameModal() {
+    usernameModal.style.display = 'flex';
+    usernameInput.focus();
+}
+
+function handleSetUsername() {
+    const newUsername = usernameInput.value.trim();
+    if (newUsername) {
+        saveUsername(newUsername);
+    } else {
+        alert(translations[currentLanguage].usernameEmpty);
+    }
 }
 
 function saveUsername(newUsername) {
@@ -166,20 +201,38 @@ function saveUsername(newUsername) {
 
     get(usernameQuery).then(snapshot => {
         if (snapshot.exists()) {
-            alert(translations[currentLanguage].usernameExists);
+            showUsernameError(translations.usernameExists[currentLanguage]);
+            usernameInput.value = '';
+            usernameInput.focus();
         } else {
             set(ref(database, `users/${currentUser.uid}`), {
                 username: newUsername
             }).then(() => {
                 username = newUsername;
+                hasSetUsername = true;
+                usernameModal.style.display = 'none';
                 loadMessages();
             }).catch(error => {
                 console.error("Error saving username:", error);
+                showUsernameError(translations.errorSavingUsername[currentLanguage]);
             });
         }
     }).catch(error => {
         console.error("Error checking username uniqueness:", error);
+        showUsernameError(translations.errorCheckingUsername[currentLanguage]);
     });
+}
+
+function showUsernameError(message) {
+    const errorElement = document.getElementById('username-error');
+    if (!errorElement) {
+        const newErrorElement = document.createElement('p');
+        newErrorElement.id = 'username-error';
+        newErrorElement.style.color = 'red';
+        newErrorElement.style.marginTop = '10px';
+        document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+    }
+    document.getElementById('username-error').textContent = message;
 }
 
 function loadMessages() {
@@ -197,6 +250,7 @@ function removeMessagesListener() {
     if (messagesRef) {
         messagesRef = null;
     }
+    messagesList.innerHTML = '';
 }
 
 function convertToLocalTime(isoTimestamp) {
@@ -253,7 +307,7 @@ function sendMessage() {
 
         push(ref(database, 'messages'), {
             sender: username,
-            avatar: currentUser.photoURL || "default-avatar.png",
+            avatar: currentUser?.photoURL || "default-avatar.png",
             content: messageInput.value,
             timestamp: timestamp
         }).then(() => {
@@ -328,8 +382,15 @@ function translatePage() {
     indentationSelect.options[0].text = translations.none[currentLanguage];
     indentationSelect.options[1].text = translations.twoSpaces[currentLanguage];
     indentationSelect.options[2].text = translations.fourSpaces[currentLanguage];
-
+    
     document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+    
+    // Update the error message if it exists
+    const errorElement = document.getElementById('username-error');
+    if (errorElement && errorElement.textContent) {
+        errorElement.textContent = translations.usernameExists[currentLanguage];
+    }
 }
 
 function handleGeneratorRedirect(e) {
@@ -352,20 +413,16 @@ function handleGeneratorRedirect(e) {
                 return;
         }
 
-        // Function to check if the link exists
         function linkExists(url, callback) {
             fetch(url, { method: 'HEAD' })
                 .then(response => callback(response.ok))
                 .catch(() => callback(false));
         }
 
-        // Check if the target URL exists
         linkExists(targetUrl, function(exists) {
             if (exists) {
-                // If the link exists, navigate to the generator page
                 window.location.href = targetUrl;
             } else {
-                // If the link doesn't exist, redirect to the home page
                 window.location.href = 'https://nosmc.github.io/';
             }
         });
@@ -1354,6 +1411,30 @@ const translations = {
     cancelLogin: {
         en: "Cancel",
         zh: "取消"
+    },
+    setUsernameTitle: {
+        en: "Set Your Username",
+        zh: "設置您的用戶名"
+    },
+    setUsernameBtn: {
+        en: "Set Username",
+        zh: "設置用戶名"
+    },
+    cancelSetUsername: {
+        en: "Cancel",
+        zh: "取消"
+    },
+    usernameEmpty: {
+        en: "Username cannot be empty",
+        zh: "用戶名不能為空"
+    },
+    errorSavingUsername: {
+        en: "Error saving username. Please try again.",
+        zh: "保存用戶名時出錯。請重試。"
+    },
+    errorCheckingUsername: {
+        en: "Error checking username. Please try again.",
+        zh: "檢查用戶名時出錯。請重試。"
     }
 };
 
