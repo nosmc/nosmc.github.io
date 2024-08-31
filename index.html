@@ -810,7 +810,10 @@
         let messagesRef = null;
         const developerUsername = "nos";
         let currentLanguage = 'en';
-        let isFirstLogin = false;
+        let isSettingUsername = false;
+
+        // At the top of your script, add this fallback message
+        const FALLBACK_USERNAME_PROMPT = "Please set your username:";
 
         // DOM elements
         const messageInput = document.getElementById('message-input');
@@ -880,7 +883,6 @@
             signInWithPopup(auth, provider).then(result => {
                 currentUser = result.user;
                 loginModal.style.display = 'none';
-                isFirstLogin = true;
                 checkUsername();
             }).catch(error => {
                 console.error(`Error during ${provider.providerId} login:`, error);
@@ -903,6 +905,8 @@
         }
 
         function checkUsername() {
+            if (isSettingUsername) return;
+            
             const userRef = ref(database, `users/${currentUser.uid}`);
             get(userRef).then(snapshot => {
                 if (snapshot.exists()) {
@@ -913,11 +917,23 @@
                 }
             }).catch(error => {
                 console.error("Error checking username:", error);
+                promptForUsername();
             });
         }
 
         function promptForUsername() {
-            const newUsername = prompt(translations[currentLanguage].enterUsername || "Please set your username:");
+            if (isSettingUsername) return;
+            isSettingUsername = true;
+
+            let message;
+            try {
+                message = translations[currentLanguage].enterUsername;
+            } catch (error) {
+                console.warn("Translation not found, using fallback message");
+                message = FALLBACK_USERNAME_PROMPT;
+            }
+
+            const newUsername = prompt(message || FALLBACK_USERNAME_PROMPT);
             if (newUsername) {
                 saveUsername(newUsername);
             } else {
@@ -929,6 +945,7 @@
                     console.error("Error signing out:", error);
                 });
             }
+            isSettingUsername = false;
         }
 
         function saveUsername(newUsername) {
@@ -937,7 +954,14 @@
 
             get(usernameQuery).then(snapshot => {
                 if (snapshot.exists()) {
-                    alert(translations[currentLanguage].usernameExists || "Username already exists. Please choose another one.");
+                    let message;
+                    try {
+                        message = translations[currentLanguage].usernameExists;
+                    } catch (error) {
+                        console.warn("Translation not found, using fallback message");
+                        message = "Username already exists. Please choose another one.";
+                    }
+                    alert(message);
                     promptForUsername();
                 } else {
                     set(ref(database, `users/${currentUser.uid}`), {
@@ -947,10 +971,12 @@
                         loadMessages();
                     }).catch(error => {
                         console.error("Error saving username:", error);
+                        promptForUsername();
                     });
                 }
             }).catch(error => {
                 console.error("Error checking username uniqueness:", error);
+                promptForUsername();
             });
         }
 
