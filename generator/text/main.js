@@ -1374,6 +1374,22 @@ const translations = {
     cancel: {
         en: "Cancel",
         zh: "取消"
+    },
+    chooseLoginMethod: {
+        en: "Choose a Login Method",
+        zh: "選擇登錄方式"
+    },
+    loginWithGoogle: {
+        en: "Login with Google",
+        zh: "使用 Google 登錄"
+    },
+    loginWithGitHub: {
+        en: "Login with GitHub",
+        zh: "使用 GitHub 登錄"
+    },
+    cancel: {
+        en: "Cancel",
+        zh: "取消"
     }
 };
 
