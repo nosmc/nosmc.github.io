@@ -1232,14 +1232,6 @@
                 zh: "用戶名已存在。請選擇另一個。"
             }
         };
-
-        // Add event listeners for generator cards
-        document.querySelectorAll('.generator-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const generatorType = card.querySelector('.generator-title').id.replace('GeneratorTitle', '').toLowerCase();
-                window.location.href = `http://nosmc.github.io/generator/${generatorType}.html`;
-            });
-        });
     </script>
 </body>
 </html>
