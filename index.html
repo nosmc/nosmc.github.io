@@ -672,7 +672,7 @@
     <header>
         <h1><i class="fas fa-cogs"></i> <span id="headerTitle">Minecraft Datapack Generator</span></h1>
         <div class="header-right">
-            <a href="https://noshere.github.io" class="home-button" aria-label="Home">
+            <a href="https://nosmc.github.io" class="home-button" aria-label="Home">
                 <i class="fas fa-home"></i> <span id="home">Home</span>
             </a>
             <div class="dropdown">
@@ -747,7 +747,7 @@
             <a href="https://discord.gg/Pah6vw36Tw" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> <span id="discord">Discord</span></a>
         </div>
         <p>
-            <a id="developer-link" href="https://github.com/noshere" target="_blank">&copy; <span id="developedBy">Developed by nos</span></a>
+            <a id="developer-link" href="https://github.com/nosmc" target="_blank">&copy; <span id="developedBy">Developed by nos</span></a>
             <a href="https://donation-link.com" target="_blank" class="donate"><i class="fas fa-heart"></i> <span id="donate">Donate</span></a>
         </p>
     </footer>
@@ -1072,13 +1072,13 @@
                 let targetUrl;
                 switch (generator) {
                     case 'text':
-                        targetUrl = 'https://noshere.github.io/generator/text';
+                        targetUrl = 'https://nosmc.github.io/generator/text';
                         break;
                     case 'item':
-                        targetUrl = 'https://noshere.github.io/generator/item';
+                        targetUrl = 'https://nosmc.github.io/generator/item';
                         break;
                     case 'entity':
-                        targetUrl = 'https://noshere.github.io/generator/entity';
+                        targetUrl = 'https://nosmc.github.io/generator/entity';
                         break;
                     default:
                         console.error('Unknown generator type:', generator);
@@ -1099,7 +1099,7 @@
                         window.location.href = targetUrl;
                     } else {
                         // If the link doesn't exist, redirect to the home page
-                        window.location.href = 'https://noshere.github.io/';
+                        window.location.href = 'https://nosmc.github.io/';
                     }
                 });
             }
@@ -1238,7 +1238,7 @@
         document.querySelectorAll('.generator-card').forEach(card => {
             card.addEventListener('click', () => {
                 const generatorType = card.querySelector('.generator-title').id.replace('GeneratorTitle', '').toLowerCase();
-                window.location.href = `http://noshere.github.io/generator/${generatorType}.html`;
+                window.location.href = `http://nosmc.github.io/generator/${generatorType}.html`;
             });
         });
     </script>
