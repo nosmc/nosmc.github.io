@@ -1355,7 +1355,21 @@
                         targetUrl = 'https://nosmc.github.io/';
                 }
 
-                window.location.href = targetUrl;
+                // Function to check if the link exists
+                function linkExists(url, callback) {
+                    fetch(url, { method: 'HEAD' })
+                        .then(response => callback(response.ok))
+                        .catch(() => callback(false));
+                }
+
+                // Check if the target URL exists
+                linkExists(targetUrl, function(exists) {
+                    if (exists) {
+                        window.location.href = targetUrl;
+                    } else {
+                        window.location.href = 'https://nosmc.github.io/';
+                    }
+                });
             });
         });
     </script>
