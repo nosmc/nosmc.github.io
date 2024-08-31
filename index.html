@@ -905,14 +905,20 @@
                     username = snapshot.val().username;
                     loadMessages();
                 } else {
-                    const newUsername = prompt(translations[currentLanguage].enterUsername);
-                    if (newUsername) {
-                        saveUsername(newUsername);
-                    }
+                    promptForUsername();
                 }
             }).catch(error => {
                 console.error("Error checking username:", error);
             });
+        }
+
+        function promptForUsername() {
+            const newUsername = prompt(translations[currentLanguage].enterUsername);
+            if (newUsername) {
+                saveUsername(newUsername);
+            } else {
+                promptForUsername(); // Recursively prompt if the user cancels
+            }
         }
 
         function saveUsername(newUsername) {
@@ -922,6 +928,7 @@
             get(usernameQuery).then(snapshot => {
                 if (snapshot.exists()) {
                     alert(translations[currentLanguage].usernameExists);
+                    promptForUsername();
                 } else {
                     set(ref(database, `users/${currentUser.uid}`), {
                         username: newUsername
@@ -1003,6 +1010,11 @@
         }
 
         function sendMessage() {
+            if (!currentUser) {
+                alert(translations[currentLanguage].pleaseLoginFirst);
+                return;
+            }
+            
             if (username && messageInput.value.trim()) {
                 const timestamp = new Date().toISOString();
 
@@ -1248,6 +1260,10 @@
             usernameExists: {
                 en: "Username already exists. Please choose another one.",
                 zh: "用戶名已存在。請選擇另一個。"
+            },
+            pleaseLoginFirst: {
+                en: "Please login first to send messages.",
+                zh: "請先登錄以發送消息。"
             }
         };
 
