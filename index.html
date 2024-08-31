@@ -895,6 +895,7 @@
                 loginButton.innerHTML = `<i class="fas fa-user"></i>`;
                 loginButton.setAttribute('aria-label', 'Login');
                 currentUser = null;
+                username = null;
             }
         }
 
@@ -905,14 +906,27 @@
                     username = snapshot.val().username;
                     loadMessages();
                 } else {
-                    const newUsername = prompt(translations[currentLanguage].enterUsername);
-                    if (newUsername) {
-                        saveUsername(newUsername);
-                    }
+                    promptForUsername();
                 }
             }).catch(error => {
                 console.error("Error checking username:", error);
             });
+        }
+
+        function promptForUsername() {
+            const newUsername = prompt(translations[currentLanguage].enterUsername);
+            if (newUsername) {
+                saveUsername(newUsername);
+            } else {
+                // If the user cancels the prompt, sign them out
+                signOut(auth).then(() => {
+                    currentUser = null;
+                    username = null;
+                    removeMessagesListener();
+                }).catch(error => {
+                    console.error("Error signing out:", error);
+                });
+            }
         }
 
         function saveUsername(newUsername) {
@@ -922,6 +936,7 @@
             get(usernameQuery).then(snapshot => {
                 if (snapshot.exists()) {
                     alert(translations[currentLanguage].usernameExists);
+                    promptForUsername(); // Ask for a different username
                 } else {
                     set(ref(database, `users/${currentUser.uid}`), {
                         username: newUsername
