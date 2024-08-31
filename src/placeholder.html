@@ -332,11 +332,13 @@
         #chat-messages li.sent {
             align-self: flex-end;
             align-items: flex-end;
+            margin-left: 20%; /* Push sent messages to the right */
         }
 
         #chat-messages li.received {
             align-self: flex-start;
             align-items: flex-start;
+            margin-right: 20%; /* Push received messages to the left */
         }
 
         #chat-messages .message-header {
@@ -344,10 +346,15 @@
             align-items: center;
             margin-bottom: 5px;
             font-size: 0.9em;
+            width: 100%; /* Ensure full width for proper alignment */
         }
 
         #chat-messages li.sent .message-header {
-            flex-direction: row-reverse;
+            justify-content: flex-end; /* Align sent message headers to the right */
+        }
+
+        #chat-messages li.received .message-header {
+            justify-content: flex-start; /* Align received message headers to the left */
         }
 
         #chat-messages .message-header img {
@@ -356,12 +363,14 @@
             border-radius: 50%;
         }
 
-        #chat-messages li.received .message-header img {
-            margin-right: 5px;
+        #chat-messages li.sent .message-header img {
+            order: 2; /* Move avatar to the right for sent messages */
+            margin-left: 5px;
         }
 
-        #chat-messages li.sent .message-header img {
-            margin-left: 5px;
+        #chat-messages li.received .message-header img {
+            order: 1; /* Keep avatar on the left for received messages */
+            margin-right: 5px;
         }
 
         #chat-messages .username {
@@ -369,10 +378,12 @@
         }
 
         #chat-messages li.sent .username {
+            order: 1; /* Move username to the left of avatar for sent messages */
             margin-right: 5px;
         }
 
         #chat-messages li.received .username {
+            order: 2; /* Keep username to the right of avatar for received messages */
             margin-left: 5px;
         }
 
@@ -383,6 +394,7 @@
             color: var(--received-message-text-color);
             word-wrap: break-word;
             overflow-wrap: break-word;
+            max-width: 100%; /* Ensure message content doesn't overflow */
         }
 
         #chat-messages li.sent .message-content {
@@ -403,6 +415,7 @@
             font-size: 0.8em;
             color: #888;
             margin-top: 5px;
+            align-self: flex-end; /* Align timestamp to the right for all messages */
         }
 
         #chat-input {
