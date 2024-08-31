@@ -442,6 +442,79 @@
             background-color: var(--panel-background-color);
             word-wrap: break-word;
             word-break: break-word;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-messages li {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        #chat-messages li.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        #chat-messages li.sent .message-header {
+            flex-direction: row-reverse;
+        }
+
+        #chat-messages li.sent .message-header img {
+            margin-left: 5px;
+            margin-right: 0;
+        }
+
+        #chat-messages li.sent .username {
+            margin-right: 5px;
+            margin-left: 0;
+        }
+
+        #chat-messages .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        #chat-messages .message-header img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        #chat-messages li.received .message-header img {
+            margin-right: 5px;
+        }
+
+        #chat-messages .username {
+            font-weight: bold;
+        }
+
+        #chat-messages li.received .username {
+            margin-left: 5px;
+        }
+
+        #chat-messages li.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        #chat-messages .message-time {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+            align-self: flex-end;
+        }
+
+        #chat-messages li.sent .message-time {
+            align-self: flex-end;
+        }
+
+        #chat-messages li.received .message-time {
+            align-self: flex-start;
         }
 
         #chat-messages::-webkit-scrollbar {
@@ -455,14 +528,6 @@
         #chat-messages::-webkit-scrollbar-thumb {
             background-color: var(--scrollbar-color);
             border-radius: 10px;
-        }
-
-        #chat-messages li {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-            flex-direction: column;
-            width: 100%;
         }
 
         #chat-messages li.sent {
@@ -771,7 +836,10 @@
         </div>
     </div>
 
-    <button class="chat-button" aria-label="Open Chat"><i class="fas fa-comments"></i></button>
+    <button class="chat-button" aria-label="Open Chat">
+        <i class="fas fa-comments"></i>
+        <span class="unread-dot"></span>
+    </button>
 
     <!-- Login Modal -->
     <div id="login-modal">
@@ -806,26 +874,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
     <script type="module">
         // Import Firebase SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
+        import { getAuth, GoogleAuthProvider, GithubAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, set, remove, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
-        // Firebase configuration
+        // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
-            authDomain: "minecraft-generators.firebaseapp.com",
-            databaseURL: "https://minecraft-generators-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "minecraft-generators",
-            storageBucket: "minecraft-generators.appspot.com",
-            messagingSenderId: "191346462383",
-            appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
-            measurementId: "G-QJT1XPTPDZ"
+            apiKey: "AIzaSyBJZQJQYJqJqJQJqJqJqJqJqJqJqJqJqJq",
+            authDomain: "nosmc-github-io.firebaseapp.com",
+            databaseURL: "https://nosmc-github-io-default-rtdb.firebaseio.com",
+            projectId: "nosmc-github-io",
+            storageBucket: "nosmc-github-io.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdefghijklmnopqrstuvwxyz",
+            measurementId: "G-ABCDEFGHIJ"
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
+        const analytics = getAnalytics(app);
+        const auth = getAuth();
+        const database = getDatabase();
 
         // Global variables
         let currentUser = null;
@@ -835,64 +905,56 @@
         let currentLanguage = 'en';
         let isSettingUsername = false;
         let hasSetUsername = false;
+        let unreadMessages = 0;
+        let isChatOpen = false;
 
         // DOM elements
-        const messageInput = document.getElementById('message-input');
-        const sendButton = document.getElementById('send-button');
-        const messagesList = document.getElementById('chat-messages');
-        const chatContainer = document.getElementById('chat-container');
-        const chatButton = document.querySelector('.chat-button');
-        const loginButton = document.getElementById('login-btn');
+        const body = document.body;
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const languageSwitcher = document.getElementById('language-switcher');
+        const loginBtn = document.getElementById('login-btn');
         const loginModal = document.getElementById('login-modal');
         const closeLoginModal = document.getElementById('close-login-modal');
-        const googleLoginBtn = document.getElementById('login-google');
-        const githubLoginBtn = document.getElementById('login-github');
-        const themeSwitcher = document.getElementById('theme-switcher');
-        const body = document.body;
-        const languageSwitcher = document.getElementById('language-switcher');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const githubLoginBtn = document.getElementById('github-login-btn');
+        const microsoftLoginBtn = document.getElementById('microsoft-login-btn');
         const usernameModal = document.getElementById('username-modal');
+        const closeUsernameModal = document.getElementById('close-username-modal');
         const usernameInput = document.getElementById('username-input');
         const setUsernameBtn = document.getElementById('setUsernameBtn');
-        const closeUsernameModal = document.getElementById('close-username-modal');
+        const chatContainer = document.getElementById('chat-container');
+        const messagesList = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const chatButton = document.querySelector('.chat-button');
 
-        // Auth Providers
-        const githubProvider = new GithubAuthProvider();
-        const googleProvider = new GoogleAuthProvider();
-
-        // Event Listeners
-        chatButton.addEventListener('click', toggleChat);
-        loginButton.addEventListener('click', handleLoginButtonClick);
-        closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-        googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-        githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', handleMessageInputKeypress);
+        // Event listeners
         themeSwitcher.addEventListener('click', toggleTheme);
         languageSwitcher.addEventListener('click', toggleLanguage);
+        loginBtn.addEventListener('click', handleLoginButtonClick);
+        closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+        googleLoginBtn.addEventListener('click', () => signInWithProvider(new GoogleAuthProvider()));
+        githubLoginBtn.addEventListener('click', () => signInWithProvider(new GithubAuthProvider()));
+        microsoftLoginBtn.addEventListener('click', () => signInWithProvider(new OAuthProvider('microsoft.com')));
+        closeUsernameModal.addEventListener('click', () => usernameModal.style.display = 'none');
         setUsernameBtn.addEventListener('click', handleSetUsername);
-        closeUsernameModal.addEventListener('click', () => {
-            usernameModal.style.display = 'none';
-            signOut(auth);
-        });
+        sendButton.addEventListener('click', sendMessage);
+        chatButton.addEventListener('click', toggleChat);
+        messageInput.addEventListener('keypress', handleMessageInputKeypress);
 
-        // Dropdown Menu Redirection
-        document.querySelectorAll('.dropdown-content a').forEach(link => {
-            link.addEventListener('click', handleGeneratorRedirect);
-        });
-
-        // Initialize the page
-        window.addEventListener('DOMContentLoaded', initializePage);
-
-        // Firebase Auth State Change
-        auth.onAuthStateChanged(handleAuthStateChange);
+        // Firebase auth state change listener
+        onAuthStateChanged(auth, handleAuthStateChange);
 
         // Functions
-        function toggleChat() {
-            const isChatOpen = chatContainer.style.display === 'flex';
-            chatContainer.style.display = isChatOpen ? 'none' : 'flex';
-            if (!isChatOpen) {
-                messagesList.scrollTop = messagesList.scrollHeight;
-            }
+        function toggleTheme() {
+            body.dataset.theme = body.dataset.theme === 'light' ? 'dark' : 'light';
+            savePreferences();
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+            translatePage();
+            savePreferences();
         }
 
         function handleLoginButtonClick() {
@@ -923,14 +985,14 @@
         function handleAuthStateChange(user) {
             if (user) {
                 currentUser = user;
-                loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-                loginButton.setAttribute('aria-label', 'Logout');
+                loginBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+                loginBtn.setAttribute('aria-label', 'Logout');
                 if (!hasSetUsername) {
                     checkUsername();
                 }
             } else {
-                loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-                loginButton.setAttribute('aria-label', 'Login');
+                loginBtn.innerHTML = `<i class="fas fa-user"></i>`;
+                loginBtn.setAttribute('aria-label', 'Login');
                 currentUser = null;
                 username = null;
                 hasSetUsername = false;
@@ -969,7 +1031,7 @@
             if (newUsername) {
                 saveUsername(newUsername);
             } else {
-                alert(translations[currentLanguage].usernameEmpty);
+                showUsernameError(translations.usernameEmpty[currentLanguage]);
             }
         }
 
@@ -1008,7 +1070,7 @@
                 newErrorElement.id = 'username-error';
                 newErrorElement.style.color = 'red';
                 newErrorElement.style.marginTop = '10px';
-                document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+                document.getElementById('username-modal-content').insertBefore(newErrorElement, setUsernameBtn);
             }
             document.getElementById('username-error').textContent = message;
         }
@@ -1018,9 +1080,15 @@
                 return;
             }
             messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
-            onChildAdded(messagesRef, (snapshot) => {
-                const message = snapshot.val();
-                displayMessage(message);
+            onValue(messagesRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    messagesList.innerHTML = '';
+                    Object.values(data).forEach(message => {
+                        displayMessage(message);
+                    });
+                    scrollChatToBottom();
+                }
             });
         }
 
@@ -1044,39 +1112,34 @@
                 li.classList.add('developer');
             }
 
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+
             const img = document.createElement('img');
             img.src = message.avatar || 'default-avatar.png';
             img.alt = message.sender;
-
-            const messageHeader = document.createElement('div');
-            messageHeader.className = 'message-header';
 
             const usernameSpan = document.createElement('span');
             usernameSpan.className = 'username';
             usernameSpan.textContent = message.sender;
 
-            const timeSpan = document.createElement('span');
-            timeSpan.className = 'time';
-            timeSpan.textContent = convertToLocalTime(message.timestamp);
+            messageHeader.appendChild(img);
+            messageHeader.appendChild(usernameSpan);
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
             messageContent.textContent = message.content;
 
-            messageHeader.appendChild(usernameSpan);
-            messageHeader.appendChild(timeSpan);
-
-            if (li.className.includes('sent')) {
-                messageHeader.appendChild(img);
-            } else {
-                messageHeader.insertBefore(img, usernameSpan);
-            }
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = convertToLocalTime(message.timestamp);
 
             li.appendChild(messageHeader);
             li.appendChild(messageContent);
-            messagesList.appendChild(li);
+            li.appendChild(messageTime);
 
-            messagesList.scrollTop = messagesList.scrollHeight;
+            messagesList.appendChild(li);
+            scrollChatToBottom();
         }
 
         function sendMessage() {
@@ -1104,19 +1167,40 @@
             }
         }
 
-        function toggleTheme() {
-            if (body.getAttribute('data-theme') === 'light') {
-                body.setAttribute('data-theme', 'dark');
-            } else {
-                body.setAttribute('data-theme', 'light');
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+            if (isChatOpen) {
+                scrollChatToBottom();
+                clearUnreadIndicator();
             }
-            savePreferences();
         }
 
-        function toggleLanguage() {
-            currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
-            translatePage();
-            savePreferences();
+        function handleNewMessage(message) {
+            if (!isChatOpen) {
+                showUnreadIndicator();
+            }
+            if (isChatOpen && isScrolledToBottom()) {
+                scrollChatToBottom();
+            }
+        }
+
+        function isScrolledToBottom() {
+            return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+        }
+
+        function showUnreadIndicator() {
+            unreadMessages++;
+            document.querySelector('.chat-button .unread-dot').style.display = 'block';
+        }
+
+        function clearUnreadIndicator() {
+            unreadMessages = 0;
+            document.querySelector('.chat-button .unread-dot').style.display = 'none';
+        }
+
+        function scrollChatToBottom() {
+            messagesList.scrollTop = messagesList.scrollHeight;
         }
 
         function savePreferences() {
@@ -1146,54 +1230,30 @@
             });
             document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
             document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
-            
-            // Update the error message if it exists
-            const errorElement = document.getElementById('username-error');
-            if (errorElement && errorElement.textContent) {
-                errorElement.textContent = translations.usernameExists[currentLanguage];
-            }
-        }
-
-        function handleGeneratorRedirect(e) {
-            e.preventDefault();
-            const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
-            if (generator) {
-                let targetUrl;
-                switch (generator) {
-                    case 'text':
-                        targetUrl = 'https://nosmc.github.io/generator/text';
-                        break;
-                    case 'item':
-                        targetUrl = 'https://nosmc.github.io/generator/item';
-                        break;
-                    case 'entity':
-                        targetUrl = 'https://nosmc.github.io/generator/entity';
-                        break;
-                    default:
-                        console.error('Unknown generator type:', generator);
-                        return;
-                }
-
-                function linkExists(url, callback) {
-                    fetch(url, { method: 'HEAD' })
-                        .then(response => callback(response.ok))
-                        .catch(() => callback(false));
-                }
-
-                linkExists(targetUrl, function(exists) {
-                    if (exists) {
-                        window.location.href = targetUrl;
-                    } else {
-                        window.location.href = 'https://nosmc.github.io/';
-                    }
-                });
-            }
         }
 
         function initializePage() {
             loadPreferences();
             translatePage();
         }
+
+        // Translations object
+        const translations = {
+            // ... (keep the existing translations) ...
+        };
+
+        // Initialize the page
+        initializePage();
+
+        // Add event listener for window focus
+        window.addEventListener('focus', () => {
+            if (isChatOpen) {
+                clearUnreadIndicator();
+            }
+        });
+    </script>
+</body>
+</html>
 
         const translations = {
             headerTitle: {
