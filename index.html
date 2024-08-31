@@ -579,7 +579,7 @@
             transform: translateY(-2px);
         }
 
-        #login-modal {
+        #login-modal, #username-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -592,19 +592,21 @@
             justify-content: center;
         }
 
-        #login-modal-content {
+        #login-modal-content, #username-modal-content {
             background-color: var(--modal-content-background);
             padding: 20px;
             border-radius: 10px;
             text-align: center;
+            max-width: 400px;
+            width: 90%;
         }
 
-        #login-modal-content h3 {
+        #login-modal-content h3, #username-modal-content h3 {
             margin-bottom: 20px;
             color: var(--text-color);
         }
 
-        .login-method-button {
+        .login-method-button, #set-username-btn {
             margin: 10px;
             padding: 10px 20px;
             background-color: var(--primary-color);
@@ -616,7 +618,7 @@
             transition: all 0.3s ease;
         }
 
-        .login-method-button:hover {
+        .login-method-button:hover, #set-username-btn:hover {
             background-color: var(--primary-color-dark);
             transform: translateY(-2px);
         }
@@ -632,6 +634,16 @@
 
         .close-modal:hover {
             color: var(--primary-color);
+        }
+
+        #username-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--panel-background-color);
+            color: var(--text-color);
         }
 
         @media (max-width: 768px) {
@@ -779,6 +791,18 @@
         </div>
     </div>
 
+    <!-- Username Modal -->
+    <div id="username-modal">
+        <div id="username-modal-content">
+            <h3 id="setUsernameTitle">Set Your Username</h3>
+            <input type="text" id="username-input" placeholder="Enter your username">
+            <button id="setUsernameBtn">Set Username</button>
+            <div class="close-modal" id="close-username-modal">
+                <span id="cancelSetUsername">Cancel</span>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
     <script type="module">
@@ -813,9 +837,6 @@
         let isSettingUsername = false;
         let hasSetUsername = false;
 
-        // At the top of your script, add this fallback message
-        const FALLBACK_USERNAME_PROMPT = "Please set your username:";
-
         // DOM elements
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
@@ -830,6 +851,10 @@
         const themeSwitcher = document.getElementById('theme-switcher');
         const body = document.body;
         const languageSwitcher = document.getElementById('language-switcher');
+        const usernameModal = document.getElementById('username-modal');
+        const usernameInput = document.getElementById('username-input');
+        const setUsernameBtn = document.getElementById('setUsernameBtn');
+        const closeUsernameModal = document.getElementById('close-username-modal');
 
         // Auth Providers
         const githubProvider = new GithubAuthProvider();
@@ -845,6 +870,11 @@
         messageInput.addEventListener('keypress', handleMessageInputKeypress);
         themeSwitcher.addEventListener('click', toggleTheme);
         languageSwitcher.addEventListener('click', toggleLanguage);
+        setUsernameBtn.addEventListener('click', handleSetUsername);
+        closeUsernameModal.addEventListener('click', () => {
+            usernameModal.style.display = 'none';
+            signOut(auth);
+        });
 
         // Dropdown Menu Redirection
         document.querySelectorAll('.dropdown-content a').forEach(link => {
@@ -920,37 +950,27 @@
                     hasSetUsername = true;
                     loadMessages();
                 } else {
-                    promptForUsername();
+                    showUsernameModal();
                 }
             }).catch(error => {
                 console.error("Error checking username:", error);
-                promptForUsername();
+                showUsernameModal();
             }).finally(() => {
                 isSettingUsername = false;
             });
         }
 
-        function promptForUsername() {
-            let message;
-            try {
-                message = translations[currentLanguage].enterUsername;
-            } catch (error) {
-                console.warn("Translation not found, using fallback message");
-                message = FALLBACK_USERNAME_PROMPT;
-            }
+        function showUsernameModal() {
+            usernameModal.style.display = 'flex';
+            usernameInput.focus();
+        }
 
-            const newUsername = prompt(message || FALLBACK_USERNAME_PROMPT);
+        function handleSetUsername() {
+            const newUsername = usernameInput.value.trim();
             if (newUsername) {
                 saveUsername(newUsername);
             } else {
-                signOut(auth).then(() => {
-                    currentUser = null;
-                    username = null;
-                    hasSetUsername = false;
-                    removeMessagesListener();
-                }).catch(error => {
-                    console.error("Error signing out:", error);
-                });
+                alert(translations[currentLanguage].usernameEmpty);
             }
         }
 
@@ -960,30 +980,25 @@
 
             get(usernameQuery).then(snapshot => {
                 if (snapshot.exists()) {
-                    let message;
-                    try {
-                        message = translations[currentLanguage].usernameExists;
-                    } catch (error) {
-                        console.warn("Translation not found, using fallback message");
-                        message = "Username already exists. Please choose another one.";
-                    }
-                    alert(message);
-                    promptForUsername();
+                    alert(translations[currentLanguage].usernameExists);
+                    usernameInput.value = '';
+                    usernameInput.focus();
                 } else {
                     set(ref(database, `users/${currentUser.uid}`), {
                         username: newUsername
                     }).then(() => {
                         username = newUsername;
                         hasSetUsername = true;
+                        usernameModal.style.display = 'none';
                         loadMessages();
                     }).catch(error => {
                         console.error("Error saving username:", error);
-                        promptForUsername();
+                        alert(translations[currentLanguage].errorSavingUsername);
                     });
                 }
             }).catch(error => {
                 console.error("Error checking username uniqueness:", error);
-                promptForUsername();
+                alert(translations[currentLanguage].errorCheckingUsername);
             });
         }
 
@@ -1115,10 +1130,15 @@
             Object.keys(translations).forEach(key => {
                 const element = document.getElementById(key);
                 if (element) {
-                    element.textContent = translations[key][currentLanguage];
+                    if (key === 'setUsernameBtn') {
+                        element.textContent = translations[key][currentLanguage];
+                    } else {
+                        element.textContent = translations[key][currentLanguage];
+                    }
                 }
             });
             document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+            document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
         }
 
         function handleGeneratorRedirect(e) {
@@ -1287,13 +1307,37 @@
                 en: "Donate",
                 zh: "捐贈"
             },
+            setUsernameTitle: {
+                en: "Set Your Username",
+                zh: "設置您的用戶名"
+            },
             enterUsername: {
-                en: "Please set your username:",
-                zh: "請設置您的用戶名："
+                en: "Enter your username",
+                zh: "輸入您的用戶名"
+            },
+            setUsernameBtn: {
+                en: "Set Username",
+                zh: "設置用戶名"
+            },
+            cancelSetUsername: {
+                en: "Cancel",
+                zh: "取消"
+            },
+            usernameEmpty: {
+                en: "Username cannot be empty",
+                zh: "用戶名不能為空"
             },
             usernameExists: {
                 en: "Username already exists. Please choose another one.",
                 zh: "用戶名已存在。請選擇另一個。"
+            },
+            errorSavingUsername: {
+                en: "Error saving username. Please try again.",
+                zh: "保存用戶名時出錯。請重試。"
+            },
+            errorCheckingUsername: {
+                en: "Error checking username. Please try again.",
+                zh: "檢查用戶名時出錯。請重試。"
             }
         };
 
