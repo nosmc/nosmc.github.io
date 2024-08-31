@@ -914,7 +914,8 @@
         }
 
         function promptForUsername() {
-            const newUsername = prompt(translations[currentLanguage].enterUsername);
+            const message = translations[currentLanguage].enterUsername || "Please set your username:";
+            const newUsername = prompt(message);
             if (newUsername) {
                 saveUsername(newUsername);
             } else {
