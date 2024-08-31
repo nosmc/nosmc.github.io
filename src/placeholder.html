@@ -36,6 +36,8 @@
             --shadow-light: 0 8px 20px rgba(0, 0, 0, 0.1);
             --shadow-dark: 0 8px 20px rgba(0, 0, 0, 0.5);
             --transition-speed: 0.3s;
+            --border-radius: 5px;
+            --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         [data-theme="light"] {
@@ -124,15 +126,16 @@
             color: white;
             padding: 10px 20px;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 16px;
             display: flex;
             align-items: center;
             gap: 10px;
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
             height: 41px;
+            box-shadow: var(--box-shadow);
         }
 
         .home-button:hover, .dropdown-button:hover, .button:hover {
@@ -661,14 +664,14 @@
         auth.onAuthStateChanged(handleAuthStateChange);
 
         // Functions
-        function toggleChat() {
+        const toggleChat = () => {
             isChatOpen = !isChatOpen;
             chatContainer.style.display = isChatOpen ? 'flex' : 'none';
             if (isChatOpen) {
                 messagesList.scrollTop = messagesList.scrollHeight;
                 clearUnreadIndicator();
             }
-        }
+        };
 
         function handleLoginButtonClick() {
             if (currentUser) {
@@ -713,12 +716,13 @@
             }
         }
 
-        function checkUsername() {
+        async function checkUsername() {
             if (isSettingUsername || hasSetUsername) return;
             
             isSettingUsername = true;
-            const userRef = ref(database, `users/${currentUser.uid}`);
-            get(userRef).then(snapshot => {
+            try {
+                const userRef = ref(database, `users/${currentUser.uid}`);
+                const snapshot = await get(userRef);
                 if (snapshot.exists()) {
                     username = snapshot.val().username;
                     hasSetUsername = true;
@@ -726,12 +730,12 @@
                 } else {
                     showUsernameModal();
                 }
-            }).catch(error => {
+            } catch (error) {
                 console.error("Error checking username:", error);
                 showUsernameModal();
-            }).finally(() => {
+            } finally {
                 isSettingUsername = false;
-            });
+            }
         }
 
         function showUsernameModal() {
@@ -838,7 +842,7 @@
             messageHeader.className = 'message-header';
 
             const img = document.createElement('img');
-            img.src = message.avatar || 'default-avatar.png';
+            img.src = message.avatar ?? 'default-avatar.png';
             img.alt = message.sender;
 
             const usernameSpan = document.createElement('span');
