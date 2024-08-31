@@ -674,7 +674,7 @@
             isChatOpen = !isChatOpen;
             chatContainer.style.display = isChatOpen ? 'flex' : 'none';
             if (isChatOpen) {
-                messagesList.scrollTop = messagesList.scrollHeight;
+                scrollChatToBottom();
                 clearUnreadIndicator();
             }
         }
@@ -815,7 +815,7 @@
             }
             // If the chat is open and the user is at the bottom, scroll to the new message
             if (isChatOpen && isScrolledToBottom()) {
-                messagesList.scrollTop = messagesList.scrollHeight;
+                scrollChatToBottom();
             }
         }
 
@@ -870,6 +870,7 @@
             li.appendChild(messageTime);
 
             messagesList.appendChild(li);
+            scrollChatToBottom();
         }
 
         function sendMessage() {
@@ -884,6 +885,7 @@
                 }).then(() => {
                     messageInput.value = '';
                     messageInput.focus();
+                    scrollChatToBottom();
                 }).catch(error => {
                     console.error("Error sending message:", error);
                 });
@@ -997,6 +999,10 @@
             }
         });
 
+        function scrollChatToBottom() {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
         const translations = {
             headerTitle: {
                 en: "Minecraft Datapack Generator",
@@ -1048,7 +1054,7 @@
             },
             cancelLogin: {
                 en: "Cancel",
-                zh: "取消"
+                zh: "取"
             },
             youtube: {
                 en: "YouTube",
