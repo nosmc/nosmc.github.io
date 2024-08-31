@@ -762,6 +762,7 @@
         <div id="username-modal-content">
             <h3 id="setUsernameTitle">Set Your Username</h3>
             <input type="text" id="username-input" placeholder="Enter your username">
+            <!-- The error message will be inserted here -->
             <button id="setUsernameBtn">Set Username</button>
             <div class="close-modal" id="close-username-modal">
                 <span id="cancelSetUsername">Cancel</span>
@@ -975,7 +976,7 @@
 
             get(usernameQuery).then(snapshot => {
                 if (snapshot.exists()) {
-                    alert(translations[currentLanguage].usernameExists);
+                    showUsernameError(translations.usernameExists[currentLanguage]);
                     usernameInput.value = '';
                     usernameInput.focus();
                 } else {
@@ -988,13 +989,25 @@
                         loadMessages();
                     }).catch(error => {
                         console.error("Error saving username:", error);
-                        alert(translations[currentLanguage].errorSavingUsername);
+                        showUsernameError(translations.errorSavingUsername[currentLanguage]);
                     });
                 }
             }).catch(error => {
                 console.error("Error checking username uniqueness:", error);
-                alert(translations[currentLanguage].errorCheckingUsername);
+                showUsernameError(translations.errorCheckingUsername[currentLanguage]);
             });
+        }
+
+        function showUsernameError(message) {
+            const errorElement = document.getElementById('username-error');
+            if (!errorElement) {
+                const newErrorElement = document.createElement('p');
+                newErrorElement.id = 'username-error';
+                newErrorElement.style.color = 'red';
+                newErrorElement.style.marginTop = '10px';
+                document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+            }
+            document.getElementById('username-error').textContent = message;
         }
 
         function loadMessages() {
@@ -1144,9 +1157,15 @@
             indentationSelect.options[0].text = translations.none[currentLanguage];
             indentationSelect.options[1].text = translations.twoSpaces[currentLanguage];
             indentationSelect.options[2].text = translations.fourSpaces[currentLanguage];
-
+            
             document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
             document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+            
+            // Update the error message if it exists
+            const errorElement = document.getElementById('username-error');
+            if (errorElement && errorElement.textContent) {
+                errorElement.textContent = translations.usernameExists[currentLanguage];
+            }
         }
 
         function handleGeneratorRedirect(e) {
