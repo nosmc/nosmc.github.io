@@ -24,12 +24,15 @@
             --developer-link-color: #0eb0f0;
             --developer-message-bg: #ff4081;
             --developer-message-text-color: white;
+            --time-username-spacing: 10px;
             --footer-link-color: #55a630;
             --footer-link-hover-color: #407f22;
             --donate-link-color: #ff4081;
             --donate-link-hover-color: #e73370;
             --modal-background-color: rgba(0, 0, 0, 0.6);
             --modal-content-background: var(--panel-background-color);
+            --accent-color: #ff4081;
+            --accent-color-dark: #c2185b;
             --shadow-light: 0 8px 20px rgba(0, 0, 0, 0.1);
             --shadow-dark: 0 8px 20px rgba(0, 0, 0, 0.5);
             --transition-speed: 0.3s;
@@ -97,10 +100,12 @@
 
         header {
             top: 0;
+            left: 0;
         }
 
         footer {
             bottom: 0;
+            left: 0;
             color: var(--text-color);
         }
 
@@ -114,7 +119,7 @@
             gap: 15px;
         }
 
-        .button, .home-button, .dropdown-button {
+        .home-button, .dropdown-button, .button {
             background-color: var(--primary-color);
             color: white;
             padding: 10px 20px;
@@ -130,13 +135,13 @@
             height: 41px;
         }
 
-        .button:hover, .home-button:hover, .dropdown-button:hover {
+        .home-button:hover, .dropdown-button:hover, .button:hover {
             background-color: var(--primary-color-dark);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
-        .button:active, .home-button:active, .dropdown-button:active {
+        .home-button:active, .dropdown-button:active, .button:active {
             transform: translateY(0);
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
@@ -201,6 +206,18 @@
             transition: all 0.3s ease;
         }
 
+        .footer-links a[aria-label="YouTube"] {
+            color: #FF0000;
+        }
+
+        .footer-links a[aria-label="Instagram"] {
+            color: #E1306C;
+        }
+
+        .footer-links a[aria-label="Discord"] {
+            color: #7289DA;
+        }
+
         .footer-links a:hover {
             transform: translateY(-2px);
             text-decoration: underline;
@@ -226,6 +243,10 @@
             margin-left: 10px;
             text-decoration: none;
             transition: all 0.3s ease;
+        }
+
+        .donate i {
+            margin-right: 5px;
         }
 
         .donate:hover {
@@ -285,6 +306,76 @@
             padding: 10px;
             background-color: var(--panel-background-color);
             word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        #chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-messages::-webkit-scrollbar-track {
+            background: var(--panel-background-color);
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-color);
+            border-radius: 10px;
+        }
+
+        #chat-messages li {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        #chat-messages li.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        #chat-messages li.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        #chat-messages li img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        #chat-messages .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        #chat-messages .username {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        #chat-messages .message-content {
+            padding: 10px 15px;
+            border-radius: 10px;
+            background-color: var(--received-message-bg);
+            color: var(--received-message-text-color);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        #chat-messages li.sent .message-content {
+            background-color: var(--sent-message-bg);
+            color: var(--sent-message-text-color);
+        }
+
+        #chat-messages .message-time {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
         }
 
         #chat-input {
@@ -403,61 +494,6 @@
                 padding: 8px 12px;
                 font-size: 14px;
             }
-        }
-
-        #chat-messages li img {
-            width: 30px; /* Adjust avatar size to be larger */
-            height: 30px; /* Adjust avatar size to be larger */
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        #chat-messages li.sent {
-            align-self: flex-end; /* Align sent messages to the right */
-        }
-
-        #chat-messages li.received {
-            align-self: flex-start; /* Align received messages to the left */
-        }
-
-        #chat-messages .message-content {
-            padding: 10px 15px;
-            border-radius: 10px;
-            color: white; /* Set message text color to white */
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            display: inline-block; /* Ensure message content has a bounding box */
-            max-width: 80%; /* Limit message width */
-            position: relative; /* For pseudo-element positioning */
-        }
-
-        #chat-messages .message-content.sent {
-            background-color: #55a630; /* Set sent message background to green */
-        }
-
-        #chat-messages .message-content.received {
-            background-color: #4e4e4e; /* Set received message background to gray */
-        }
-
-        #chat-messages .message-content.developer {
-            background-color: #ff4081; /* Set developer message background to a different color */
-        }
-
-        #chat-messages .message-content::after {
-            content: '';
-            position: absolute;
-            bottom: 100%; /* Position above the message */
-            left: 10px; /* Adjust as needed */
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent; /* Create the left triangle */
-            border-right: 10px solid transparent; /* Create the right triangle */
-        }
-
-        #chat-messages .message-time {
-            font-size: 0.8em; /* Smaller font size */
-            color: #888; /* Gray color */
-            margin-top: 5px; /* Space between message content and time */
         }
     </style>
 </head>
@@ -798,24 +834,33 @@
                 li.classList.add('developer');
             }
 
-            const messageContent = document.createElement('div');
-            messageContent.className = `message-content ${li.className}`; // Add class based on sent/received
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
 
+            const img = document.createElement('img');
+            img.src = message.avatar || 'default-avatar.png';
+            img.alt = message.sender;
+
+            const usernameSpan = document.createElement('span');
+            usernameSpan.className = 'username';
+            usernameSpan.textContent = message.sender;
+
+            messageHeader.appendChild(img);
+            messageHeader.appendChild(usernameSpan);
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
             messageContent.textContent = message.content;
 
             const messageTime = document.createElement('div');
             messageTime.className = 'message-time';
             messageTime.textContent = convertToLocalTime(message.timestamp);
 
+            li.appendChild(messageHeader);
             li.appendChild(messageContent);
             li.appendChild(messageTime);
 
             messagesList.appendChild(li);
-            messagesList.scrollTop = messagesList.scrollHeight;
-
-            if (!isChatOpen) {
-                showUnreadIndicator();
-            }
         }
 
         function sendMessage() {
@@ -844,7 +889,10 @@
         }
 
         function toggleTheme() {
-            body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+            if (body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+            } else {body.setAttribute('data-theme', 'light');
+            }
             savePreferences();
         }
 
@@ -887,23 +935,35 @@
             e.preventDefault();
             const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
             if (generator) {
-                const targetUrl = {
-                    text: 'https://nosmc.github.io/generator/text',
-                    item: 'https://nosmc.github.io/generator/item',
-                    entity: 'https://nosmc.github.io/generator/entity'
-                }[generator];
-
-                if (targetUrl) {
-                    fetch(targetUrl, { method: 'HEAD' })
-                        .then(response => {
-                            window.location.href = response.ok ? targetUrl : 'https://nosmc.github.io/';
-                        })
-                        .catch(() => {
-                            window.location.href = 'https://nosmc.github.io/';
-                        });
-                } else {
-                    console.error('Unknown generator type:', generator);
+                let targetUrl;
+                switch (generator) {
+                    case 'text':
+                        targetUrl = 'https://nosmc.github.io/generator/text';
+                        break;
+                    case 'item':
+                        targetUrl = 'https://nosmc.github.io/generator/item';
+                        break;
+                    case 'entity':
+                        targetUrl = 'https://nosmc.github.io/generator/entity';
+                        break;
+                    default:
+                        console.error('Unknown generator type:', generator);
+                        return;
                 }
+
+                function linkExists(url, callback) {
+                    fetch(url, { method: 'HEAD' })
+                        .then(response => callback(response.ok))
+                        .catch(() => callback(false));
+                }
+
+                linkExists(targetUrl, function(exists) {
+                    if (exists) {
+                        window.location.href = targetUrl;
+                    } else {
+                        window.location.href = 'https://nosmc.github.io/';
+                    }
+                });
             }
         }
 
@@ -929,44 +989,114 @@
         });
 
         const translations = {
-            headerTitle: { en: "Minecraft Datapack Generator", zh: "Minecraft 資料包生成器" },
-            home: { en: "Home", zh: "主頁" },
-            generators: { en: "Generators", zh: "生成器" },
-            generatorText: { en: "Text", zh: "文字" },
-            generatorItem: { en: "Item", zh: "物品" },
-            generatorEntity: { en: "Entity", zh: "實體" },
-            chatTitle: { en: "Chat", zh: "聊天" },
-            sendButtonText: { en: "Send", zh: "發送" },
-            typeAMessage: { en: "Type a message...", zh: "輸入消息..." },
-            chooseLoginMethod: { en: "Choose a Login Method", zh: "選擇登錄方式" },
-            loginWithGoogle: { en: "Login with Google", zh: "使用 Google 登錄" },
-            loginWithGithub: { en: "Login with GitHub", zh: "使用 GitHub 登錄" },
-            cancelLogin: { en: "Cancel", zh: "取消" },
-            youtube: { en: "YouTube", zh: "YouTube" },
-            instagram: { en: "Instagram", zh: "Instagram" },
-            discord: { en: "Discord", zh: "Discord" },
-            developedBy: { en: "Developed by nos", zh: "由 nos 開發" },
-            donate: { en: "Donate", zh: "捐贈" },
-            setUsernameTitle: { en: "Set Your Username", zh: "設置您的用戶名" },
-            enterUsername: { en: "Enter your username", zh: "輸入您的用戶名" },
-            setUsernameBtn: { en: "Set Username", zh: "設置用戶名" },
-            cancelSetUsername: { en: "Cancel", zh: "取消" },
-            usernameEmpty: { en: "Username cannot be empty", zh: "用戶名不能為空" },
-            usernameExists: { en: "Username already exists. Please choose another one.", zh: "用戶名已存在。請選擇另一個。" },
-            errorSavingUsername: { en: "Error saving username. Please try again.", zh: "保存用戶名時出錯。請重試。" },
-            errorCheckingUsername: { en: "Error checking username. Please try again.", zh: "檢查用戶名時出錯。請重試。" }
+            headerTitle: {
+                en: "Minecraft Datapack Generator",
+                zh: "Minecraft 資料包生成器"
+            },
+            home: {
+                en: "Home",
+                zh: "主頁"
+            },
+            generators: {
+                en: "Generators",
+                zh: "生成器"
+            },
+            generatorText: {
+                en: "Text",
+                zh: "文字"
+            },
+            generatorItem: {
+                en: "Item",
+                zh: "物品"
+            },
+            generatorEntity: {
+                en: "Entity",
+                zh: "實體"
+            },
+            chatTitle: {
+                en: "Chat",
+                zh: "聊天"
+            },
+            sendButtonText: {
+                en: "Send",
+                zh: "發送"
+            },
+            typeAMessage: {
+                en: "Type a message...",
+                zh: "輸入消息..."
+            },
+            chooseLoginMethod: {
+                en: "Choose a Login Method",
+                zh: "選擇登錄方式"
+            },
+            loginWithGoogle: {
+                en: "Login with Google",
+                zh: "使用 Google 登錄"
+            },
+            loginWithGithub: {
+                en: "Login with GitHub",
+                zh: "使用 GitHub 登錄"
+            },
+            cancelLogin: {
+                en: "Cancel",
+                zh: "取消"
+            },
+            youtube: {
+                en: "YouTube",
+                zh: "YouTube"
+            },
+            instagram: {
+                en: "Instagram",
+                zh: "Instagram"
+            },
+            discord: {
+                en: "Discord",
+                zh: "Discord"
+            },
+            developedBy: {
+                en: "Developed by nos",
+                zh: "由 nos 開發"
+            },
+            donate: {
+                en: "Donate",
+                zh: "捐贈"
+            },
+            setUsernameTitle: {
+                en: "Set Your Username",
+                zh: "設置您的用戶名"
+            },
+            enterUsername: {
+                en: "Enter your username",
+                zh: "輸入您的用戶名"
+            },
+            setUsernameBtn: {
+                en: "Set Username",
+                zh: "設置用戶名"
+            },
+            cancelSetUsername: {
+                en: "Cancel",
+                zh: "取消"
+            },
+            usernameEmpty: {
+                en: "Username cannot be empty",
+                zh: "用戶名不能為空"
+            },
+            usernameExists: {
+                en: "Username already exists. Please choose another one.",
+                zh: "用戶名已存在。請選擇另一個。"
+            },
+            errorSavingUsername: {
+                en: "Error saving username. Please try again.",
+                zh: "保存用戶名時出錯。請重試。"
+            },
+            errorCheckingUsername: {
+                en: "Error checking username. Please try again.",
+                zh: "檢查用戶名時出錯。請重試。"
+            }
         };
 
         // Initialize the page
         initializePage();
-
-        // Load unread messages count from local storage
-        window.addEventListener('load', () => {
-            unreadMessages = parseInt(localStorage.getItem('unreadMessages')) || 0;
-            if (unreadMessages > 0) {
-                document.querySelector('.chat-button .unread-dot').style.display = 'block';
-            }
-        });
     </script>
 </body>
 </html>
