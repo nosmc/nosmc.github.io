@@ -517,6 +517,17 @@
                 padding: 8px 12px;
                 font-size: 14px;
             }
+
+            .chat-button .unread-dot {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                width: 10px;
+                height: 10px;
+                background-color: red;
+                border-radius: 50%;
+                display: none;
+            }
         }
     </style>
 </head>
@@ -565,7 +576,10 @@
         </div>
     </div>
 
-    <button class="chat-button" aria-label="Open Chat"><i class="fas fa-comments"></i></button>
+    <button class="chat-button" aria-label="Open Chat">
+        <i class="fas fa-comments"></i>
+        <span class="unread-dot"></span>
+    </button>
 
     <!-- Login Modal -->
     <div id="login-modal">
@@ -627,6 +641,8 @@
         let currentLanguage = 'en';
         let isSettingUsername = false;
         let hasSetUsername = false;
+        let unreadMessages = 0;
+        let isChatOpen = false;
 
         // DOM elements
         const messageInput = document.getElementById('message-input');
@@ -666,6 +682,11 @@
             usernameModal.style.display = 'none';
             signOut(auth);
         });
+        window.addEventListener('focus', () => {
+            if (isChatOpen) {
+                clearUnreadIndicator();
+            }
+        });
 
         // Dropdown Menu Redirection
         document.querySelectorAll('.dropdown-content a').forEach(link => {
@@ -680,11 +701,24 @@
 
         // Functions
         function toggleChat() {
-            const isChatOpen = chatContainer.style.display === 'flex';
-            chatContainer.style.display = isChatOpen ? 'none' : 'flex';
-            if (!isChatOpen) {
+            isChatOpen = !isChatOpen;
+            chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+            if (isChatOpen) {
                 messagesList.scrollTop = messagesList.scrollHeight;
+                clearUnreadIndicator();
             }
+        }
+
+        function showUnreadIndicator() {
+            if (!isChatOpen) {
+                unreadMessages++;
+                document.querySelector('.chat-button .unread-dot').style.display = 'block';
+            }
+        }
+
+        function clearUnreadIndicator() {
+            unreadMessages = 0;
+            document.querySelector('.chat-button .unread-dot').style.display = 'none';
         }
 
         function handleLoginButtonClick() {
@@ -804,9 +838,18 @@
                 return;
             }
             messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+            
+            // Get the current timestamp when loading messages
+            const loadTimestamp = new Date().getTime();
+            
             onChildAdded(messagesRef, (snapshot) => {
                 const message = snapshot.val();
                 displayMessage(message);
+                
+                // Only show unread indicator for new messages
+                if (new Date(message.timestamp).getTime() > loadTimestamp) {
+                    showUnreadIndicator();
+                }
             });
         }
 
@@ -863,6 +906,12 @@
             messagesList.appendChild(li);
 
             messagesList.scrollTop = messagesList.scrollHeight;
+
+            messagesList.appendChild(li);
+            messagesList.scrollTop = messagesList.scrollHeight;
+
+            showUnreadIndicator();
+
         }
 
         function sendMessage() {
