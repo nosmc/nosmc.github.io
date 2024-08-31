@@ -339,13 +339,13 @@ function handleGeneratorRedirect(e) {
         let targetUrl;
         switch (generator) {
             case 'text':
-                targetUrl = 'https://noshere.github.io/generator/text';
+                targetUrl = 'https://nosmc.github.io/generator/text';
                 break;
             case 'item':
-                targetUrl = 'https://noshere.github.io/generator/item';
+                targetUrl = 'https://nosmc.github.io/generator/item';
                 break;
             case 'entity':
-                targetUrl = 'https://noshere.github.io/generator/entity';
+                targetUrl = 'https://nosmc.github.io/generator/entity';
                 break;
             default:
                 console.error('Unknown generator type:', generator);
@@ -366,7 +366,7 @@ function handleGeneratorRedirect(e) {
                 window.location.href = targetUrl;
             } else {
                 // If the link doesn't exist, redirect to the home page
-                window.location.href = 'https://noshere.github.io/';
+                window.location.href = 'https://nosmc.github.io/';
             }
         });
     }
