@@ -811,6 +811,7 @@
         const developerUsername = "nos";
         let currentLanguage = 'en';
         let isSettingUsername = false;
+        let hasSetUsername = false;
 
         // At the top of your script, add this fallback message
         const FALLBACK_USERNAME_PROMPT = "Please set your username:";
@@ -870,6 +871,7 @@
                 signOut(auth).then(() => {
                     currentUser = null;
                     username = null;
+                    hasSetUsername = false;
                     removeMessagesListener();
                 }).catch(error => {
                     console.error("Error signing out:", error);
@@ -894,23 +896,28 @@
                 currentUser = user;
                 loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
                 loginButton.setAttribute('aria-label', 'Logout');
-                checkUsername();
+                if (!hasSetUsername) {
+                    checkUsername();
+                }
             } else {
                 loginButton.innerHTML = `<i class="fas fa-user"></i>`;
                 loginButton.setAttribute('aria-label', 'Login');
                 currentUser = null;
                 username = null;
+                hasSetUsername = false;
                 removeMessagesListener();
             }
         }
 
         function checkUsername() {
-            if (isSettingUsername) return;
+            if (isSettingUsername || hasSetUsername) return;
             
+            isSettingUsername = true;
             const userRef = ref(database, `users/${currentUser.uid}`);
             get(userRef).then(snapshot => {
                 if (snapshot.exists()) {
                     username = snapshot.val().username;
+                    hasSetUsername = true;
                     loadMessages();
                 } else {
                     promptForUsername();
@@ -918,13 +925,12 @@
             }).catch(error => {
                 console.error("Error checking username:", error);
                 promptForUsername();
+            }).finally(() => {
+                isSettingUsername = false;
             });
         }
 
         function promptForUsername() {
-            if (isSettingUsername) return;
-            isSettingUsername = true;
-
             let message;
             try {
                 message = translations[currentLanguage].enterUsername;
@@ -940,12 +946,12 @@
                 signOut(auth).then(() => {
                     currentUser = null;
                     username = null;
+                    hasSetUsername = false;
                     removeMessagesListener();
                 }).catch(error => {
                     console.error("Error signing out:", error);
                 });
             }
-            isSettingUsername = false;
         }
 
         function saveUsername(newUsername) {
@@ -968,6 +974,7 @@
                         username: newUsername
                     }).then(() => {
                         username = newUsername;
+                        hasSetUsername = true;
                         loadMessages();
                     }).catch(error => {
                         console.error("Error saving username:", error);
@@ -1052,7 +1059,7 @@
 
                 push(ref(database, 'messages'), {
                     sender: username,
-                    avatar: currentUser.photoURL || "default-avatar.png",
+                    avatar: currentUser?.photoURL || "default-avatar.png",
                     content: messageInput.value,
                     timestamp: timestamp
                 }).then(() => {
