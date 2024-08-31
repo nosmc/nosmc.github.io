@@ -810,9 +810,7 @@
         let messagesRef = null;
         const developerUsername = "nos";
         let currentLanguage = 'en';
-
-        // At the top of your script, add this fallback message
-        const FALLBACK_USERNAME_PROMPT = "Please set your username:";
+        let isFirstLogin = false;
 
         // DOM elements
         const messageInput = document.getElementById('message-input');
@@ -882,6 +880,7 @@
             signInWithPopup(auth, provider).then(result => {
                 currentUser = result.user;
                 loginModal.style.display = 'none';
+                isFirstLogin = true;
                 checkUsername();
             }).catch(error => {
                 console.error(`Error during ${provider.providerId} login:`, error);
@@ -899,6 +898,7 @@
                 loginButton.setAttribute('aria-label', 'Login');
                 currentUser = null;
                 username = null;
+                removeMessagesListener();
             }
         }
 
@@ -913,24 +913,14 @@
                 }
             }).catch(error => {
                 console.error("Error checking username:", error);
-                promptForUsername(); // Fallback to prompt even if there's an error
             });
         }
 
         function promptForUsername() {
-            let message;
-            try {
-                message = translations[currentLanguage].enterUsername;
-            } catch (error) {
-                console.warn("Translation not found, using fallback message");
-                message = FALLBACK_USERNAME_PROMPT;
-            }
-
-            const newUsername = prompt(message || FALLBACK_USERNAME_PROMPT);
+            const newUsername = prompt(translations[currentLanguage].enterUsername || "Please set your username:");
             if (newUsername) {
                 saveUsername(newUsername);
             } else {
-                // If the user cancels the prompt, sign them out
                 signOut(auth).then(() => {
                     currentUser = null;
                     username = null;
@@ -947,15 +937,8 @@
 
             get(usernameQuery).then(snapshot => {
                 if (snapshot.exists()) {
-                    let message;
-                    try {
-                        message = translations[currentLanguage].usernameExists;
-                    } catch (error) {
-                        console.warn("Translation not found, using fallback message");
-                        message = "Username already exists. Please choose another one.";
-                    }
-                    alert(message);
-                    promptForUsername(); // Ask for a different username
+                    alert(translations[currentLanguage].usernameExists || "Username already exists. Please choose another one.");
+                    promptForUsername();
                 } else {
                     set(ref(database, `users/${currentUser.uid}`), {
                         username: newUsername
@@ -964,12 +947,10 @@
                         loadMessages();
                     }).catch(error => {
                         console.error("Error saving username:", error);
-                        promptForUsername(); // Retry if there's an error
                     });
                 }
             }).catch(error => {
                 console.error("Error checking username uniqueness:", error);
-                promptForUsername(); // Retry if there's an error
             });
         }
 
@@ -988,6 +969,7 @@
             if (messagesRef) {
                 messagesRef = null;
             }
+            messagesList.innerHTML = '';
         }
 
         function convertToLocalTime(isoTimestamp) {
@@ -1126,20 +1108,16 @@
                         return;
                 }
 
-                // Function to check if the link exists
                 function linkExists(url, callback) {
                     fetch(url, { method: 'HEAD' })
                         .then(response => callback(response.ok))
                         .catch(() => callback(false));
                 }
 
-                // Check if the target URL exists
                 linkExists(targetUrl, function(exists) {
                     if (exists) {
-                        // If the link exists, navigate to the generator page
                         window.location.href = targetUrl;
                     } else {
-                        // If the link doesn't exist, redirect to the home page
                         window.location.href = 'https://nosmc.github.io/';
                     }
                 });
@@ -1151,7 +1129,6 @@
             translatePage();
         }
 
-        // Translations
         const translations = {
             headerTitle: {
                 en: "Minecraft Datapack Generator",
@@ -1287,7 +1264,6 @@
             }
         };
 
-        // Add event listeners for generator cards
         document.querySelectorAll('.generator-card').forEach(card => {
             card.addEventListener('click', () => {
                 const generatorType = card.querySelector('.generator-title').id.replace('GeneratorTitle', '').toLowerCase();
