@@ -406,22 +406,41 @@
         }
 
         #chat-messages li img {
-            width: 20px; /* Adjust avatar size to normal */
-            height: 20px; /* Adjust avatar size to normal */
+            width: 30px; /* Adjust avatar size to be larger */
+            height: 30px; /* Adjust avatar size to be larger */
             border-radius: 50%;
             margin-right: 5px;
+        }
+
+        #chat-messages li.sent {
+            align-self: flex-end; /* Align sent messages to the right */
+        }
+
+        #chat-messages li.received {
+            align-self: flex-start; /* Align received messages to the left */
         }
 
         #chat-messages .message-content {
             padding: 10px 15px;
             border-radius: 10px;
-            background-color: #55a630; /* Set message background to green */
             color: white; /* Set message text color to white */
             word-wrap: break-word;
             overflow-wrap: break-word;
             display: inline-block; /* Ensure message content has a bounding box */
             max-width: 80%; /* Limit message width */
             position: relative; /* For pseudo-element positioning */
+        }
+
+        #chat-messages .message-content.sent {
+            background-color: #55a630; /* Set sent message background to green */
+        }
+
+        #chat-messages .message-content.received {
+            background-color: #4e4e4e; /* Set received message background to gray */
+        }
+
+        #chat-messages .message-content.developer {
+            background-color: #ff4081; /* Set developer message background to a different color */
         }
 
         #chat-messages .message-content::after {
@@ -433,7 +452,6 @@
             height: 0;
             border-left: 10px solid transparent; /* Create the left triangle */
             border-right: 10px solid transparent; /* Create the right triangle */
-            border-bottom: 10px solid #55a630; /* Match the background color */
         }
 
         #chat-messages .message-time {
@@ -780,29 +798,15 @@
                 li.classList.add('developer');
             }
 
-            const messageHeader = document.createElement('div');
-            messageHeader.className = 'message-header';
-
-            const img = document.createElement('img');
-            img.src = message.avatar || 'default-avatar.png';
-            img.alt = message.sender;
-
-            const usernameSpan = document.createElement('span');
-            usernameSpan.className = 'username';
-            usernameSpan.textContent = message.sender;
-
-            messageHeader.appendChild(img);
-            messageHeader.appendChild(usernameSpan);
-
             const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
+            messageContent.className = `message-content ${li.className}`; // Add class based on sent/received
+
             messageContent.textContent = message.content;
 
             const messageTime = document.createElement('div');
             messageTime.className = 'message-time';
             messageTime.textContent = convertToLocalTime(message.timestamp);
 
-            li.appendChild(messageHeader);
             li.appendChild(messageContent);
             li.appendChild(messageTime);
 
@@ -955,6 +959,14 @@
 
         // Initialize the page
         initializePage();
+
+        // Load unread messages count from local storage
+        window.addEventListener('load', () => {
+            unreadMessages = parseInt(localStorage.getItem('unreadMessages')) || 0;
+            if (unreadMessages > 0) {
+                document.querySelector('.chat-button .unread-dot').style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
