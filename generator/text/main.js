@@ -463,7 +463,13 @@ function createContent(type, data = {}) {
 }
 
 function addContent(type) {
-    contents.push(createContent(type));
+    let newContent;
+    if (type === 'translatedText') {
+        newContent = createContent(type, { translate: '', with: [] });
+    } else {
+        newContent = createContent(type);
+    }
+    contents.push(newContent);
     updateUI();
     saveContents();
 }
@@ -537,9 +543,13 @@ function addTextInput(parent, content, field, placeholder) {
 }
 
 function addWithInputs(parent, content) {
+    if (!Array.isArray(content.data.with)) {
+        content.data.with = [];
+    }
+    
     content.data.with.forEach((withContent, withIndex) => {
         const withDiv = document.createElement('div');
-        addTextInput(withDiv, withContent.data, 'text', `${translations.enterText[currentLanguage]} ${withIndex + 1}`);
+        addTextInput(withDiv, withContent, 'text', `${translations.enterText[currentLanguage]} ${withIndex + 1}`);
         const deleteWithButton = createButton(translations.delete[currentLanguage], 'fa-trash', () => {
             content.data.with.splice(withIndex, 1);
             updateUI();
