@@ -453,6 +453,8 @@
             background-color: var(--panel-background-color);
             word-wrap: break-word;
             word-break: break-word;
+            display: flex;
+            flex-direction: column;
         }
 
         #chat-messages::-webkit-scrollbar {
@@ -480,18 +482,9 @@
             align-items: flex-end;
         }
 
-        #chat-messages li.sent .message-header {
-            flex-direction: row-reverse;
-        }
-
-        #chat-messages li.sent .message-header img {
-            margin-left: 5px;
-            margin-right: 0;
-        }
-
-        #chat-messages li.sent .username {
-            margin-right: 5px;
-            margin-left: 0;
+        #chat-messages li.received {
+            align-self: flex-start;
+            align-items: flex-start;
         }
 
         #chat-messages .message-header {
@@ -501,10 +494,19 @@
             font-size: 0.9em;
         }
 
+        #chat-messages li.sent .message-header {
+            flex-direction: row-reverse;
+        }
+
         #chat-messages .message-header img {
             width: 24px;
             height: 24px;
             border-radius: 50%;
+        }
+
+        #chat-messages li.sent .message-header img {
+            margin-left: 5px;
+            margin-right: 0;
         }
 
         #chat-messages li.received .message-header img {
@@ -515,13 +517,13 @@
             font-weight: bold;
         }
 
-        #chat-messages li.received .username {
-            margin-left: 5px;
+        #chat-messages li.sent .username {
+            margin-right: 5px;
+            margin-left: 0;
         }
 
-        #chat-messages li.received {
-            align-self: flex-start;
-            align-items: flex-start;
+        #chat-messages li.received .username {
+            margin-left: 5px;
         }
 
         #chat-messages .message-content {
