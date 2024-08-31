@@ -853,6 +853,11 @@
         auth.onAuthStateChanged(handleAuthStateChange);
 
         // Functions
+        function setInitialLanguage() {
+            const browserLang = navigator.language || navigator.userLanguage;
+            currentLanguage = browserLang.startsWith('zh') ? 'zh' : 'en';
+        }
+    
         function toggleChat() {
             const isChatOpen = chatContainer.style.display === 'flex';
             chatContainer.style.display = isChatOpen ? 'none' : 'flex';
@@ -913,7 +918,7 @@
         }
 
         function promptForUsername() {
-            const newUsername = prompt(translations[currentLanguage].enterUsername);
+            const newUsername = prompt(translations[currentLanguage].enterUsername || "Please enter your username:");
             if (newUsername) {
                 saveUsername(newUsername);
             } else {
@@ -1075,11 +1080,13 @@
         function translatePage() {
             Object.keys(translations).forEach(key => {
                 const element = document.getElementById(key);
-                if (element) {
+                if (element && translations[key][currentLanguage]) {
                     element.textContent = translations[key][currentLanguage];
                 }
             });
-            document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+            if (messageInput) {
+                messageInput.placeholder = translations.typeAMessage[currentLanguage] || "Type a message...";
+            }
         }
 
         function handleGeneratorRedirect(e) {
@@ -1123,6 +1130,7 @@
         }
 
         function initializePage() {
+            setInitialLanguage();
             loadPreferences();
             translatePage();
         }
