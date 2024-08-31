@@ -403,6 +403,15 @@
             font-size: 0.8em;
             color: #888;
             margin-top: 5px;
+            align-self: flex-end; /* Align timestamp to the right for all messages */
+        }
+
+        #chat-messages li.sent .message-time {
+            align-self: flex-end; /* Align to the right for sent messages */
+        }
+
+        #chat-messages li.received .message-time {
+            align-self: flex-start; /* Align to the left for received messages */
         }
 
         #chat-input {
