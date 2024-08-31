@@ -339,13 +339,6 @@
             align-items: flex-start;
         }
 
-        #chat-messages li img {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
         #chat-messages .message-header {
             display: flex;
             align-items: center;
@@ -353,9 +346,34 @@
             font-size: 0.9em;
         }
 
+        #chat-messages li.sent .message-header {
+            flex-direction: row-reverse;
+        }
+
+        #chat-messages .message-header img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        #chat-messages li.received .message-header img {
+            margin-right: 5px;
+        }
+
+        #chat-messages li.sent .message-header img {
+            margin-left: 5px;
+        }
+
         #chat-messages .username {
             font-weight: bold;
+        }
+
+        #chat-messages li.sent .username {
             margin-right: 5px;
+        }
+
+        #chat-messages li.received .username {
+            margin-left: 5px;
         }
 
         #chat-messages .message-content {
