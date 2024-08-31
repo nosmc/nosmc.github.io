@@ -769,7 +769,7 @@
             <h3 id="chooseLoginMethod">Choose a Login Method</h3>
             <button id="login-google" class="login-method-button">Login with Google</button>
             <button id="login-github" class="login-method-button">Login with GitHub</button>
-            <div class="close-modal" id="cancel">Cancel</div>
+            <div class="close-modal" id="close-login-modal">Cancel</div>
         </div>
     </div>
 
@@ -1062,10 +1062,6 @@
                 }
             });
             document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
-            
-            // Translate login modal buttons
-            document.getElementById('login-google').textContent = translations.loginWithGoogle[currentLanguage];
-            document.getElementById('login-github').textContent = translations.loginWithGitHub[currentLanguage];
         }
 
         function handleGeneratorRedirect(e) {
@@ -1234,23 +1230,7 @@
             usernameExists: {
                 en: "Username already exists. Please choose another one.",
                 zh: "用戶名已存在。請選擇另一個。"
-            },
-            chooseLoginMethod: {
-        en: "Choose a Login Method",
-        zh: "選擇登錄方式"
-    },
-    loginWithGoogle: {
-        en: "Login with Google",
-        zh: "使用 Google 登錄"
-    },
-    loginWithGitHub: {
-        en: "Login with GitHub",
-        zh: "使用 GitHub 登錄"
-    },
-    cancel: {
-        en: "Cancel",
-        zh: "取消"
-    }
+            }
         };
     </script>
 </body>
