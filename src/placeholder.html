@@ -24,20 +24,15 @@
             --developer-link-color: #0eb0f0;
             --developer-message-bg: #ff4081;
             --developer-message-text-color: white;
-            --time-username-spacing: 10px;
             --footer-link-color: #55a630;
             --footer-link-hover-color: #407f22;
             --donate-link-color: #ff4081;
             --donate-link-hover-color: #e73370;
             --modal-background-color: rgba(0, 0, 0, 0.6);
             --modal-content-background: var(--panel-background-color);
-            --accent-color: #ff4081;
-            --accent-color-dark: #c2185b;
             --shadow-light: 0 8px 20px rgba(0, 0, 0, 0.1);
             --shadow-dark: 0 8px 20px rgba(0, 0, 0, 0.5);
             --transition-speed: 0.3s;
-            --border-radius: 5px;
-            --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         [data-theme="light"] {
@@ -102,12 +97,10 @@
 
         header {
             top: 0;
-            left: 0;
         }
 
         footer {
             bottom: 0;
-            left: 0;
             color: var(--text-color);
         }
 
@@ -121,30 +114,29 @@
             gap: 15px;
         }
 
-        .home-button, .dropdown-button, .button {
+        .button, .home-button, .dropdown-button {
             background-color: var(--primary-color);
             color: white;
             padding: 10px 20px;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
             display: flex;
             align-items: center;
             gap: 10px;
             text-decoration: none;
-            transition: all var(--transition-speed) ease;
+            transition: all 0.3s ease;
             height: 41px;
-            box-shadow: var(--box-shadow);
         }
 
-        .home-button:hover, .dropdown-button:hover, .button:hover {
+        .button:hover, .home-button:hover, .dropdown-button:hover {
             background-color: var(--primary-color-dark);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
-        .home-button:active, .dropdown-button:active, .button:active {
+        .button:active, .home-button:active, .dropdown-button:active {
             transform: translateY(0);
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
@@ -209,18 +201,6 @@
             transition: all 0.3s ease;
         }
 
-        .footer-links a[aria-label="YouTube"] {
-            color: #FF0000;
-        }
-
-        .footer-links a[aria-label="Instagram"] {
-            color: #E1306C;
-        }
-
-        .footer-links a[aria-label="Discord"] {
-            color: #7289DA;
-        }
-
         .footer-links a:hover {
             transform: translateY(-2px);
             text-decoration: underline;
@@ -246,10 +226,6 @@
             margin-left: 10px;
             text-decoration: none;
             transition: all 0.3s ease;
-        }
-
-        .donate i {
-            margin-right: 5px;
         }
 
         .donate:hover {
@@ -309,76 +285,6 @@
             padding: 10px;
             background-color: var(--panel-background-color);
             word-wrap: break-word;
-            word-break: break-word;
-        }
-
-        #chat-messages::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #chat-messages::-webkit-scrollbar-track {
-            background: var(--panel-background-color);
-        }
-
-        #chat-messages::-webkit-scrollbar-thumb {
-            background-color: var(--scrollbar-color);
-            border-radius: 10px;
-        }
-
-        #chat-messages li {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            max-width: 80%;
-        }
-
-        #chat-messages li img {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        #chat-messages li.sent {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
-
-        #chat-messages li.received {
-            align-self: flex-start;
-            align-items: flex-start;
-        }
-
-        #chat-messages .username {
-            font-weight: bold;
-            margin-right: 5px;
-        }
-
-        #chat-messages .message-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-            font-size: 0.9em;
-        }
-
-        #chat-messages .message-content {
-            padding: 10px 15px;
-            border-radius: 10px;
-            background-color: var(--received-message-bg);
-            color: var(--received-message-text-color);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        #chat-messages li.sent .message-content {
-            background-color: var(--sent-message-bg);
-            color: var(--sent-message-text-color);
-        }
-
-        #chat-messages .message-time {
-            font-size: 0.8em;
-            color: #888;
-            margin-top: 5px;
         }
 
         #chat-input {
@@ -664,14 +570,14 @@
         auth.onAuthStateChanged(handleAuthStateChange);
 
         // Functions
-        const toggleChat = () => {
+        function toggleChat() {
             isChatOpen = !isChatOpen;
             chatContainer.style.display = isChatOpen ? 'flex' : 'none';
             if (isChatOpen) {
                 messagesList.scrollTop = messagesList.scrollHeight;
                 clearUnreadIndicator();
             }
-        };
+        }
 
         function handleLoginButtonClick() {
             if (currentUser) {
@@ -716,13 +622,12 @@
             }
         }
 
-        async function checkUsername() {
+        function checkUsername() {
             if (isSettingUsername || hasSetUsername) return;
             
             isSettingUsername = true;
-            try {
-                const userRef = ref(database, `users/${currentUser.uid}`);
-                const snapshot = await get(userRef);
+            const userRef = ref(database, `users/${currentUser.uid}`);
+            get(userRef).then(snapshot => {
                 if (snapshot.exists()) {
                     username = snapshot.val().username;
                     hasSetUsername = true;
@@ -730,12 +635,12 @@
                 } else {
                     showUsernameModal();
                 }
-            } catch (error) {
+            }).catch(error => {
                 console.error("Error checking username:", error);
                 showUsernameModal();
-            } finally {
+            }).finally(() => {
                 isSettingUsername = false;
-            }
+            });
         }
 
         function showUsernameModal() {
@@ -842,7 +747,7 @@
             messageHeader.className = 'message-header';
 
             const img = document.createElement('img');
-            img.src = message.avatar ?? 'default-avatar.png';
+            img.src = message.avatar || 'default-avatar.png';
             img.alt = message.sender;
 
             const usernameSpan = document.createElement('span');
@@ -898,10 +803,7 @@
         }
 
         function toggleTheme() {
-            if (body.getAttribute('data-theme') === 'light') {
-                body.setAttribute('data-theme', 'dark');
-            } else {body.setAttribute('data-theme', 'light');
-            }
+            body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
             savePreferences();
         }
 
@@ -944,35 +846,23 @@
             e.preventDefault();
             const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
             if (generator) {
-                let targetUrl;
-                switch (generator) {
-                    case 'text':
-                        targetUrl = 'https://nosmc.github.io/generator/text';
-                        break;
-                    case 'item':
-                        targetUrl = 'https://nosmc.github.io/generator/item';
-                        break;
-                    case 'entity':
-                        targetUrl = 'https://nosmc.github.io/generator/entity';
-                        break;
-                    default:
-                        console.error('Unknown generator type:', generator);
-                        return;
-                }
+                const targetUrl = {
+                    text: 'https://nosmc.github.io/generator/text',
+                    item: 'https://nosmc.github.io/generator/item',
+                    entity: 'https://nosmc.github.io/generator/entity'
+                }[generator];
 
-                function linkExists(url, callback) {
-                    fetch(url, { method: 'HEAD' })
-                        .then(response => callback(response.ok))
-                        .catch(() => callback(false));
+                if (targetUrl) {
+                    fetch(targetUrl, { method: 'HEAD' })
+                        .then(response => {
+                            window.location.href = response.ok ? targetUrl : 'https://nosmc.github.io/';
+                        })
+                        .catch(() => {
+                            window.location.href = 'https://nosmc.github.io/';
+                        });
+                } else {
+                    console.error('Unknown generator type:', generator);
                 }
-
-                linkExists(targetUrl, function(exists) {
-                    if (exists) {
-                        window.location.href = targetUrl;
-                    } else {
-                        window.location.href = 'https://nosmc.github.io/';
-                    }
-                });
             }
         }
 
@@ -998,110 +888,32 @@
         });
 
         const translations = {
-            headerTitle: {
-                en: "Minecraft Datapack Generator",
-                zh: "Minecraft 資料包生成器"
-            },
-            home: {
-                en: "Home",
-                zh: "主頁"
-            },
-            generators: {
-                en: "Generators",
-                zh: "生成器"
-            },
-            generatorText: {
-                en: "Text",
-                zh: "文字"
-            },
-            generatorItem: {
-                en: "Item",
-                zh: "物品"
-            },
-            generatorEntity: {
-                en: "Entity",
-                zh: "實體"
-            },
-            chatTitle: {
-                en: "Chat",
-                zh: "聊天"
-            },
-            sendButtonText: {
-                en: "Send",
-                zh: "發送"
-            },
-            typeAMessage: {
-                en: "Type a message...",
-                zh: "輸入消息..."
-            },
-            chooseLoginMethod: {
-                en: "Choose a Login Method",
-                zh: "選擇登錄方式"
-            },
-            loginWithGoogle: {
-                en: "Login with Google",
-                zh: "使用 Google 登錄"
-            },
-            loginWithGithub: {
-                en: "Login with GitHub",
-                zh: "使用 GitHub 登錄"
-            },
-            cancelLogin: {
-                en: "Cancel",
-                zh: "取消"
-            },
-            youtube: {
-                en: "YouTube",
-                zh: "YouTube"
-            },
-            instagram: {
-                en: "Instagram",
-                zh: "Instagram"
-            },
-            discord: {
-                en: "Discord",
-                zh: "Discord"
-            },
-            developedBy: {
-                en: "Developed by nos",
-                zh: "由 nos 開發"
-            },
-            donate: {
-                en: "Donate",
-                zh: "捐贈"
-            },
-            setUsernameTitle: {
-                en: "Set Your Username",
-                zh: "設置您的用戶名"
-            },
-            enterUsername: {
-                en: "Enter your username",
-                zh: "輸入您的用戶名"
-            },
-            setUsernameBtn: {
-                en: "Set Username",
-                zh: "設置用戶名"
-            },
-            cancelSetUsername: {
-                en: "Cancel",
-                zh: "取消"
-            },
-            usernameEmpty: {
-                en: "Username cannot be empty",
-                zh: "用戶名不能為空"
-            },
-            usernameExists: {
-                en: "Username already exists. Please choose another one.",
-                zh: "用戶名已存在。請選擇另一個。"
-            },
-            errorSavingUsername: {
-                en: "Error saving username. Please try again.",
-                zh: "保存用戶名時出錯。請重試。"
-            },
-            errorCheckingUsername: {
-                en: "Error checking username. Please try again.",
-                zh: "檢查用戶名時出錯。請重試。"
-            }
+            headerTitle: { en: "Minecraft Datapack Generator", zh: "Minecraft 資料包生成器" },
+            home: { en: "Home", zh: "主頁" },
+            generators: { en: "Generators", zh: "生成器" },
+            generatorText: { en: "Text", zh: "文字" },
+            generatorItem: { en: "Item", zh: "物品" },
+            generatorEntity: { en: "Entity", zh: "實體" },
+            chatTitle: { en: "Chat", zh: "聊天" },
+            sendButtonText: { en: "Send", zh: "發送" },
+            typeAMessage: { en: "Type a message...", zh: "輸入消息..." },
+            chooseLoginMethod: { en: "Choose a Login Method", zh: "選擇登錄方式" },
+            loginWithGoogle: { en: "Login with Google", zh: "使用 Google 登錄" },
+            loginWithGithub: { en: "Login with GitHub", zh: "使用 GitHub 登錄" },
+            cancelLogin: { en: "Cancel", zh: "取消" },
+            youtube: { en: "YouTube", zh: "YouTube" },
+            instagram: { en: "Instagram", zh: "Instagram" },
+            discord: { en: "Discord", zh: "Discord" },
+            developedBy: { en: "Developed by nos", zh: "由 nos 開發" },
+            donate: { en: "Donate", zh: "捐贈" },
+            setUsernameTitle: { en: "Set Your Username", zh: "設置您的用戶名" },
+            enterUsername: { en: "Enter your username", zh: "輸入您的用戶名" },
+            setUsernameBtn: { en: "Set Username", zh: "設置用戶名" },
+            cancelSetUsername: { en: "Cancel", zh: "取消" },
+            usernameEmpty: { en: "Username cannot be empty", zh: "用戶名不能為空" },
+            usernameExists: { en: "Username already exists. Please choose another one.", zh: "用戶名已存在。請選擇另一個。" },
+            errorSavingUsername: { en: "Error saving username. Please try again.", zh: "保存用戶名時出錯。請重試。" },
+            errorCheckingUsername: { en: "Error checking username. Please try again.", zh: "檢查用戶名時出錯。請重試。" }
         };
 
         // Initialize the page
