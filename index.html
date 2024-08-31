@@ -421,6 +421,17 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
         }
 
+        .chat-button .unread-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+        }
+
         #chat-container {
             width: 400px;
             height: 500px;
@@ -460,19 +471,72 @@
         #chat-messages li {
             margin-bottom: 20px;
             display: flex;
-            align-items: flex-start;
             flex-direction: column;
-            width: 100%;
+            max-width: 80%;
         }
 
         #chat-messages li.sent {
-            text-align: right;
+            align-self: flex-end;
             align-items: flex-end;
         }
 
+        #chat-messages li.sent .message-header {
+            flex-direction: row-reverse;
+        }
+
+        #chat-messages li.sent .message-header img {
+            margin-left: 5px;
+            margin-right: 0;
+        }
+
+        #chat-messages li.sent .username {
+            margin-right: 5px;
+            margin-left: 0;
+        }
+
+        #chat-messages .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        #chat-messages .message-header img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        #chat-messages li.received .message-header img {
+            margin-right: 5px;
+        }
+
+        #chat-messages .username {
+            font-weight: bold;
+        }
+
+        #chat-messages li.received .username {
+            margin-left: 5px;
+        }
+
         #chat-messages li.received {
-            text-align: left;
+            align-self: flex-start;
             align-items: flex-start;
+        }
+
+        #chat-messages .message-time {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+            align-self: flex-end;
+        }
+
+        #chat-messages li.sent .message-time {
+            align-self: flex-end;
+        }
+
+        #chat-messages li.received .message-time {
+            align-self: flex-start;
         }
 
         #chat-messages li.developer .message-content {
@@ -771,7 +835,10 @@
         </div>
     </div>
 
-    <button class="chat-button" aria-label="Open Chat"><i class="fas fa-comments"></i></button>
+    <button class="chat-button" aria-label="Open Chat">
+        <i class="fas fa-comments"></i>
+        <span class="unread-dot"></span>
+    </button>
 
     <!-- Login Modal -->
     <div id="login-modal">
@@ -835,6 +902,8 @@
         let currentLanguage = 'en';
         let isSettingUsername = false;
         let hasSetUsername = false;
+        let isChatOpen = false;
+        let unreadMessages = 0;
 
         // DOM elements
         const messageInput = document.getElementById('message-input');
@@ -888,10 +957,11 @@
 
         // Functions
         function toggleChat() {
-            const isChatOpen = chatContainer.style.display === 'flex';
-            chatContainer.style.display = isChatOpen ? 'none' : 'flex';
-            if (!isChatOpen) {
-                messagesList.scrollTop = messagesList.scrollHeight;
+            isChatOpen = !isChatOpen;
+            chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+            if (isChatOpen) {
+                scrollChatToBottom();
+                clearUnreadIndicator();
             }
         }
 
@@ -1018,10 +1088,30 @@
                 return;
             }
             messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+            
+            const loadTimestamp = new Date().getTime();
+            
             onChildAdded(messagesRef, (snapshot) => {
                 const message = snapshot.val();
                 displayMessage(message);
+                
+                if (new Date(message.timestamp).getTime() > loadTimestamp) {
+                    handleNewMessage(message);
+                }
             });
+        }
+
+        function handleNewMessage(message) {
+            if (!isChatOpen) {
+                showUnreadIndicator();
+            }
+            if (isChatOpen && isScrolledToBottom()) {
+                scrollChatToBottom();
+            }
+        }
+
+        function isScrolledToBottom() {
+            return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
         }
 
         function removeMessagesListener() {
@@ -1044,39 +1134,34 @@
                 li.classList.add('developer');
             }
 
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+
             const img = document.createElement('img');
             img.src = message.avatar || 'default-avatar.png';
             img.alt = message.sender;
-
-            const messageHeader = document.createElement('div');
-            messageHeader.className = 'message-header';
 
             const usernameSpan = document.createElement('span');
             usernameSpan.className = 'username';
             usernameSpan.textContent = message.sender;
 
-            const timeSpan = document.createElement('span');
-            timeSpan.className = 'time';
-            timeSpan.textContent = convertToLocalTime(message.timestamp);
+            messageHeader.appendChild(img);
+            messageHeader.appendChild(usernameSpan);
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
             messageContent.textContent = message.content;
 
-            messageHeader.appendChild(usernameSpan);
-            messageHeader.appendChild(timeSpan);
-
-            if (li.className.includes('sent')) {
-                messageHeader.appendChild(img);
-            } else {
-                messageHeader.insertBefore(img, usernameSpan);
-            }
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = convertToLocalTime(message.timestamp);
 
             li.appendChild(messageHeader);
             li.appendChild(messageContent);
-            messagesList.appendChild(li);
+            li.appendChild(messageTime);
 
-            messagesList.scrollTop = messagesList.scrollHeight;
+            messagesList.appendChild(li);
+            scrollChatToBottom();
         }
 
         function sendMessage() {
@@ -1193,6 +1278,26 @@
         function initializePage() {
             loadPreferences();
             translatePage();
+        }
+
+        function showUnreadIndicator() {
+            unreadMessages++;
+            document.querySelector('.chat-button .unread-dot').style.display = 'block';
+        }
+
+        function clearUnreadIndicator() {
+            unreadMessages = 0;
+            document.querySelector('.chat-button .unread-dot').style.display = 'none';
+        }
+
+        window.addEventListener('focus', () => {
+            if (isChatOpen) {
+                clearUnreadIndicator();
+            }
+        });
+
+        function scrollChatToBottom() {
+            messagesList.scrollTop = messagesList.scrollHeight;
         }
 
         const translations = {
