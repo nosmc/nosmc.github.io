@@ -329,6 +329,13 @@
             max-width: 80%;
         }
 
+        #chat-messages li img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
         #chat-messages li.sent {
             align-self: flex-end;
             align-items: flex-end;
@@ -339,10 +346,16 @@
             align-items: flex-start;
         }
 
+        #chat-messages .username {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
         #chat-messages .message-header {
             display: flex;
             align-items: center;
             margin-bottom: 5px;
+            font-size: 0.9em;
         }
 
         #chat-messages .message-content {
@@ -781,10 +794,24 @@
                 const message = snapshot.val();
                 displayMessage(message);
                 
-                if (new Date(message.timestamp).getTime() > loadTimestamp && !isChatOpen) {
-                    showUnreadIndicator();
+                if (new Date(message.timestamp).getTime() > loadTimestamp) {
+                    handleNewMessage(message);
                 }
             });
+        }
+
+        function handleNewMessage(message) {
+            if (!isChatOpen) {
+                showUnreadIndicator();
+            }
+            // If the chat is open and the user is at the bottom, scroll to the new message
+            if (isChatOpen && isScrolledToBottom()) {
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+        }
+
+        function isScrolledToBottom() {
+            return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
         }
 
         function removeMessagesListener() {
