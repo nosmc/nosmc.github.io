@@ -654,6 +654,17 @@
         .close-modal:hover {
             color: var(--primary-color);
         }
+
+        .chat-button .unread-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -744,7 +755,10 @@
         </div>
     </div>
 
-    <button class="chat-button" aria-label="Open Chat"><i class="fas fa-comments"></i></button>
+    <button class="chat-button" aria-label="Open Chat">
+        <i class="fas fa-comments"></i>
+        <span class="unread-dot"></span>
+    </button>
 
     <!-- Login Modal -->
     <div id="login-modal">
@@ -1021,22 +1035,45 @@
             }
             messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
             
-            const loadTimestamp = new Date().getTime();
-            
             onChildAdded(messagesRef, (snapshot) => {
                 try {
                     const message = snapshot.val();
                     if (message) {
                         displayMessage(message);
-                        
-                        if (new Date(message.timestamp).getTime() > loadTimestamp) {
-                            handleNewMessage(message);
+                        if (!isChatOpen) {
+                            showUnreadIndicator();
                         }
                     }
                 } catch (error) {
                     console.error("Error processing message:", error);
                 }
             });
+        }
+
+        function showUnreadIndicator() {
+            const unreadDot = document.querySelector('.chat-button .unread-dot');
+            if (unreadDot) {
+                unreadDot.style.display = 'block';
+            }
+        }
+
+        let isChatOpen = false;
+
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+            if (isChatOpen) {
+                scrollChatToBottom();
+                clearUnreadIndicator();
+            }
+        }
+
+        function clearUnreadIndicator() {
+            const unreadDot = document.querySelector('.chat-button .unread-dot');
+            if (unreadDot) {
+                unreadDot.style.display = 'none';
+            }
         }
 
         function removeMessagesListener() {
