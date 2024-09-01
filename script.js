@@ -10,8 +10,11 @@ fetch('./header.html')
     header.innerHTML=data
     const parser = new DOMParser()
     const doc = parser.parseFromString(data, 'text/html')
-    eval(doc.querySelector('script').textContent)
+    const scriptContent = doc.querySelector('script')?.textContent;
+    if (scriptContent) eval(scriptContent);
 })
+.catch(error => console.error('Error loading header:', error));
+
 const footer = document.querySelector('.footer')
 fetch('./footer.html')
 .then(res=>res.text())
@@ -19,8 +22,11 @@ fetch('./footer.html')
     footer.innerHTML=data
     const parser = new DOMParser()
     const doc = parser.parseFromString(data, 'text/html')
-    eval(doc.querySelector('script').textContent)
+    const scriptContent = doc.querySelector('script')?.textContent;
+    if (scriptContent) eval(scriptContent);
 })
+.catch(error => console.error('Error loading footer:', error));
+
 const chat = document.querySelector('.chat')
 fetch('./chat.html')
 .then(res=>res.text())
@@ -28,8 +34,12 @@ fetch('./chat.html')
     chat.innerHTML=data
     const parser = new DOMParser()
     const doc = parser.parseFromString(data, 'text/html')
-    eval(doc.querySelector('script').textContent)
+    const scriptContent = doc.querySelector('script')?.textContent;
+    if (scriptContent) eval(scriptContent);
+    initializeChat();
 })
+.catch(error => console.error('Error loading chat:', error));
+
 const login = document.querySelector('.login')
 fetch('./login.html')
 .then(res=>res.text())
@@ -37,8 +47,12 @@ fetch('./login.html')
     login.innerHTML=data
     const parser = new DOMParser()
     const doc = parser.parseFromString(data, 'text/html')
-    eval(doc.querySelector('script').textContent)
+    const scriptContent = doc.querySelector('script')?.textContent;
+    if (scriptContent) eval(scriptContent);
+    initializeLogin();
 })
+.catch(error => console.error('Error loading login:', error));
+
 const user = document.querySelector('.user')
 fetch('./user.html')
 .then(res=>res.text())
@@ -46,8 +60,10 @@ fetch('./user.html')
     user.innerHTML=data
     const parser = new DOMParser()
     const doc = parser.parseFromString(data, 'text/html')
-    eval(doc.querySelector('script').textContent)
+    const scriptContent = doc.querySelector('script')?.textContent;
+    if (scriptContent) eval(scriptContent);
 })
+.catch(error => console.error('Error loading user:', error));
 
 // Firebase configuration
 const firebaseConfig = {
@@ -78,36 +94,44 @@ let unreadMessages = 0;
 let isChatOpen = false;
 
 // DOM elements
-const messageInput = document.getElementById('message-input');
-const sendButton = document.getElementById('send-button');
-const messagesList = document.getElementById('chat-messages');
-const chatContainer = document.getElementById('chat-container');
-const chatButton = document.querySelector('.chat-button');
-const loginButton = document.getElementById('login-btn');
-const loginModal = document.getElementById('login-modal');
-const closeLoginModal = document.getElementById('close-login-modal');
-const googleLoginBtn = document.getElementById('login-google');
-const githubLoginBtn = document.getElementById('login-github');
-const themeSwitcher = document.getElementById('theme-switcher');
-const body = document.body;
-const languageSwitcher = document.getElementById('language-switcher');
-const usernameModal = document.getElementById('username-modal');
-const usernameInput = document.getElementById('username-input');
-const setUsernameBtn = document.getElementById('setUsernameBtn');
-const closeUsernameModal = document.getElementById('close-username-modal');
+let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButton, loginModal, closeLoginModal, googleLoginBtn, githubLoginBtn, themeSwitcher, body, languageSwitcher, usernameModal, usernameInput, setUsernameBtn, closeUsernameModal;
 
 // Auth Providers
 const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
 // Event Listeners
-chatButton.addEventListener('click', toggleChat);
-loginButton.addEventListener('click', handleLoginButtonClick);
-closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-sendButton.addEventListener('click', sendMessage);
-messageInput.addEventListener('keypress', handleMessageInputKeypress);
+function initializeChat() {
+    messageInput = document.getElementById('message-input');
+    sendButton = document.getElementById('send-button');
+    messagesList = document.getElementById('chat-messages');
+    chatContainer = document.getElementById('chat-container');
+    chatButton = document.querySelector('.chat-button');
+    chatButton.addEventListener('click', toggleChat);
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', handleMessageInputKeypress);
+}
+
+function initializeLogin() {
+    loginButton = document.getElementById('login-btn');
+    loginModal = document.getElementById('login-modal');
+    closeLoginModal = document.getElementById('close-login-modal');
+    googleLoginBtn = document.getElementById('login-google');
+    githubLoginBtn = document.getElementById('login-github');
+    loginButton.addEventListener('click', handleLoginButtonClick);
+    closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+    googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+    githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+}
+
+themeSwitcher = document.getElementById('theme-switcher');
+body = document.body;
+languageSwitcher = document.getElementById('language-switcher');
+usernameModal = document.getElementById('username-modal');
+usernameInput = document.getElementById('username-input');
+setUsernameBtn = document.getElementById('setUsernameBtn');
+closeUsernameModal = document.getElementById('close-username-modal');
+
 themeSwitcher.addEventListener('click', toggleTheme);
 languageSwitcher.addEventListener('click', toggleLanguage);
 setUsernameBtn.addEventListener('click', handleSetUsername);
@@ -360,7 +384,8 @@ function handleMessageInputKeypress(e) {
 function toggleTheme() {
     if (body.getAttribute('data-theme') === 'light') {
         body.setAttribute('data-theme', 'dark');
-    } else {body.setAttribute('data-theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'light');
     }
     savePreferences();
 }
