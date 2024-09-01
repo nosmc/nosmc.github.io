@@ -6,152 +6,7 @@
     <title>Minecraft Datapack Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="./common/styles.css">
-    <style>
-        main {
-            padding-top: 60px;
-            padding-bottom: 50px;
-        }
-
-        .hero-section {
-            background-image: url('https://i.imgur.com/9fjG7UA.jpeg');
-            background-size: cover;
-            background-position: center;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            color: white;
-            max-width: 800px;
-            padding: 20px;
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero-description {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-        }
-
-        .cta-button {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .cta-button:hover {
-            background-color: var(--primary-color-dark);
-            transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .features-section {
-            padding: 5rem 2rem;
-            background-color: var(--background-color);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .feature-card {
-            background-color: var(--panel-background-color);
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-dark);
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .feature-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--text-color);
-        }
-
-        .feature-description {
-            color: var(--text-color);
-        }
-
-        .generators-section {
-            padding: 5rem 2rem;
-            background-color: var(--panel-background-color);
-        }
-
-        .generators-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .generator-card {
-            background-color: var(--background-color);
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-        }
-
-        .generator-card:hover {
-            transform: scale(1.05);
-            box-shadow: var(--shadow-dark);
-        }
-
-        .generator-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .generator-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--text-color);
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body data-theme="dark">
     <!-- Header Section -->
@@ -249,6 +104,7 @@
 
     <!-- Chat Container -->
     <div id="chat-container">
+        <h2><i class="fas fa-comments"></i> <span id="chatTitle">Chat</span></h2>
         <ul id="chat-messages"></ul>
         <div id="chat-input">
             <input type="text" id="message-input" placeholder="Type a message...">
@@ -290,46 +146,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
-    <script type="module" src="./common/scripts.js">
-        // Replace the existing code for generator card click events with this:
-        document.querySelectorAll('.generator-card').forEach(card => {
-            card.addEventListener('click', () => {
-                let targetUrl;
-                const generatorTitle = card.querySelector('.generator-title').id;
-                
-                switch (generatorTitle) {
-                    case 'textGeneratorTitle':
-                        targetUrl = 'https://nosmc.github.io/generator/text';
-                        break;
-                    case 'itemGeneratorTitle':
-                        targetUrl = 'https://nosmc.github.io/generator/item';
-                        break;
-                    case 'entityGeneratorTitle':
-                        targetUrl = 'https://nosmc.github.io/generator/entity';
-                        break;
-                    default:
-                        targetUrl = 'https://nosmc.github.io/';
-                }
-
-                // Function to check if the link exists
-                function linkExists(url, callback) {
-                    fetch(url, { method: 'HEAD' })
-                        .then(response => callback(response.ok))
-                        .catch(() => callback(false));
-                }
-
-                // Check if the target URL exists
-                linkExists(targetUrl, function(exists) {
-                    if (exists) {
-                        window.location.href = targetUrl;
-                    } else {
-                        window.location.href = 'https://nosmc.github.io/';
-                    }
-                });
-            });
-        });
-    </script>
+    <script type="module" src="./common/scripts.js"></script>
+    <script type="module" src="scripts.js"></script>
 </body>
 </html>
