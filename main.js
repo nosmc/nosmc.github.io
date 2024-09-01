@@ -10,6 +10,10 @@ function loadComponents() {
 }
 
 function init() {
+    // Load preferences immediately
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
     loadComponents()
         .then(() => {
             initializePage();
