@@ -806,7 +806,7 @@
         // Import Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -918,10 +918,12 @@
         // Functions
         function toggleChat() {
             isChatOpen = !isChatOpen;
-            chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-            if (isChatOpen) {
-                scrollChatToBottom();
-                clearUnreadIndicator();
+            if (chatContainer) {
+                chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+                if (isChatOpen) {
+                    scrollChatToBottom();
+                    clearUnreadIndicator();
+                }
             }
         }
 
@@ -953,19 +955,15 @@
         function handleAuthStateChange(user) {
             if (user) {
                 currentUser = user;
-                loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-                loginButton.setAttribute('aria-label', 'Logout');
-                if (!hasSetUsername) {
-                    checkUsername();
-                }
+                checkUsername();
+                loadMessages();
             } else {
-                loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-                loginButton.setAttribute('aria-label', 'Login');
                 currentUser = null;
                 username = null;
                 hasSetUsername = false;
                 removeMessagesListener();
             }
+            updateLoginButton();
         }
 
         function checkUsername() {
@@ -977,7 +975,6 @@
                 if (snapshot.exists()) {
                     username = snapshot.val().username;
                     hasSetUsername = true;
-                    loadMessages();
                 } else {
                     showUsernameModal();
                 }
@@ -1019,7 +1016,6 @@
                         username = newUsername;
                         hasSetUsername = true;
                         usernameModal.style.display = 'none';
-                        loadMessages();
                     }).catch(error => {
                         console.error("Error saving username:", error);
                         showUsernameError(translations.errorSavingUsername[currentLanguage]);
@@ -1047,17 +1043,20 @@
             if (messagesRef) {
                 return;
             }
-            messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+            messagesRef = ref(database, 'messages');
             
             const loadTimestamp = new Date().getTime();
             
-            onChildAdded(messagesRef, (snapshot) => {
-                const message = snapshot.val();
-                displayMessage(message);
-                
-                if (new Date(message.timestamp).getTime() > loadTimestamp) {
-                    handleNewMessage(message);
-                }
+            onValue(messagesRef, (snapshot) => {
+                messagesList.innerHTML = ''; // Clear existing messages
+                snapshot.forEach((childSnapshot) => {
+                    const message = childSnapshot.val();
+                    displayMessage(message);
+                    
+                    if (new Date(message.timestamp).getTime() > loadTimestamp) {
+                        handleNewMessage(message);
+                    }
+                });
             });
         }
 
@@ -2169,7 +2168,7 @@
             },
             green: {
                 en: "Green",
-                zh: "綠色"
+                zh: "綠"
             },
             aqua: {
                 en: "Aqua",
