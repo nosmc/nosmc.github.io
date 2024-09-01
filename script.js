@@ -32,7 +32,7 @@ let unreadMessages = 0;
 let isChatOpen = false;
 
 // DOM elements
-let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButton, loginModal, closeLoginModal, googleLoginBtn, githubLoginBtn, themeSwitcher, body, languageSwitcher, usernameModal, usernameInput, setUsernameBtn, closeUsernameModal;
+let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButton, loginModal, closeLoginModal, googleLoginBtn, githubLoginBtn, themeSwitcher, languageSwitcher, usernameModal, usernameInput, setUsernameBtn, closeUsernameModal;
 
 // Auth Providers
 const githubProvider = new GithubAuthProvider();
@@ -269,6 +269,7 @@ function handleMessageInputKeypress(e) {
 }
 
 function toggleTheme() {
+    const body = document.body;
     if (body.getAttribute('data-theme') === 'light') {
         body.setAttribute('data-theme', 'dark');
     } else {
@@ -284,6 +285,7 @@ function toggleLanguage() {
 }
 
 function savePreferences() {
+    const body = document.body;
     localStorage.setItem('theme', body.getAttribute('data-theme'));
     localStorage.setItem('language', currentLanguage);
 }
@@ -292,6 +294,7 @@ function loadPreferences() {
     const savedTheme = localStorage.getItem('theme');
     const savedLanguage = localStorage.getItem('language');
 
+    const body = document.body;
     if (savedTheme) {
         body.setAttribute('data-theme', savedTheme);
     }
@@ -361,7 +364,6 @@ function initializeDOMElements() {
     googleLoginBtn = document.getElementById('login-google');
     githubLoginBtn = document.getElementById('login-github');
     themeSwitcher = document.getElementById('theme-switcher');
-    body = document.body;
     languageSwitcher = document.getElementById('language-switcher');
     usernameModal = document.getElementById('username-modal');
     usernameInput = document.getElementById('username-input');
