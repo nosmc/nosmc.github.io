@@ -5,11 +5,11 @@ import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, eq
 
 const header = document.querySelector('.header')
 fetch('./header.html')
-.then(res=>res.text())
-.then(data=>{
-    header.innerHTML=data
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(data, 'text/html')
+.then(res => res.text())
+.then(data => {
+    header.innerHTML = data;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data, 'text/html');
     const scriptContent = doc.querySelector('script')?.textContent;
     if (scriptContent) eval(scriptContent);
 })
@@ -17,11 +17,11 @@ fetch('./header.html')
 
 const footer = document.querySelector('.footer')
 fetch('./footer.html')
-.then(res=>res.text())
-.then(data=>{
-    footer.innerHTML=data
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(data, 'text/html')
+.then(res => res.text())
+.then(data => {
+    footer.innerHTML = data;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data, 'text/html');
     const scriptContent = doc.querySelector('script')?.textContent;
     if (scriptContent) eval(scriptContent);
 })
@@ -29,11 +29,11 @@ fetch('./footer.html')
 
 const chat = document.querySelector('.chat')
 fetch('./chat.html')
-.then(res=>res.text())
-.then(data=>{
-    chat.innerHTML=data
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(data, 'text/html')
+.then(res => res.text())
+.then(data => {
+    chat.innerHTML = data;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data, 'text/html');
     const scriptContent = doc.querySelector('script')?.textContent;
     if (scriptContent) eval(scriptContent);
     initializeChat();
@@ -42,11 +42,11 @@ fetch('./chat.html')
 
 const login = document.querySelector('.login')
 fetch('./login.html')
-.then(res=>res.text())
-.then(data=>{
-    login.innerHTML=data
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(data, 'text/html')
+.then(res => res.text())
+.then(data => {
+    login.innerHTML = data;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data, 'text/html');
     const scriptContent = doc.querySelector('script')?.textContent;
     if (scriptContent) eval(scriptContent);
     initializeLogin();
@@ -55,11 +55,11 @@ fetch('./login.html')
 
 const user = document.querySelector('.user')
 fetch('./user.html')
-.then(res=>res.text())
-.then(data=>{
-    user.innerHTML=data
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(data, 'text/html')
+.then(res => res.text())
+.then(data => {
+    user.innerHTML = data;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data, 'text/html');
     const scriptContent = doc.querySelector('script')?.textContent;
     if (scriptContent) eval(scriptContent);
 })
@@ -107,9 +107,9 @@ function initializeChat() {
     messagesList = document.getElementById('chat-messages');
     chatContainer = document.getElementById('chat-container');
     chatButton = document.querySelector('.chat-button');
-    chatButton.addEventListener('click', toggleChat);
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', handleMessageInputKeypress);
+    if (chatButton) chatButton.addEventListener('click', toggleChat);
+    if (sendButton) sendButton.addEventListener('click', sendMessage);
+    if (messageInput) messageInput.addEventListener('keypress', handleMessageInputKeypress);
 }
 
 function initializeLogin() {
@@ -118,10 +118,10 @@ function initializeLogin() {
     closeLoginModal = document.getElementById('close-login-modal');
     googleLoginBtn = document.getElementById('login-google');
     githubLoginBtn = document.getElementById('login-github');
-    loginButton.addEventListener('click', handleLoginButtonClick);
-    closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-    googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-    githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+    if (loginButton) loginButton.addEventListener('click', handleLoginButtonClick);
+    if (closeLoginModal) closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+    if (googleLoginBtn) googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+    if (githubLoginBtn) githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
 }
 
 themeSwitcher = document.getElementById('theme-switcher');
@@ -132,10 +132,10 @@ usernameInput = document.getElementById('username-input');
 setUsernameBtn = document.getElementById('setUsernameBtn');
 closeUsernameModal = document.getElementById('close-username-modal');
 
-themeSwitcher.addEventListener('click', toggleTheme);
-languageSwitcher.addEventListener('click', toggleLanguage);
-setUsernameBtn.addEventListener('click', handleSetUsername);
-closeUsernameModal.addEventListener('click', () => {
+if (themeSwitcher) themeSwitcher.addEventListener('click', toggleTheme);
+if (languageSwitcher) languageSwitcher.addEventListener('click', toggleLanguage);
+if (setUsernameBtn) setUsernameBtn.addEventListener('click', handleSetUsername);
+if (closeUsernameModal) closeUsernameModal.addEventListener('click', () => {
     usernameModal.style.display = 'none';
     signOut(auth);
 });
@@ -154,7 +154,7 @@ auth.onAuthStateChanged(handleAuthStateChange);
 // Functions
 function toggleChat() {
     isChatOpen = !isChatOpen;
-    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+    if (chatContainer) chatContainer.style.display = isChatOpen ? 'flex' : 'none';
     if (isChatOpen) {
         scrollChatToBottom();
         clearUnreadIndicator();
@@ -172,14 +172,14 @@ function handleLoginButtonClick() {
             console.error("Error signing out:", error);
         });
     } else {
-        loginModal.style.display = 'flex';
+        if (loginModal) loginModal.style.display = 'flex';
     }
 }
 
 function signInWithProvider(provider) {
     signInWithPopup(auth, provider).then(result => {
         currentUser = result.user;
-        loginModal.style.display = 'none';
+        if (loginModal) loginModal.style.display = 'none';
         checkUsername();
     }).catch(error => {
         console.error(`Error during ${provider.providerId} login:`, error);
@@ -189,14 +189,18 @@ function signInWithProvider(provider) {
 function handleAuthStateChange(user) {
     if (user) {
         currentUser = user;
-        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-        loginButton.setAttribute('aria-label', 'Logout');
+        if (loginButton) {
+            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+            loginButton.setAttribute('aria-label', 'Logout');
+        }
         if (!hasSetUsername) {
             checkUsername();
         }
     } else {
-        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-        loginButton.setAttribute('aria-label', 'Login');
+        if (loginButton) {
+            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+            loginButton.setAttribute('aria-label', 'Login');
+        }
         currentUser = null;
         username = null;
         hasSetUsername = false;
@@ -226,12 +230,14 @@ function checkUsername() {
 }
 
 function showUsernameModal() {
-    usernameModal.style.display = 'flex';
-    usernameInput.focus();
+    if (usernameModal) {
+        usernameModal.style.display = 'flex';
+        if (usernameInput) usernameInput.focus();
+    }
 }
 
 function handleSetUsername() {
-    const newUsername = usernameInput.value.trim();
+    const newUsername = usernameInput?.value.trim();
     if (newUsername) {
         saveUsername(newUsername);
     } else {
@@ -246,15 +252,17 @@ function saveUsername(newUsername) {
     get(usernameQuery).then(snapshot => {
         if (snapshot.exists()) {
             showUsernameError(translations.usernameExists[currentLanguage]);
-            usernameInput.value = '';
-            usernameInput.focus();
+            if (usernameInput) {
+                usernameInput.value = '';
+                usernameInput.focus();
+            }
         } else {
             set(ref(database, `users/${currentUser.uid}`), {
                 username: newUsername
             }).then(() => {
                 username = newUsername;
                 hasSetUsername = true;
-                usernameModal.style.display = 'none';
+                if (usernameModal) usernameModal.style.display = 'none';
                 loadMessages();
             }).catch(error => {
                 console.error("Error saving username:", error);
@@ -269,8 +277,10 @@ function saveUsername(newUsername) {
 
 function showUsernameError(message) {
     const errorElement = document.getElementById('username-error');
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
 }
 
 function loadMessages() {
@@ -309,7 +319,7 @@ function removeMessagesListener() {
     if (messagesRef) {
         messagesRef = null;
     }
-    messagesList.innerHTML = '';
+    if (messagesList) messagesList.innerHTML = '';
 }
 
 function convertToLocalTime(isoTimestamp) {
@@ -351,12 +361,12 @@ function displayMessage(message) {
     li.appendChild(messageContent);
     li.appendChild(messageTime);
 
-    messagesList.appendChild(li);
+    if (messagesList) messagesList.appendChild(li);
     scrollChatToBottom();
 }
 
 function sendMessage() {
-    if (username && messageInput.value.trim()) {
+    if (username && messageInput?.value.trim()) {
         const timestamp = new Date().toISOString();
 
         push(ref(database, 'messages'), {
@@ -365,8 +375,10 @@ function sendMessage() {
             content: messageInput.value,
             timestamp: timestamp
         }).then(() => {
-            messageInput.value = '';
-            messageInput.focus();
+            if (messageInput) {
+                messageInput.value = '';
+                messageInput.focus();
+            }
             scrollChatToBottom();
         }).catch(error => {
             console.error("Error sending message:", error);
@@ -421,13 +433,15 @@ function translatePage() {
             element.textContent = translations[key][currentLanguage];
         }
     });
-    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
-    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+    const messageInputElement = document.getElementById('message-input');
+    const usernameInputElement = document.getElementById('username-input');
+    if (messageInputElement) messageInputElement.placeholder = translations.typeAMessage[currentLanguage];
+    if (usernameInputElement) usernameInputElement.placeholder = translations.enterUsername[currentLanguage];
 }
 
 function handleGeneratorRedirect(e) {
     e.preventDefault();
-    const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
+    const generator = e.target.closest('[data-generator]')?.getAttribute('data-generator');
     if (generator) {
         let targetUrl;
         switch (generator) {
@@ -468,12 +482,14 @@ function initializePage() {
 
 function showUnreadIndicator() {
     unreadMessages++;
-    document.querySelector('.chat-button .unread-dot').style.display = 'block';
+    const unreadDot = document.querySelector('.chat-button .unread-dot');
+    if (unreadDot) unreadDot.style.display = 'block';
 }
 
 function clearUnreadIndicator() {
     unreadMessages = 0;
-    document.querySelector('.chat-button .unread-dot').style.display = 'none';
+    const unreadDot = document.querySelector('.chat-button .unread-dot');
+    if (unreadDot) unreadDot.style.display = 'none';
 }
 
 window.addEventListener('focus', () => {
@@ -483,7 +499,7 @@ window.addEventListener('focus', () => {
 });
 
 function scrollChatToBottom() {
-    messagesList.scrollTop = messagesList.scrollHeight;
+    if (messagesList) messagesList.scrollTop = messagesList.scrollHeight;
 }
 
 const translations = {
