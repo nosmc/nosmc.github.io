@@ -1,7 +1,7 @@
 import { initializePage, translations } from './script.js';
 
 function loadComponents() {
-    return fetch('./components.html')
+    return fetch('./common/components.html')  // Updated path
         .then(response => response.text())
         .then(html => {
             document.body.insertAdjacentHTML('afterbegin', html);

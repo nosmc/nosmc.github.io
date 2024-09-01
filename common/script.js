@@ -74,20 +74,24 @@ function signInWithProvider(provider) {
 }
 
 function handleAuthStateChange(user) {
-    if (user) {
-        currentUser = user;
-        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-        loginButton.setAttribute('aria-label', 'Logout');
-        if (!hasSetUsername) {
-            checkUsername();
+    if (loginButton) {  // Check if loginButton exists
+        if (user) {
+            currentUser = user;
+            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+            loginButton.setAttribute('aria-label', 'Logout');
+            if (!hasSetUsername) {
+                checkUsername();
+            }
+        } else {
+            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+            loginButton.setAttribute('aria-label', 'Login');
+            currentUser = null;
+            username = null;
+            hasSetUsername = false;
+            removeMessagesListener();
         }
     } else {
-        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-        loginButton.setAttribute('aria-label', 'Login');
-        currentUser = null;
-        username = null;
-        hasSetUsername = false;
-        removeMessagesListener();
+        console.warn('Login button not found in the DOM');
     }
 }
 
