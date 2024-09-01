@@ -836,6 +836,8 @@
         let contents = JSON.parse(localStorage.getItem('contents')) || [];
         let dragSrcIndex = null;
         let scrollInterval = null;
+        let unreadMessages = 0;
+        let isChatOpen = false;
 
         const minecraftColorMap = {
             black: '#000000',
@@ -2235,7 +2237,7 @@
             },
             loginWithGoogle: {
                 en: "Login with Google",
-                zh: "使��� Google 登錄"
+                zh: "使用 Google 登錄"
             },
             loginWithGithub: {
                 en: "Login with GitHub",
