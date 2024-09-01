@@ -3,6 +3,52 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
+const header = document.querySelector('.header')
+fetch('./header.html')
+.then(res=>res.text())
+.then(data=>{
+    header.innerHTML=data
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(data, 'text/html')
+    eval(doc.querySelector('script').textContent)
+})
+const footer = document.querySelector('.footer')
+fetch('./footer.html')
+.then(res=>res.text())
+.then(data=>{
+    footer.innerHTML=data
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(data, 'text/html')
+    eval(doc.querySelector('script').textContent)
+})
+const chat = document.querySelector('.chat')
+fetch('./chat.html')
+.then(res=>res.text())
+.then(data=>{
+    chat.innerHTML=data
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(data, 'text/html')
+    eval(doc.querySelector('script').textContent)
+})
+const login = document.querySelector('.login')
+fetch('./login.html')
+.then(res=>res.text())
+.then(data=>{
+    login.innerHTML=data
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(data, 'text/html')
+    eval(doc.querySelector('script').textContent)
+})
+const user = document.querySelector('.user')
+fetch('./user.html')
+.then(res=>res.text())
+.then(data=>{
+    user.innerHTML=data
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(data, 'text/html')
+    eval(doc.querySelector('script').textContent)
+})
+
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
@@ -32,148 +78,51 @@ let unreadMessages = 0;
 let isChatOpen = false;
 
 // DOM elements
-let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButton, loginModal, closeLoginModal, googleLoginBtn, githubLoginBtn, themeSwitcher, body, languageSwitcher, usernameModal, usernameInput, setUsernameBtn, closeUsernameModal;
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const messagesList = document.getElementById('chat-messages');
+const chatContainer = document.getElementById('chat-container');
+const chatButton = document.querySelector('.chat-button');
+const loginButton = document.getElementById('login-btn');
+const loginModal = document.getElementById('login-modal');
+const closeLoginModal = document.getElementById('close-login-modal');
+const googleLoginBtn = document.getElementById('login-google');
+const githubLoginBtn = document.getElementById('login-github');
+const themeSwitcher = document.getElementById('theme-switcher');
+const body = document.body;
+const languageSwitcher = document.getElementById('language-switcher');
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const setUsernameBtn = document.getElementById('setUsernameBtn');
+const closeUsernameModal = document.getElementById('close-username-modal');
 
 // Auth Providers
 const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
-// Fetch HTML content and initialize the page
-window.addEventListener('DOMContentLoaded', () => {
-    const header = document.querySelector('.header');
-    const footer = document.querySelector('.footer');
-    const chat = document.querySelector('.chat');
-    const login = document.querySelector('.login');
-    const user = document.querySelector('.user');
-
-    const fetchHeader = fetch('./header.html')
-        .then(res => res.text())
-        .then(data => {
-            header.innerHTML = data;
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data, 'text/html');
-            const script = doc.querySelector('script');
-            if (script) {
-                eval(script.textContent);
-            }
-        });
-
-    const fetchFooter = fetch('./footer.html')
-        .then(res => res.text())
-        .then(data => {
-            footer.innerHTML = data;
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data, 'text/html');
-            const script = doc.querySelector('script');
-            if (script) {
-                eval(script.textContent);
-            }
-        });
-
-    const fetchChat = fetch('./chat.html')
-        .then(res => res.text())
-        .then(data => {
-            chat.innerHTML = data;
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data, 'text/html');
-            const script = doc.querySelector('script');
-            if (script) {
-                eval(script.textContent);
-            }
-        });
-
-    const fetchLogin = fetch('./login.html')
-        .then(res => res.text())
-        .then(data => {
-            login.innerHTML = data;
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data, 'text/html');
-            const script = doc.querySelector('script');
-            if (script) {
-                eval(script.textContent);
-            }
-        });
-
-    const fetchUser = fetch('./user.html')
-        .then(res => res.text())
-        .then(data => {
-            user.innerHTML = data;
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data, 'text/html');
-            const script = doc.querySelector('script');
-            if (script) {
-                eval(script.textContent);
-            }
-        });
-
-    Promise.all([fetchHeader, fetchFooter, fetchChat, fetchLogin, fetchUser]).then(() => {
-        // Get DOM elements
-        messageInput = document.getElementById('message-input');
-        sendButton = document.getElementById('send-button');
-        messagesList = document.getElementById('chat-messages');
-        chatContainer = document.getElementById('chat-container');
-        chatButton = document.querySelector('.chat-button');
-        loginButton = document.getElementById('login-btn');
-        loginModal = document.getElementById('login-modal');
-        closeLoginModal = document.getElementById('close-login-modal');
-        googleLoginBtn = document.getElementById('login-google');
-        githubLoginBtn = document.getElementById('login-github');
-        themeSwitcher = document.getElementById('theme-switcher');
-        body = document.body;
-        languageSwitcher = document.getElementById('language-switcher');
-        usernameModal = document.getElementById('username-modal');
-        usernameInput = document.getElementById('username-input');
-        setUsernameBtn = document.getElementById('setUsernameBtn');
-        closeUsernameModal = document.getElementById('close-username-modal');
-
-        // Event Listeners
-        if (chatButton) {
-            chatButton.addEventListener('click', toggleChat);
-        }
-        if (loginButton) {
-            loginButton.addEventListener('click', handleLoginButtonClick);
-        }
-        if (closeLoginModal) {
-            closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-        }
-        if (googleLoginBtn) {
-            googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-        }
-        if (githubLoginBtn) {
-            githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-        }
-        if (sendButton) {
-            sendButton.addEventListener('click', sendMessage);
-        }
-        if (messageInput) {
-            messageInput.addEventListener('keypress', handleMessageInputKeypress);
-        }
-        if (themeSwitcher) {
-            themeSwitcher.addEventListener('click', toggleTheme);
-        }
-        if (languageSwitcher) {
-            languageSwitcher.addEventListener('click', toggleLanguage);
-        }
-        if (setUsernameBtn) {
-            setUsernameBtn.addEventListener('click', handleSetUsername);
-        }
-        if (closeUsernameModal) {
-            closeUsernameModal.addEventListener('click', () => {
-                usernameModal.style.display = 'none';
-                signOut(auth);
-            });
-        }
-
-        // Dropdown Menu Redirection
-        document.querySelectorAll('.dropdown-content a').forEach(link => {
-            link.addEventListener('click', handleGeneratorRedirect);
-        });
-
-        // Initialize the page
-        loadPreferences();
-        translatePage();
-    });
+// Event Listeners
+chatButton.addEventListener('click', toggleChat);
+loginButton.addEventListener('click', handleLoginButtonClick);
+closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', handleMessageInputKeypress);
+themeSwitcher.addEventListener('click', toggleTheme);
+languageSwitcher.addEventListener('click', toggleLanguage);
+setUsernameBtn.addEventListener('click', handleSetUsername);
+closeUsernameModal.addEventListener('click', () => {
+    usernameModal.style.display = 'none';
+    signOut(auth);
 });
+
+// Dropdown Menu Redirection
+document.querySelectorAll('.dropdown-content a').forEach(link => {
+    link.addEventListener('click', handleGeneratorRedirect);
+});
+
+// Initialize the page
+window.addEventListener('DOMContentLoaded', initializePage);
 
 // Firebase Auth State Change
 auth.onAuthStateChanged(handleAuthStateChange);
@@ -181,9 +130,7 @@ auth.onAuthStateChanged(handleAuthStateChange);
 // Functions
 function toggleChat() {
     isChatOpen = !isChatOpen;
-    if (chatContainer) {
-        chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-    }
+    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
     if (isChatOpen) {
         scrollChatToBottom();
         clearUnreadIndicator();
@@ -201,18 +148,14 @@ function handleLoginButtonClick() {
             console.error("Error signing out:", error);
         });
     } else {
-        if (loginModal) {
-            loginModal.style.display = 'flex';
-        }
+        loginModal.style.display = 'flex';
     }
 }
 
 function signInWithProvider(provider) {
     signInWithPopup(auth, provider).then(result => {
         currentUser = result.user;
-        if (loginModal) {
-            loginModal.style.display = 'none';
-        }
+        loginModal.style.display = 'none';
         checkUsername();
     }).catch(error => {
         console.error(`Error during ${provider.providerId} login:`, error);
@@ -222,18 +165,14 @@ function signInWithProvider(provider) {
 function handleAuthStateChange(user) {
     if (user) {
         currentUser = user;
-        if (loginButton) {
-            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-            loginButton.setAttribute('aria-label', 'Logout');
-        }
+        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+        loginButton.setAttribute('aria-label', 'Logout');
         if (!hasSetUsername) {
             checkUsername();
         }
     } else {
-        if (loginButton) {
-            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-            loginButton.setAttribute('aria-label', 'Login');
-        }
+        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+        loginButton.setAttribute('aria-label', 'Login');
         currentUser = null;
         username = null;
         hasSetUsername = false;
@@ -263,12 +202,8 @@ function checkUsername() {
 }
 
 function showUsernameModal() {
-    if (usernameModal) {
-        usernameModal.style.display = 'flex';
-        if (usernameInput) {
-            usernameInput.focus();
-        }
-    }
+    usernameModal.style.display = 'flex';
+    usernameInput.focus();
 }
 
 function handleSetUsername() {
@@ -295,9 +230,7 @@ function saveUsername(newUsername) {
             }).then(() => {
                 username = newUsername;
                 hasSetUsername = true;
-                if (usernameModal) {
-                    usernameModal.style.display = 'none';
-                }
+                usernameModal.style.display = 'none';
                 loadMessages();
             }).catch(error => {
                 console.error("Error saving username:", error);
@@ -312,10 +245,8 @@ function saveUsername(newUsername) {
 
 function showUsernameError(message) {
     const errorElement = document.getElementById('username-error');
-    if (errorElement) {
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
-    }
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
 }
 
 function loadMessages() {
@@ -347,16 +278,14 @@ function handleNewMessage(message) {
 }
 
 function isScrolledToBottom() {
-    return messagesList && (messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1);
+    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
 }
 
 function removeMessagesListener() {
     if (messagesRef) {
         messagesRef = null;
     }
-    if (messagesList) {
-        messagesList.innerHTML = '';
-    }
+    messagesList.innerHTML = '';
 }
 
 function convertToLocalTime(isoTimestamp) {
@@ -365,8 +294,6 @@ function convertToLocalTime(isoTimestamp) {
 }
 
 function displayMessage(message) {
-    if (!messagesList) return;
-
     const li = document.createElement('li');
     li.className = message.sender === username ? 'sent' : 'received';
 
@@ -433,8 +360,7 @@ function handleMessageInputKeypress(e) {
 function toggleTheme() {
     if (body.getAttribute('data-theme') === 'light') {
         body.setAttribute('data-theme', 'dark');
-    } else {
-        body.setAttribute('data-theme', 'light');
+    } else {body.setAttribute('data-theme', 'light');
     }
     savePreferences();
 }
@@ -470,14 +396,8 @@ function translatePage() {
             element.textContent = translations[key][currentLanguage];
         }
     });
-    const messageInputElement = document.getElementById('message-input');
-    if (messageInputElement) {
-        messageInputElement.placeholder = translations.typeAMessage[currentLanguage];
-    }
-    const usernameInputElement = document.getElementById('username-input');
-    if (usernameInputElement) {
-        usernameInputElement.placeholder = translations.enterUsername[currentLanguage];
-    }
+    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
 }
 
 function handleGeneratorRedirect(e) {
@@ -523,18 +443,12 @@ function initializePage() {
 
 function showUnreadIndicator() {
     unreadMessages++;
-    const unreadDot = document.querySelector('.chat-button .unread-dot');
-    if (unreadDot) {
-        unreadDot.style.display = 'block';
-    }
+    document.querySelector('.chat-button .unread-dot').style.display = 'block';
 }
 
 function clearUnreadIndicator() {
     unreadMessages = 0;
-    const unreadDot = document.querySelector('.chat-button .unread-dot');
-    if (unreadDot) {
-        unreadDot.style.display = 'none';
-    }
+    document.querySelector('.chat-button .unread-dot').style.display = 'none';
 }
 
 window.addEventListener('focus', () => {
@@ -544,9 +458,7 @@ window.addEventListener('focus', () => {
 });
 
 function scrollChatToBottom() {
-    if (messagesList) {
-        messagesList.scrollTop = messagesList.scrollHeight;
-    }
+    messagesList.scrollTop = messagesList.scrollHeight;
 }
 
 const translations = {
@@ -600,7 +512,7 @@ const translations = {
     },
     cancelLogin: {
         en: "Cancel",
-        zh: "取消"
+        zh: "取"
     },
     youtube: {
         en: "YouTube",
