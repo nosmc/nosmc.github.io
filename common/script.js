@@ -1,7 +1,11 @@
+console.log("Script is loading...");
+
 // Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+console.log("Imports completed");
 
 // Firebase configuration
 const firebaseConfig = {
@@ -32,6 +36,8 @@ let unreadMessages = 0;
 let isChatOpen = false;
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOMContentLoaded event fired");
+
     // DOM elements
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
@@ -460,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         loginWithGoogle: {
             en: "Login with Google",
+            zh: "使用 Google 登錄"
         },
         loginWithGithub: {
             en: "Login with GitHub",
