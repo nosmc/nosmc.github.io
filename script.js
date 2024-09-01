@@ -31,7 +31,8 @@ let hasSetUsername = false;
 let unreadMessages = 0;
 let isChatOpen = false;
 
-// DOM elements and event listeners will be initialized in a separate function
+// DOM elements
+let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButton, loginModal, closeLoginModal, googleLoginBtn, githubLoginBtn, themeSwitcher, body, languageSwitcher, usernameModal, usernameInput, setUsernameBtn, closeUsernameModal;
 
 // Auth Providers
 const githubProvider = new GithubAuthProvider();
@@ -349,23 +350,23 @@ function handleGeneratorRedirect(e) {
 
 // New function to initialize DOM elements and event listeners
 function initializeDOMElements() {
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const messagesList = document.getElementById('chat-messages');
-    const chatContainer = document.getElementById('chat-container');
-    const chatButton = document.querySelector('.chat-button');
-    const loginButton = document.getElementById('login-btn');
-    const loginModal = document.getElementById('login-modal');
-    const closeLoginModal = document.getElementById('close-login-modal');
-    const googleLoginBtn = document.getElementById('login-google');
-    const githubLoginBtn = document.getElementById('login-github');
-    const themeSwitcher = document.getElementById('theme-switcher');
-    const body = document.body;
-    const languageSwitcher = document.getElementById('language-switcher');
-    const usernameModal = document.getElementById('username-modal');
-    const usernameInput = document.getElementById('username-input');
-    const setUsernameBtn = document.getElementById('setUsernameBtn');
-    const closeUsernameModal = document.getElementById('close-username-modal');
+    messageInput = document.getElementById('message-input');
+    sendButton = document.getElementById('send-button');
+    messagesList = document.getElementById('chat-messages');
+    chatContainer = document.getElementById('chat-container');
+    chatButton = document.querySelector('.chat-button');
+    loginButton = document.getElementById('login-btn');
+    loginModal = document.getElementById('login-modal');
+    closeLoginModal = document.getElementById('close-login-modal');
+    googleLoginBtn = document.getElementById('login-google');
+    githubLoginBtn = document.getElementById('login-github');
+    themeSwitcher = document.getElementById('theme-switcher');
+    body = document.body;
+    languageSwitcher = document.getElementById('language-switcher');
+    usernameModal = document.getElementById('username-modal');
+    usernameInput = document.getElementById('username-input');
+    setUsernameBtn = document.getElementById('setUsernameBtn');
+    closeUsernameModal = document.getElementById('close-username-modal');
 
     // Event Listeners
     chatButton.addEventListener('click', toggleChat);
