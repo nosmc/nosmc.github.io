@@ -825,6 +825,7 @@
         let contents = JSON.parse(localStorage.getItem('contents')) || [];
         let dragSrcIndex = null;
         let scrollInterval = null;
+        let isChatOpen = false;
 
         const minecraftColorMap = {
             black: '#000000',
@@ -904,10 +905,25 @@
 
         // Functions
         function toggleChat() {
-            const isChatOpen = chatContainer.style.display === 'flex';
-            chatContainer.style.display = isChatOpen ? 'none' : 'flex';
-            if (!isChatOpen) {
-                messagesList.scrollTop = messagesList.scrollHeight;
+            isChatOpen = !isChatOpen;
+            chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+            if (isChatOpen) {
+                scrollChatToBottom();
+                clearUnreadIndicator();
+            }
+        }
+
+        function showUnreadIndicator() {
+            const unreadDot = document.querySelector('.chat-button .unread-dot');
+            if (unreadDot) {
+                unreadDot.style.display = 'block';
+            }
+        }
+
+        function clearUnreadIndicator() {
+            const unreadDot = document.querySelector('.chat-button .unread-dot');
+            if (unreadDot) {
+                unreadDot.style.display = 'none';
             }
         }
 
@@ -1048,32 +1064,6 @@
                     console.error("Error processing message:", error);
                 }
             });
-        }
-
-        function showUnreadIndicator() {
-            const unreadDot = document.querySelector('.chat-button .unread-dot');
-            if (unreadDot) {
-                unreadDot.style.display = 'block';
-            }
-        }
-
-        let isChatOpen = false;
-
-        function toggleChat() {
-            isChatOpen = !isChatOpen;
-            const chatContainer = document.getElementById('chat-container');
-            chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-            if (isChatOpen) {
-                scrollChatToBottom();
-                clearUnreadIndicator();
-            }
-        }
-
-        function clearUnreadIndicator() {
-            const unreadDot = document.querySelector('.chat-button .unread-dot');
-            if (unreadDot) {
-                unreadDot.style.display = 'none';
-            }
         }
 
         function removeMessagesListener() {
