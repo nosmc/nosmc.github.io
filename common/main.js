@@ -1,4 +1,4 @@
-import { initializePage, translations } from './script.js';
+import { initializePage, translations } from './common/script.js';
 
 function loadComponents() {
     return fetch('components.html')
