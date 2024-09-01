@@ -124,29 +124,31 @@ function initializeLogin() {
     if (githubLoginBtn) githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
 }
 
-themeSwitcher = document.getElementById('theme-switcher');
-body = document.body;
-languageSwitcher = document.getElementById('language-switcher');
-usernameModal = document.getElementById('username-modal');
-usernameInput = document.getElementById('username-input');
-setUsernameBtn = document.getElementById('setUsernameBtn');
-closeUsernameModal = document.getElementById('close-username-modal');
+function initializePage() {
+    themeSwitcher = document.getElementById('theme-switcher');
+    body = document.body;
+    languageSwitcher = document.getElementById('language-switcher');
+    usernameModal = document.getElementById('username-modal');
+    usernameInput = document.getElementById('username-input');
+    setUsernameBtn = document.getElementById('setUsernameBtn');
+    closeUsernameModal = document.getElementById('close-username-modal');
 
-if (themeSwitcher) themeSwitcher.addEventListener('click', toggleTheme);
-if (languageSwitcher) languageSwitcher.addEventListener('click', toggleLanguage);
-if (setUsernameBtn) setUsernameBtn.addEventListener('click', handleSetUsername);
-if (closeUsernameModal) closeUsernameModal.addEventListener('click', () => {
-    usernameModal.style.display = 'none';
-    signOut(auth);
-});
+    if (themeSwitcher) themeSwitcher.addEventListener('click', toggleTheme);
+    if (languageSwitcher) languageSwitcher.addEventListener('click', toggleLanguage);
+    if (setUsernameBtn) setUsernameBtn.addEventListener('click', handleSetUsername);
+    if (closeUsernameModal) closeUsernameModal.addEventListener('click', () => {
+        usernameModal.style.display = 'none';
+        signOut(auth);
+    });
 
-// Dropdown Menu Redirection
-document.querySelectorAll('.dropdown-content a').forEach(link => {
-    link.addEventListener('click', handleGeneratorRedirect);
-});
+    // Dropdown Menu Redirection
+    document.querySelectorAll('.dropdown-content a').forEach(link => {
+        link.addEventListener('click', handleGeneratorRedirect);
+    });
 
-// Initialize the page
-window.addEventListener('DOMContentLoaded', initializePage);
+    loadPreferences();
+    translatePage();
+}
 
 // Firebase Auth State Change
 auth.onAuthStateChanged(handleAuthStateChange);
@@ -473,11 +475,6 @@ function handleGeneratorRedirect(e) {
             }
         });
     }
-}
-
-function initializePage() {
-    loadPreferences();
-    translatePage();
 }
 
 function showUnreadIndicator() {
