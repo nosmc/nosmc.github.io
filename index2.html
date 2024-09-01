@@ -5,11 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Datapack Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="/common/styles.css">
+    <link rel="stylesheet" href="common/styles.css">
 </head>
 <body data-theme="dark">
-    <!-- Your page-specific content goes here -->
+    <!-- Include Header -->
+    <div id="header-placeholder"></div>
 
-    <script type="module" src="/common/main.js"></script>
+    <!-- Main Content -->
+    <main>
+        <!-- Your main content here -->
+    </main>
+
+    <!-- Include Footer -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Include Chat System -->
+    <div id="chat-placeholder"></div>
+
+    <!-- Modals -->
+    <div id="login-modal">
+        <div id="login-modal-content">
+            <h3 id="chooseLoginMethod">Choose a Login Method</h3>
+            <button id="login-google" class="login-method-button">
+                <span id="loginWithGoogle">Login with Google</span>
+            </button>
+            <button id="login-github" class="login-method-button">
+                <span id="loginWithGithub">Login with GitHub</span>
+            </button>
+            <div class="close-modal" id="close-login-modal">
+                <span id="cancelLogin">Cancel</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="username-modal">
+        <div id="username-modal-content">
+            <h3 id="setUsernameTitle">Set Your Username</h3>
+            <input type="text" id="username-input" placeholder="Enter your username">
+            <p id="username-error" style="color: red; display: none;"></p>
+            <button id="setUsernameBtn">Set Username</button>
+            <div class="close-modal" id="close-username-modal">
+                <span id="cancelSetUsername">Cancel</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="common/scripts.js"></script>
+    <script>
+        // Load external HTML components
+        async function loadComponent(url, placeholderId) {
+            const response = await fetch(url);
+            const text = await response.text();
+            document.getElementById(placeholderId).innerHTML = text;
+        }
+
+        loadComponent('common/header.html', 'header-placeholder');
+        loadComponent('common/footer.html', 'footer-placeholder');
+        loadComponent('common/chat.html', 'chat-placeholder');
+    </script>
 </body>
 </html>

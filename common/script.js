@@ -32,38 +32,56 @@ let unreadMessages = 0;
 let isChatOpen = false;
 
 // DOM elements
-let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButton, loginModal, closeLoginModal, googleLoginBtn, githubLoginBtn, themeSwitcher, languageSwitcher, usernameModal, usernameInput, setUsernameBtn, closeUsernameModal;
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const messagesList = document.getElementById('chat-messages');
+const chatContainer = document.getElementById('chat-container');
+const chatButton = document.querySelector('.chat-button');
+const loginButton = document.getElementById('login-btn');
+const loginModal = document.getElementById('login-modal');
+const closeLoginModal = document.getElementById('close-login-modal');
+const googleLoginBtn = document.getElementById('login-google');
+const githubLoginBtn = document.getElementById('login-github');
+const themeSwitcher = document.getElementById('theme-switcher');
+const body = document.body;
+const languageSwitcher = document.getElementById('language-switcher');
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const setUsernameBtn = document.getElementById('setUsernameBtn');
+const closeUsernameModal = document.getElementById('close-username-modal');
 
 // Auth Providers
 const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
-function handleAuthStateChange(user) {
-    if (!loginButton) {
-        loginButton = document.getElementById('login-btn');
-    }
-    
-    if (loginButton) {
-        if (user) {
-            currentUser = user;
-            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-            loginButton.setAttribute('aria-label', 'Logout');
-            if (!hasSetUsername) {
-                checkUsername();
-            }
-        } else {
-            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-            loginButton.setAttribute('aria-label', 'Login');
-            currentUser = null;
-            username = null;
-            hasSetUsername = false;
-            removeMessagesListener();
-        }
-    } else {
-        console.warn('Login button not found in the DOM');
-    }
-}
+// Event Listeners
+chatButton.addEventListener('click', toggleChat);
+loginButton.addEventListener('click', handleLoginButtonClick);
+closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', handleMessageInputKeypress);
+themeSwitcher.addEventListener('click', toggleTheme);
+languageSwitcher.addEventListener('click', toggleLanguage);
+setUsernameBtn.addEventListener('click', handleSetUsername);
+closeUsernameModal.addEventListener('click', () => {
+    usernameModal.style.display = 'none';
+    signOut(auth);
+});
 
+// Dropdown Menu Redirection
+document.querySelectorAll('.dropdown-content a').forEach(link => {
+    link.addEventListener('click', handleGeneratorRedirect);
+});
+
+// Initialize the page
+window.addEventListener('DOMContentLoaded', initializePage);
+
+// Firebase Auth State Change
+auth.onAuthStateChanged(handleAuthStateChange);
+
+// Functions
 function toggleChat() {
     isChatOpen = !isChatOpen;
     chatContainer.style.display = isChatOpen ? 'flex' : 'none';
@@ -98,109 +116,22 @@ function signInWithProvider(provider) {
     });
 }
 
-function toggleTheme() {
-    console.log('toggleTheme called');
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
-    console.log('Current theme:', currentTheme);
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    console.log('New theme:', newTheme);
-    html.setAttribute('data-theme', newTheme);
-    savePreferences();
-    console.log('Theme switched to:', newTheme);
-}
-
-function savePreferences() {
-    const theme = document.documentElement.getAttribute('data-theme');
-    console.log('Saving theme:', theme);
-    localStorage.setItem('theme', theme);
-    localStorage.setItem('language', currentLanguage);
-}
-
-function loadPreferences() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    const savedLanguage = localStorage.getItem('language') || 'en';
-    console.log('Loaded theme:', savedTheme);
-
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    currentLanguage = savedLanguage;
-}
-
-function toggleLanguage() {
-    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
-    translatePage();
-    savePreferences();
-}
-
-function translatePage() {
-    Object.keys(translations).forEach(key => {
-        const element = document.getElementById(key);
-        if (element) {
-            element.textContent = translations[key][currentLanguage];
+function handleAuthStateChange(user) {
+    if (user) {
+        currentUser = user;
+        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+        loginButton.setAttribute('aria-label', 'Logout');
+        if (!hasSetUsername) {
+            checkUsername();
         }
-    });
-    if (messageInput) {
-        messageInput.placeholder = translations.typeAMessage[currentLanguage];
-    }
-    if (usernameInput) {
-        usernameInput.placeholder = translations.enterUsername[currentLanguage];
-    }
-}
-
-function initializeDOMElements() {
-    messageInput = document.getElementById('message-input');
-    sendButton = document.getElementById('send-button');
-    messagesList = document.getElementById('chat-messages');
-    chatContainer = document.getElementById('chat-container');
-    chatButton = document.querySelector('.chat-button');
-    loginButton = document.getElementById('login-btn');
-    loginModal = document.getElementById('login-modal');
-    closeLoginModal = document.getElementById('close-login-modal');
-    googleLoginBtn = document.getElementById('login-google');
-    githubLoginBtn = document.getElementById('login-github');
-    themeSwitcher = document.getElementById('theme-switcher');
-    console.log('Theme switcher element:', themeSwitcher);
-    languageSwitcher = document.getElementById('language-switcher');
-    usernameModal = document.getElementById('username-modal');
-    usernameInput = document.getElementById('username-input');
-    setUsernameBtn = document.getElementById('setUsernameBtn');
-    closeUsernameModal = document.getElementById('close-username-modal');
-
-    // Event Listeners
-    chatButton?.addEventListener('click', toggleChat);
-    loginButton?.addEventListener('click', handleLoginButtonClick);
-    closeLoginModal?.addEventListener('click', () => loginModal.style.display = 'none');
-    googleLoginBtn?.addEventListener('click', () => signInWithProvider(googleProvider));
-    githubLoginBtn?.addEventListener('click', () => signInWithProvider(githubProvider));
-    sendButton?.addEventListener('click', sendMessage);
-    messageInput?.addEventListener('keypress', handleMessageInputKeypress);
-    if (themeSwitcher) {
-        themeSwitcher.addEventListener('click', toggleTheme);
-        console.log('Added click event listener to theme switcher');
     } else {
-        console.error('Theme switcher element not found');
+        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+        loginButton.setAttribute('aria-label', 'Login');
+        currentUser = null;
+        username = null;
+        hasSetUsername = false;
+        removeMessagesListener();
     }
-    languageSwitcher?.addEventListener('click', toggleLanguage);
-    setUsernameBtn?.addEventListener('click', handleSetUsername);
-    closeUsernameModal?.addEventListener('click', () => {
-        usernameModal.style.display = 'none';
-        signOut(auth);
-    });
-
-    // Dropdown Menu Redirection
-    document.querySelectorAll('.dropdown-content a').forEach(link => {
-        link?.addEventListener('click', handleGeneratorRedirect);
-    });
-}
-
-function initializePage() {
-    console.log('Initializing page');
-    loadPreferences();
-    initializeDOMElements();
-    translatePage();
-    
-    // Add auth state listener here
-    auth.onAuthStateChanged(handleAuthStateChange);
 }
 
 function checkUsername() {
@@ -380,6 +311,50 @@ function handleMessageInputKeypress(e) {
     }
 }
 
+function toggleTheme() {
+    if (body.getAttribute('data-theme') === 'light') {
+        body.setAttribute('data-theme', 'dark');
+    } else {
+        body.setAttribute('data-theme', 'light');
+    }
+    savePreferences();
+}
+
+function toggleLanguage() {
+    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+    translatePage();
+    savePreferences();
+}
+
+function savePreferences() {
+    localStorage.setItem('theme', body.getAttribute('data-theme'));
+    localStorage.setItem('language', currentLanguage);
+}
+
+function loadPreferences() {
+    const savedTheme = localStorage.getItem('theme');
+    const savedLanguage = localStorage.getItem('language');
+
+    if (savedTheme) {
+        body.setAttribute('data-theme', savedTheme);
+    }
+    if (savedLanguage) {
+        currentLanguage = savedLanguage;
+        translatePage();
+    }
+}
+
+function translatePage() {
+    Object.keys(translations).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            element.textContent = translations[key][currentLanguage];
+        }
+    });
+    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+}
+
 function handleGeneratorRedirect(e) {
     e.preventDefault();
     const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
@@ -414,6 +389,11 @@ function handleGeneratorRedirect(e) {
             }
         });
     }
+}
+
+function initializePage() {
+    loadPreferences();
+    translatePage();
 }
 
 function showUnreadIndicator() {
@@ -543,4 +523,5 @@ const translations = {
     }
 };
 
-export { initializePage, translations };
+// Initialize the page
+initializePage();
