@@ -3,71 +3,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-const header = document.querySelector('.header');
-fetch('./header.html')
-.then(res => res.text())
-.then(data => {
-    header.innerHTML = data;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(data, 'text/html');
-    const script = doc.querySelector('script');
-    if (script) {
-        eval(script.textContent);
-    }
-});
-
-const footer = document.querySelector('.footer');
-fetch('./footer.html')
-.then(res => res.text())
-.then(data => {
-    footer.innerHTML = data;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(data, 'text/html');
-    const script = doc.querySelector('script');
-    if (script) {
-        eval(script.textContent);
-    }
-});
-
-const chat = document.querySelector('.chat');
-fetch('./chat.html')
-.then(res => res.text())
-.then(data => {
-    chat.innerHTML = data;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(data, 'text/html');
-    const script = doc.querySelector('script');
-    if (script) {
-        eval(script.textContent);
-    }
-});
-
-const login = document.querySelector('.login');
-fetch('./login.html')
-.then(res => res.text())
-.then(data => {
-    login.innerHTML = data;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(data, 'text/html');
-    const script = doc.querySelector('script');
-    if (script) {
-        eval(script.textContent);
-    }
-});
-
-const user = document.querySelector('.user');
-fetch('./user.html')
-.then(res => res.text())
-.then(data => {
-    user.innerHTML = data;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(data, 'text/html');
-    const script = doc.querySelector('script');
-    if (script) {
-        eval(script.textContent);
-    }
-});
-
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
@@ -597,7 +532,7 @@ const translations = {
     },
     cancelLogin: {
         en: "Cancel",
-        zh: "取"
+        zh: "取消"
     },
     youtube: {
         en: "YouTube",
@@ -620,7 +555,7 @@ const translations = {
         zh: "捐贈"
     },
     setUsernameTitle: {
-        en: "Set Your User Username",
+        en: "Set Your Username",
         zh: "設置您的用戶名"
     },
     enterUsername: {
