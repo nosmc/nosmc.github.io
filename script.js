@@ -269,10 +269,9 @@ function handleMessageInputKeypress(e) {
 }
 
 function toggleTheme() {
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
+    const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    html.setAttribute('data-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
     savePreferences();
 }
 
@@ -283,23 +282,16 @@ function toggleLanguage() {
 }
 
 function savePreferences() {
-    const html = document.documentElement;
-    localStorage.setItem('theme', html.getAttribute('data-theme'));
+    localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
     localStorage.setItem('language', currentLanguage);
 }
 
 function loadPreferences() {
-    const savedTheme = localStorage.getItem('theme');
-    const savedLanguage = localStorage.getItem('language');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedLanguage = localStorage.getItem('language') || 'en';
 
-    const html = document.documentElement;
-    if (savedTheme) {
-        html.setAttribute('data-theme', savedTheme);
-    }
-    if (savedLanguage) {
-        currentLanguage = savedLanguage;
-        translatePage();
-    }
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    currentLanguage = savedLanguage;
 }
 
 function translatePage() {
@@ -309,8 +301,12 @@ function translatePage() {
             element.textContent = translations[key][currentLanguage];
         }
     });
-    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
-    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+    if (messageInput) {
+        messageInput.placeholder = translations.typeAMessage[currentLanguage];
+    }
+    if (usernameInput) {
+        usernameInput.placeholder = translations.enterUsername[currentLanguage];
+    }
 }
 
 function handleGeneratorRedirect(e) {
@@ -369,24 +365,24 @@ function initializeDOMElements() {
     closeUsernameModal = document.getElementById('close-username-modal');
 
     // Event Listeners
-    chatButton.addEventListener('click', toggleChat);
-    loginButton.addEventListener('click', handleLoginButtonClick);
-    closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-    googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-    githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', handleMessageInputKeypress);
-    themeSwitcher.addEventListener('click', toggleTheme);
-    languageSwitcher.addEventListener('click', toggleLanguage);
-    setUsernameBtn.addEventListener('click', handleSetUsername);
-    closeUsernameModal.addEventListener('click', () => {
+    chatButton?.addEventListener('click', toggleChat);
+    loginButton?.addEventListener('click', handleLoginButtonClick);
+    closeLoginModal?.addEventListener('click', () => loginModal.style.display = 'none');
+    googleLoginBtn?.addEventListener('click', () => signInWithProvider(googleProvider));
+    githubLoginBtn?.addEventListener('click', () => signInWithProvider(githubProvider));
+    sendButton?.addEventListener('click', sendMessage);
+    messageInput?.addEventListener('keypress', handleMessageInputKeypress);
+    themeSwitcher?.addEventListener('click', toggleTheme);
+    languageSwitcher?.addEventListener('click', toggleLanguage);
+    setUsernameBtn?.addEventListener('click', handleSetUsername);
+    closeUsernameModal?.addEventListener('click', () => {
         usernameModal.style.display = 'none';
         signOut(auth);
     });
 
     // Dropdown Menu Redirection
     document.querySelectorAll('.dropdown-content a').forEach(link => {
-        link.addEventListener('click', handleGeneratorRedirect);
+        link?.addEventListener('click', handleGeneratorRedirect);
     });
 
     // Firebase Auth State Change
@@ -395,8 +391,8 @@ function initializeDOMElements() {
 
 function initializePage() {
     loadPreferences();
-    translatePage();
     initializeDOMElements();
+    translatePage();
 }
 
 function showUnreadIndicator() {
