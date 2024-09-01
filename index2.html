@@ -3,35 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Datapack Generator</title>
+    <title>Subpage Title</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="common/styles.css">
+    <link rel="stylesheet" href="/common/styles.css">
+    <!-- Add any additional page-specific styles here -->
 </head>
 <body data-theme="dark">
+    <!-- Include the header -->
     <div id="header-placeholder"></div>
 
-    <!-- Your main content goes here -->
+    <!-- Main content of the subpage -->
+    <main>
+        <!-- Add your subpage-specific content here -->
+    </main>
 
+    <!-- Include the footer -->
     <div id="footer-placeholder"></div>
-    <div id="chat-placeholder"></div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js" type="module"></script>
-    <script type="module" src="/common/script.js"></script>
+    <script src="/common/scripts.js" type="module"></script>
     <script>
-        // Load header, footer, and chat
-        fetch('common/header.html')
+        // Load header and footer
+        fetch('/common/header.html')
             .then(response => response.text())
             .then(data => document.getElementById('header-placeholder').innerHTML = data);
 
-        fetch('common/footer.html')
+        fetch('/common/footer.html')
             .then(response => response.text())
             .then(data => document.getElementById('footer-placeholder').innerHTML = data);
 
-        fetch('common/chat.html')
-            .then(response => response.text())
-            .then(data => document.getElementById('chat-placeholder').innerHTML = data);
+        // Add any additional page-specific scripts here
     </script>
 </body>
 </html>
