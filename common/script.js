@@ -98,6 +98,110 @@ function signInWithProvider(provider) {
     });
 }
 
+function toggleTheme() {
+    console.log('toggleTheme called');
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    console.log('Current theme:', currentTheme);
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    console.log('New theme:', newTheme);
+    html.setAttribute('data-theme', newTheme);
+    savePreferences();
+}
+
+function savePreferences() {
+    const theme = document.documentElement.getAttribute('data-theme');
+    console.log('Saving theme:', theme);
+    localStorage.setItem('theme', theme);
+    localStorage.setItem('language', currentLanguage);
+}
+
+function loadPreferences() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedLanguage = localStorage.getItem('language') || 'en';
+    console.log('Loaded theme:', savedTheme);
+
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    currentLanguage = savedLanguage;
+}
+
+function toggleLanguage() {
+    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+    translatePage();
+    savePreferences();
+}
+
+function translatePage() {
+    Object.keys(translations).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            element.textContent = translations[key][currentLanguage];
+        }
+    });
+    if (messageInput) {
+        messageInput.placeholder = translations.typeAMessage[currentLanguage];
+    }
+    if (usernameInput) {
+        usernameInput.placeholder = translations.enterUsername[currentLanguage];
+    }
+}
+
+function initializeDOMElements() {
+    messageInput = document.getElementById('message-input');
+    sendButton = document.getElementById('send-button');
+    messagesList = document.getElementById('chat-messages');
+    chatContainer = document.getElementById('chat-container');
+    chatButton = document.querySelector('.chat-button');
+    loginButton = document.getElementById('login-btn');
+    loginModal = document.getElementById('login-modal');
+    closeLoginModal = document.getElementById('close-login-modal');
+    googleLoginBtn = document.getElementById('login-google');
+    githubLoginBtn = document.getElementById('login-github');
+    themeSwitcher = document.getElementById('theme-switcher');
+    console.log('Theme switcher element:', themeSwitcher);
+    languageSwitcher = document.getElementById('language-switcher');
+    usernameModal = document.getElementById('username-modal');
+    usernameInput = document.getElementById('username-input');
+    setUsernameBtn = document.getElementById('setUsernameBtn');
+    closeUsernameModal = document.getElementById('close-username-modal');
+
+    // Event Listeners
+    chatButton?.addEventListener('click', toggleChat);
+    loginButton?.addEventListener('click', handleLoginButtonClick);
+    closeLoginModal?.addEventListener('click', () => loginModal.style.display = 'none');
+    googleLoginBtn?.addEventListener('click', () => signInWithProvider(googleProvider));
+    githubLoginBtn?.addEventListener('click', () => signInWithProvider(githubProvider));
+    sendButton?.addEventListener('click', sendMessage);
+    messageInput?.addEventListener('keypress', handleMessageInputKeypress);
+    if (themeSwitcher) {
+        themeSwitcher.addEventListener('click', toggleTheme);
+        console.log('Added click event listener to theme switcher');
+    } else {
+        console.error('Theme switcher element not found');
+    }
+    languageSwitcher?.addEventListener('click', toggleLanguage);
+    setUsernameBtn?.addEventListener('click', handleSetUsername);
+    closeUsernameModal?.addEventListener('click', () => {
+        usernameModal.style.display = 'none';
+        signOut(auth);
+    });
+
+    // Dropdown Menu Redirection
+    document.querySelectorAll('.dropdown-content a').forEach(link => {
+        link?.addEventListener('click', handleGeneratorRedirect);
+    });
+}
+
+function initializePage() {
+    console.log('Initializing page');
+    loadPreferences();
+    initializeDOMElements();
+    translatePage();
+    
+    // Add auth state listener here
+    auth.onAuthStateChanged(handleAuthStateChange);
+}
+
 function checkUsername() {
     if (isSettingUsername || hasSetUsername) return;
     
@@ -275,47 +379,6 @@ function handleMessageInputKeypress(e) {
     }
 }
 
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    savePreferences();
-}
-
-function toggleLanguage() {
-    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
-    translatePage();
-    savePreferences();
-}
-
-function savePreferences() {
-    localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
-    localStorage.setItem('language', currentLanguage);
-}
-
-function loadPreferences() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    const savedLanguage = localStorage.getItem('language') || 'en';
-
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    currentLanguage = savedLanguage;
-}
-
-function translatePage() {
-    Object.keys(translations).forEach(key => {
-        const element = document.getElementById(key);
-        if (element) {
-            element.textContent = translations[key][currentLanguage];
-        }
-    });
-    if (messageInput) {
-        messageInput.placeholder = translations.typeAMessage[currentLanguage];
-    }
-    if (usernameInput) {
-        usernameInput.placeholder = translations.enterUsername[currentLanguage];
-    }
-}
-
 function handleGeneratorRedirect(e) {
     e.preventDefault();
     const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
@@ -350,55 +413,6 @@ function handleGeneratorRedirect(e) {
             }
         });
     }
-}
-
-function initializeDOMElements() {
-    messageInput = document.getElementById('message-input');
-    sendButton = document.getElementById('send-button');
-    messagesList = document.getElementById('chat-messages');
-    chatContainer = document.getElementById('chat-container');
-    chatButton = document.querySelector('.chat-button');
-    loginButton = document.getElementById('login-btn');
-    loginModal = document.getElementById('login-modal');
-    closeLoginModal = document.getElementById('close-login-modal');
-    googleLoginBtn = document.getElementById('login-google');
-    githubLoginBtn = document.getElementById('login-github');
-    themeSwitcher = document.getElementById('theme-switcher');
-    languageSwitcher = document.getElementById('language-switcher');
-    usernameModal = document.getElementById('username-modal');
-    usernameInput = document.getElementById('username-input');
-    setUsernameBtn = document.getElementById('setUsernameBtn');
-    closeUsernameModal = document.getElementById('close-username-modal');
-
-    // Event Listeners
-    chatButton?.addEventListener('click', toggleChat);
-    loginButton?.addEventListener('click', handleLoginButtonClick);
-    closeLoginModal?.addEventListener('click', () => loginModal.style.display = 'none');
-    googleLoginBtn?.addEventListener('click', () => signInWithProvider(googleProvider));
-    githubLoginBtn?.addEventListener('click', () => signInWithProvider(githubProvider));
-    sendButton?.addEventListener('click', sendMessage);
-    messageInput?.addEventListener('keypress', handleMessageInputKeypress);
-    themeSwitcher?.addEventListener('click', toggleTheme);
-    languageSwitcher?.addEventListener('click', toggleLanguage);
-    setUsernameBtn?.addEventListener('click', handleSetUsername);
-    closeUsernameModal?.addEventListener('click', () => {
-        usernameModal.style.display = 'none';
-        signOut(auth);
-    });
-
-    // Dropdown Menu Redirection
-    document.querySelectorAll('.dropdown-content a').forEach(link => {
-        link?.addEventListener('click', handleGeneratorRedirect);
-    });
-}
-
-function initializePage() {
-    loadPreferences();
-    initializeDOMElements();
-    translatePage();
-    
-    // Add auth state listener here
-    auth.onAuthStateChanged(handleAuthStateChange);
 }
 
 function showUnreadIndicator() {
