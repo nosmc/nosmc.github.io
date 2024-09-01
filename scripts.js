@@ -1,5 +1,3 @@
-import { translations } from './common/translations.js';
-
 // Replace the existing code for generator card click events with this:
 document.querySelectorAll('.generator-card').forEach(card => {
     card.addEventListener('click', () => {
