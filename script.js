@@ -269,12 +269,10 @@ function handleMessageInputKeypress(e) {
 }
 
 function toggleTheme() {
-    const body = document.body;
-    if (body.getAttribute('data-theme') === 'light') {
-        body.setAttribute('data-theme', 'dark');
-    } else {
-        body.setAttribute('data-theme', 'light');
-    }
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
     savePreferences();
 }
 
@@ -285,8 +283,8 @@ function toggleLanguage() {
 }
 
 function savePreferences() {
-    const body = document.body;
-    localStorage.setItem('theme', body.getAttribute('data-theme'));
+    const html = document.documentElement;
+    localStorage.setItem('theme', html.getAttribute('data-theme'));
     localStorage.setItem('language', currentLanguage);
 }
 
@@ -294,9 +292,9 @@ function loadPreferences() {
     const savedTheme = localStorage.getItem('theme');
     const savedLanguage = localStorage.getItem('language');
 
-    const body = document.body;
+    const html = document.documentElement;
     if (savedTheme) {
-        body.setAttribute('data-theme', savedTheme);
+        html.setAttribute('data-theme', savedTheme);
     }
     if (savedLanguage) {
         currentLanguage = savedLanguage;
