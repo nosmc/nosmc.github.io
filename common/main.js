@@ -1,11 +1,10 @@
 import { initializePage, translations } from './script.js';
 
 function loadComponents() {
-    return fetch('/common/components.html')
+    return fetch('/common/components.html')  // Use absolute path
         .then(response => response.text())
         .then(html => {
             document.body.insertAdjacentHTML('afterbegin', html);
-            console.log('Components loaded');
         })
         .catch(error => console.error('Error loading components:', error));
 }

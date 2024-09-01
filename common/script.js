@@ -107,6 +107,7 @@ function toggleTheme() {
     console.log('New theme:', newTheme);
     html.setAttribute('data-theme', newTheme);
     savePreferences();
+    console.log('Theme switched to:', newTheme);
 }
 
 function savePreferences() {
