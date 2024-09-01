@@ -97,73 +97,79 @@ let unreadMessages = 0;
 let isChatOpen = false;
 
 // DOM elements
-const messageInput = document.getElementById('message-input');
-const sendButton = document.getElementById('send-button');
-const messagesList = document.getElementById('chat-messages');
-const chatContainer = document.getElementById('chat-container');
-const chatButton = document.querySelector('.chat-button');
-const loginButton = document.getElementById('login-btn');
-const loginModal = document.getElementById('login-modal');
-const closeLoginModal = document.getElementById('close-login-modal');
-const googleLoginBtn = document.getElementById('login-google');
-const githubLoginBtn = document.getElementById('login-github');
-const themeSwitcher = document.getElementById('theme-switcher');
-const body = document.body;
-const languageSwitcher = document.getElementById('language-switcher');
-const usernameModal = document.getElementById('username-modal');
-const usernameInput = document.getElementById('username-input');
-const setUsernameBtn = document.getElementById('setUsernameBtn');
-const closeUsernameModal = document.getElementById('close-username-modal');
+let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButton, loginModal, closeLoginModal, googleLoginBtn, githubLoginBtn, themeSwitcher, body, languageSwitcher, usernameModal, usernameInput, setUsernameBtn, closeUsernameModal;
 
 // Auth Providers
 const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
-// Event Listeners
-if (chatButton) {
-    chatButton.addEventListener('click', toggleChat);
-}
-if (loginButton) {
-    loginButton.addEventListener('click', handleLoginButtonClick);
-}
-if (closeLoginModal) {
-    closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-}
-if (googleLoginBtn) {
-    googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-}
-if (githubLoginBtn) {
-    githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-}
-if (sendButton) {
-    sendButton.addEventListener('click', sendMessage);
-}
-if (messageInput) {
-    messageInput.addEventListener('keypress', handleMessageInputKeypress);
-}
-if (themeSwitcher) {
-    themeSwitcher.addEventListener('click', toggleTheme);
-}
-if (languageSwitcher) {
-    languageSwitcher.addEventListener('click', toggleLanguage);
-}
-if (setUsernameBtn) {
-    setUsernameBtn.addEventListener('click', handleSetUsername);
-}
-if (closeUsernameModal) {
-    closeUsernameModal.addEventListener('click', () => {
-        usernameModal.style.display = 'none';
-        signOut(auth);
-    });
-}
-
-// Dropdown Menu Redirection
-document.querySelectorAll('.dropdown-content a').forEach(link => {
-    link.addEventListener('click', handleGeneratorRedirect);
-});
-
 // Initialize the page
-window.addEventListener('DOMContentLoaded', initializePage);
+window.addEventListener('DOMContentLoaded', () => {
+    // Get DOM elements
+    messageInput = document.getElementById('message-input');
+    sendButton = document.getElementById('send-button');
+    messagesList = document.getElementById('chat-messages');
+    chatContainer = document.getElementById('chat-container');
+    chatButton = document.querySelector('.chat-button');
+    loginButton = document.getElementById('login-btn');
+    loginModal = document.getElementById('login-modal');
+    closeLoginModal = document.getElementById('close-login-modal');
+    googleLoginBtn = document.getElementById('login-google');
+    githubLoginBtn = document.getElementById('login-github');
+    themeSwitcher = document.getElementById('theme-switcher');
+    body = document.body;
+    languageSwitcher = document.getElementById('language-switcher');
+    usernameModal = document.getElementById('username-modal');
+    usernameInput = document.getElementById('username-input');
+    setUsernameBtn = document.getElementById('setUsernameBtn');
+    closeUsernameModal = document.getElementById('close-username-modal');
+
+    // Event Listeners
+    if (chatButton) {
+        chatButton.addEventListener('click', toggleChat);
+    }
+    if (loginButton) {
+        loginButton.addEventListener('click', handleLoginButtonClick);
+    }
+    if (closeLoginModal) {
+        closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+    }
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+    }
+    if (githubLoginBtn) {
+        githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+    }
+    if (sendButton) {
+        sendButton.addEventListener('click', sendMessage);
+    }
+    if (messageInput) {
+        messageInput.addEventListener('keypress', handleMessageInputKeypress);
+    }
+    if (themeSwitcher) {
+        themeSwitcher.addEventListener('click', toggleTheme);
+    }
+    if (languageSwitcher) {
+        languageSwitcher.addEventListener('click', toggleLanguage);
+    }
+    if (setUsernameBtn) {
+        setUsernameBtn.addEventListener('click', handleSetUsername);
+    }
+    if (closeUsernameModal) {
+        closeUsernameModal.addEventListener('click', () => {
+            usernameModal.style.display = 'none';
+            signOut(auth);
+        });
+    }
+
+    // Dropdown Menu Redirection
+    document.querySelectorAll('.dropdown-content a').forEach(link => {
+        link.addEventListener('click', handleGeneratorRedirect);
+    });
+
+    // Initialize the page
+    initializePage();
+});
 
 // Firebase Auth State Change
 auth.onAuthStateChanged(handleAuthStateChange);
