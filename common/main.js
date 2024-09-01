@@ -1,7 +1,7 @@
 import { initializePage, translations } from './script.js';
 
 function loadComponents() {
-    return fetch('./common/components.html')  // Updated path
+    return fetch('/common/components.html')  // Use absolute path
         .then(response => response.text())
         .then(html => {
             document.body.insertAdjacentHTML('afterbegin', html);
@@ -17,7 +17,8 @@ function init() {
     loadComponents()
         .then(() => {
             initializePage();
-        });
+        })
+        .catch(error => console.error('Error initializing page:', error));
 }
 
 // Wait for the DOM to be fully loaded before initializing
