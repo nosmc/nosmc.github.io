@@ -495,7 +495,9 @@ window.addEventListener('focus', () => {
 });
 
 function scrollChatToBottom() {
-    messagesList.scrollTop = messagesList.scrollHeight;
+    if (messagesList) {
+        messagesList.scrollTop = messagesList.scrollHeight;
+    }
 }
 
 const translations = {
