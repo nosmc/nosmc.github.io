@@ -41,135 +41,138 @@ const googleProvider = new GoogleAuthProvider();
 // Fetch HTML content and initialize the page
 window.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.header');
-    fetch('./header.html')
-    .then(res => res.text())
-    .then(data => {
-        header.innerHTML = data;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data, 'text/html');
-        const script = doc.querySelector('script');
-        if (script) {
-            eval(script.textContent);
-        }
-    });
-
     const footer = document.querySelector('.footer');
-    fetch('./footer.html')
-    .then(res => res.text())
-    .then(data => {
-        footer.innerHTML = data;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data, 'text/html');
-        const script = doc.querySelector('script');
-        if (script) {
-            eval(script.textContent);
-        }
-    });
-
     const chat = document.querySelector('.chat');
-    fetch('./chat.html')
-    .then(res => res.text())
-    .then(data => {
-        chat.innerHTML = data;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data, 'text/html');
-        const script = doc.querySelector('script');
-        if (script) {
-            eval(script.textContent);
-        }
-    });
-
     const login = document.querySelector('.login');
-    fetch('./login.html')
-    .then(res => res.text())
-    .then(data => {
-        login.innerHTML = data;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data, 'text/html');
-        const script = doc.querySelector('script');
-        if (script) {
-            eval(script.textContent);
-        }
-    });
-
     const user = document.querySelector('.user');
-    fetch('./user.html')
-    .then(res => res.text())
-    .then(data => {
-        user.innerHTML = data;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data, 'text/html');
-        const script = doc.querySelector('script');
-        if (script) {
-            eval(script.textContent);
-        }
-    });
 
-    // Get DOM elements
-    messageInput = document.getElementById('message-input');
-    sendButton = document.getElementById('send-button');
-    messagesList = document.getElementById('chat-messages');
-    chatContainer = document.getElementById('chat-container');
-    chatButton = document.querySelector('.chat-button');
-    loginButton = document.getElementById('login-btn');
-    loginModal = document.getElementById('login-modal');
-    closeLoginModal = document.getElementById('close-login-modal');
-    googleLoginBtn = document.getElementById('login-google');
-    githubLoginBtn = document.getElementById('login-github');
-    themeSwitcher = document.getElementById('theme-switcher');
-    body = document.body;
-    languageSwitcher = document.getElementById('language-switcher');
-    usernameModal = document.getElementById('username-modal');
-    usernameInput = document.getElementById('username-input');
-    setUsernameBtn = document.getElementById('setUsernameBtn');
-    closeUsernameModal = document.getElementById('close-username-modal');
-
-    // Event Listeners
-    if (chatButton) {
-        chatButton.addEventListener('click', toggleChat);
-    }
-    if (loginButton) {
-        loginButton.addEventListener('click', handleLoginButtonClick);
-    }
-    if (closeLoginModal) {
-        closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-    }
-    if (googleLoginBtn) {
-        googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-    }
-    if (githubLoginBtn) {
-        githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-    }
-    if (sendButton) {
-        sendButton.addEventListener('click', sendMessage);
-    }
-    if (messageInput) {
-        messageInput.addEventListener('keypress', handleMessageInputKeypress);
-    }
-    if (themeSwitcher) {
-        themeSwitcher.addEventListener('click', toggleTheme);
-    }
-    if (languageSwitcher) {
-        languageSwitcher.addEventListener('click', toggleLanguage);
-    }
-    if (setUsernameBtn) {
-        setUsernameBtn.addEventListener('click', handleSetUsername);
-    }
-    if (closeUsernameModal) {
-        closeUsernameModal.addEventListener('click', () => {
-            usernameModal.style.display = 'none';
-            signOut(auth);
+    const fetchHeader = fetch('./header.html')
+        .then(res => res.text())
+        .then(data => {
+            header.innerHTML = data;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, 'text/html');
+            const script = doc.querySelector('script');
+            if (script) {
+                eval(script.textContent);
+            }
         });
-    }
 
-    // Dropdown Menu Redirection
-    document.querySelectorAll('.dropdown-content a').forEach(link => {
-        link.addEventListener('click', handleGeneratorRedirect);
+    const fetchFooter = fetch('./footer.html')
+        .then(res => res.text())
+        .then(data => {
+            footer.innerHTML = data;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, 'text/html');
+            const script = doc.querySelector('script');
+            if (script) {
+                eval(script.textContent);
+            }
+        });
+
+    const fetchChat = fetch('./chat.html')
+        .then(res => res.text())
+        .then(data => {
+            chat.innerHTML = data;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, 'text/html');
+            const script = doc.querySelector('script');
+            if (script) {
+                eval(script.textContent);
+            }
+        });
+
+    const fetchLogin = fetch('./login.html')
+        .then(res => res.text())
+        .then(data => {
+            login.innerHTML = data;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, 'text/html');
+            const script = doc.querySelector('script');
+            if (script) {
+                eval(script.textContent);
+            }
+        });
+
+    const fetchUser = fetch('./user.html')
+        .then(res => res.text())
+        .then(data => {
+            user.innerHTML = data;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, 'text/html');
+            const script = doc.querySelector('script');
+            if (script) {
+                eval(script.textContent);
+            }
+        });
+
+    Promise.all([fetchHeader, fetchFooter, fetchChat, fetchLogin, fetchUser]).then(() => {
+        // Get DOM elements
+        messageInput = document.getElementById('message-input');
+        sendButton = document.getElementById('send-button');
+        messagesList = document.getElementById('chat-messages');
+        chatContainer = document.getElementById('chat-container');
+        chatButton = document.querySelector('.chat-button');
+        loginButton = document.getElementById('login-btn');
+        loginModal = document.getElementById('login-modal');
+        closeLoginModal = document.getElementById('close-login-modal');
+        googleLoginBtn = document.getElementById('login-google');
+        githubLoginBtn = document.getElementById('login-github');
+        themeSwitcher = document.getElementById('theme-switcher');
+        body = document.body;
+        languageSwitcher = document.getElementById('language-switcher');
+        usernameModal = document.getElementById('username-modal');
+        usernameInput = document.getElementById('username-input');
+        setUsernameBtn = document.getElementById('setUsernameBtn');
+        closeUsernameModal = document.getElementById('close-username-modal');
+
+        // Event Listeners
+        if (chatButton) {
+            chatButton.addEventListener('click', toggleChat);
+        }
+        if (loginButton) {
+            loginButton.addEventListener('click', handleLoginButtonClick);
+        }
+        if (closeLoginModal) {
+            closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+        }
+        if (googleLoginBtn) {
+            googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+        }
+        if (githubLoginBtn) {
+            githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+        }
+        if (sendButton) {
+            sendButton.addEventListener('click', sendMessage);
+        }
+        if (messageInput) {
+            messageInput.addEventListener('keypress', handleMessageInputKeypress);
+        }
+        if (themeSwitcher) {
+            themeSwitcher.addEventListener('click', toggleTheme);
+        }
+        if (languageSwitcher) {
+            languageSwitcher.addEventListener('click', toggleLanguage);
+        }
+        if (setUsernameBtn) {
+            setUsernameBtn.addEventListener('click', handleSetUsername);
+        }
+        if (closeUsernameModal) {
+            closeUsernameModal.addEventListener('click', () => {
+                usernameModal.style.display = 'none';
+                signOut(auth);
+            });
+        }
+
+        // Dropdown Menu Redirection
+        document.querySelectorAll('.dropdown-content a').forEach(link => {
+            link.addEventListener('click', handleGeneratorRedirect);
+        });
+
+        // Initialize the page
+        loadPreferences();
+        translatePage();
     });
-
-    // Initialize the page
-    loadPreferences();
-    translatePage();
 });
 
 // Firebase Auth State Change
