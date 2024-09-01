@@ -89,4 +89,4 @@ const translations = {
         en: "Entity Generator",
         zh: "實體生成器"
     }
-}
+};
