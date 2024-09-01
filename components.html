@@ -1,0 +1,74 @@
+<header>
+    <h1><i class="fas fa-cogs"></i> <span id="headerTitle">Minecraft Datapack Generator</span></h1>
+    <div class="header-right">
+        <a href="https://nosmc.github.io" class="home-button" aria-label="Home">
+            <i class="fas fa-home"></i> <span id="home">Home</span>
+        </a>
+        <div class="dropdown">
+            <button class="dropdown-button" aria-label="Generators"><i class="fas fa-caret-down"></i> <span id="generators">Generators</span></button>
+            <div class="dropdown-content">
+                <a href="#" data-generator="text"><span id="generatorText">Text</span></a>
+                <a href="#" data-generator="item"><span id="generatorItem">Item</span></a>
+                <a href="#" data-generator="entity"><span id="generatorEntity">Entity</span></a>
+            </div>
+        </div>
+        <button class="language-button" id="language-switcher" aria-label="Switch Language">
+            <i class="fas fa-language"></i>
+        </button>
+        <div id="theme-switcher" aria-label="Switch Theme"><i class="fas fa-adjust"></i></div>
+        <div id="login-btn" aria-label="Login"><i class="fas fa-user"></i></div>
+    </div>
+</header>
+
+<footer>
+    <div class="footer-links">
+        <a href="https://www.youtube.com/@n_os_" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i> <span id="youtube">YouTube</span></a>
+        <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i> <span id="instagram">Instagram</span></a>
+        <a href="https://discord.gg/Pah6vw36Tw" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> <span id="discord">Discord</span></a>
+    </div>
+    <p>
+        <a id="developer-link" href="https://github.com/nosmc" target="_blank">&copy; <span id="developedBy">Developed by nos</span></a>
+        <a href="https://donation-link.com" target="_blank" class="donate"><i class="fas fa-heart"></i> <span id="donate">Donate</span></a>
+    </p>
+</footer>
+
+<div id="chat-container">
+    <h2><i class="fas fa-comments"></i> <span id="chatTitle">Chat</span></h2>
+    <ul id="chat-messages"></ul>
+    <div id="chat-input">
+        <input type="text" id="message-input" placeholder="Type a message..." aria-label="Message Input">
+        <button id="send-button"><span id="sendButtonText">Send</span></button>
+    </div>
+</div>
+
+<button class="chat-button" aria-label="Open Chat">
+    <i class="fas fa-comments"></i>
+    <span class="unread-dot"></span>
+</button>
+
+<div id="login-modal">
+    <div id="login-modal-content">
+        <h3 id="chooseLoginMethod">Choose a Login Method</h3>
+        <button id="login-google" class="login-method-button">
+            <span id="loginWithGoogle">Login with Google</span>
+        </button>
+        <button id="login-github" class="login-method-button">
+            <span id="loginWithGithub">Login with GitHub</span>
+        </button>
+        <div class="close-modal" id="close-login-modal">
+            <span id="cancelLogin">Cancel</span>
+        </div>
+    </div>
+</div>
+
+<div id="username-modal">
+    <div id="username-modal-content">
+        <h3 id="setUsernameTitle">Set Your Username</h3>
+        <input type="text" id="username-input" placeholder="Enter your username">
+        <p id="username-error" style="color: red; display: none;"></p>
+        <button id="setUsernameBtn">Set Username</button>
+        <div class="close-modal" id="close-username-modal">
+            <span id="cancelSetUsername">Cancel</span>
+        </div>
+    </div>
+</div>
