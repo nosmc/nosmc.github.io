@@ -38,8 +38,73 @@ let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButt
 const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
-// Initialize the page
+// Fetch HTML content and initialize the page
 window.addEventListener('DOMContentLoaded', () => {
+    const header = document.querySelector('.header');
+    fetch('./header.html')
+    .then(res => res.text())
+    .then(data => {
+        header.innerHTML = data;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data, 'text/html');
+        const script = doc.querySelector('script');
+        if (script) {
+            eval(script.textContent);
+        }
+    });
+
+    const footer = document.querySelector('.footer');
+    fetch('./footer.html')
+    .then(res => res.text())
+    .then(data => {
+        footer.innerHTML = data;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data, 'text/html');
+        const script = doc.querySelector('script');
+        if (script) {
+            eval(script.textContent);
+        }
+    });
+
+    const chat = document.querySelector('.chat');
+    fetch('./chat.html')
+    .then(res => res.text())
+    .then(data => {
+        chat.innerHTML = data;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data, 'text/html');
+        const script = doc.querySelector('script');
+        if (script) {
+            eval(script.textContent);
+        }
+    });
+
+    const login = document.querySelector('.login');
+    fetch('./login.html')
+    .then(res => res.text())
+    .then(data => {
+        login.innerHTML = data;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data, 'text/html');
+        const script = doc.querySelector('script');
+        if (script) {
+            eval(script.textContent);
+        }
+    });
+
+    const user = document.querySelector('.user');
+    fetch('./user.html')
+    .then(res => res.text())
+    .then(data => {
+        user.innerHTML = data;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data, 'text/html');
+        const script = doc.querySelector('script');
+        if (script) {
+            eval(script.textContent);
+        }
+    });
+
     // Get DOM elements
     messageInput = document.getElementById('message-input');
     sendButton = document.getElementById('send-button');
