@@ -1020,9 +1020,22 @@
                 return;
             }
             messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+            
+            const loadTimestamp = new Date().getTime();
+            
             onChildAdded(messagesRef, (snapshot) => {
-                const message = snapshot.val();
-                displayMessage(message);
+                try {
+                    const message = snapshot.val();
+                    if (message) {
+                        displayMessage(message);
+                        
+                        if (new Date(message.timestamp).getTime() > loadTimestamp) {
+                            handleNewMessage(message);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error processing message:", error);
+                }
             });
         }
 
@@ -1039,6 +1052,11 @@
         }
 
         function displayMessage(message) {
+            if (!message || typeof message !== 'object') {
+                console.error('Invalid message format:', message);
+                return;
+            }
+
             const li = document.createElement('li');
             li.className = message.sender === username ? 'sent' : 'received';
 
@@ -1051,22 +1069,22 @@
 
             const img = document.createElement('img');
             img.src = message.avatar || 'default-avatar.png';
-            img.alt = message.sender;
+            img.alt = message.sender || 'Unknown';
 
             const usernameSpan = document.createElement('span');
             usernameSpan.className = 'username';
-            usernameSpan.textContent = message.sender;
+            usernameSpan.textContent = message.sender || 'Unknown';
 
             messageHeader.appendChild(img);
             messageHeader.appendChild(usernameSpan);
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            messageContent.textContent = message.content;
+            messageContent.textContent = message.content || '';
 
             const messageTime = document.createElement('div');
             messageTime.className = 'message-time';
-            messageTime.textContent = convertToLocalTime(message.timestamp);
+            messageTime.textContent = message.timestamp ? convertToLocalTime(message.timestamp) : '';
 
             li.appendChild(messageHeader);
             li.appendChild(messageContent);
@@ -1074,6 +1092,10 @@
 
             messagesList.appendChild(li);
             scrollChatToBottom();
+        }
+
+        function scrollChatToBottom() {
+            messagesList.scrollTop = messagesList.scrollHeight;
         }
 
         function sendMessage() {
@@ -2119,7 +2141,7 @@
             },
             green: {
                 en: "Green",
-                zh: "綠色"
+                zh: "綠"
             },
             aqua: {
                 en: "Aqua",
