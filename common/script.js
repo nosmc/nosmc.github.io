@@ -38,7 +38,32 @@ let messageInput, sendButton, messagesList, chatContainer, chatButton, loginButt
 const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
-// Functions
+function handleAuthStateChange(user) {
+    if (!loginButton) {
+        loginButton = document.getElementById('login-btn');
+    }
+    
+    if (loginButton) {
+        if (user) {
+            currentUser = user;
+            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+            loginButton.setAttribute('aria-label', 'Logout');
+            if (!hasSetUsername) {
+                checkUsername();
+            }
+        } else {
+            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+            loginButton.setAttribute('aria-label', 'Login');
+            currentUser = null;
+            username = null;
+            hasSetUsername = false;
+            removeMessagesListener();
+        }
+    } else {
+        console.warn('Login button not found in the DOM');
+    }
+}
+
 function toggleChat() {
     isChatOpen = !isChatOpen;
     chatContainer.style.display = isChatOpen ? 'flex' : 'none';
@@ -71,28 +96,6 @@ function signInWithProvider(provider) {
     }).catch(error => {
         console.error(`Error during ${provider.providerId} login:`, error);
     });
-}
-
-function handleAuthStateChange(user) {
-    if (loginButton) {  // Check if loginButton exists
-        if (user) {
-            currentUser = user;
-            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-            loginButton.setAttribute('aria-label', 'Logout');
-            if (!hasSetUsername) {
-                checkUsername();
-            }
-        } else {
-            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-            loginButton.setAttribute('aria-label', 'Login');
-            currentUser = null;
-            username = null;
-            hasSetUsername = false;
-            removeMessagesListener();
-        }
-    } else {
-        console.warn('Login button not found in the DOM');
-    }
 }
 
 function checkUsername() {
@@ -349,7 +352,6 @@ function handleGeneratorRedirect(e) {
     }
 }
 
-// New function to initialize DOM elements and event listeners
 function initializeDOMElements() {
     messageInput = document.getElementById('message-input');
     sendButton = document.getElementById('send-button');
@@ -388,15 +390,15 @@ function initializeDOMElements() {
     document.querySelectorAll('.dropdown-content a').forEach(link => {
         link?.addEventListener('click', handleGeneratorRedirect);
     });
-
-    // Firebase Auth State Change
-    auth.onAuthStateChanged(handleAuthStateChange);
 }
 
 function initializePage() {
     loadPreferences();
     initializeDOMElements();
     translatePage();
+    
+    // Add auth state listener here
+    auth.onAuthStateChanged(handleAuthStateChange);
 }
 
 function showUnreadIndicator() {
