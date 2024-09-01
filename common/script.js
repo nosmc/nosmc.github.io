@@ -61,19 +61,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const githubProvider = new GithubAuthProvider();
     const googleProvider = new GoogleAuthProvider();
 
-    // Event Listeners
-    chatButton.addEventListener('click', toggleChat);
-    loginButton.addEventListener('click', handleLoginButtonClick);
-    closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-    googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-    githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', handleMessageInputKeypress);
-    themeSwitcher.addEventListener('click', toggleTheme);
-    languageSwitcher.addEventListener('click', toggleLanguage);
-    setUsernameBtn.addEventListener('click', handleSetUsername);
-    closeUsernameModal.addEventListener('click', () => {
-        usernameModal.style.display = 'none';
+    // Add null checks before adding event listeners
+    if (chatButton) chatButton.addEventListener('click', toggleChat);
+    if (loginButton) loginButton.addEventListener('click', handleLoginButtonClick);
+    if (closeLoginModal) closeLoginModal.addEventListener('click', () => {
+        if (loginModal) loginModal.style.display = 'none';
+    });
+    if (googleLoginBtn) googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+    if (githubLoginBtn) githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+    if (sendButton) sendButton.addEventListener('click', sendMessage);
+    if (messageInput) messageInput.addEventListener('keypress', handleMessageInputKeypress);
+    if (themeSwitcher) themeSwitcher.addEventListener('click', toggleTheme);
+    if (languageSwitcher) languageSwitcher.addEventListener('click', toggleLanguage);
+    if (setUsernameBtn) setUsernameBtn.addEventListener('click', handleSetUsername);
+    if (closeUsernameModal) closeUsernameModal.addEventListener('click', () => {
+        if (usernameModal) usernameModal.style.display = 'none';
         signOut(auth);
     });
 
@@ -109,14 +111,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error("Error signing out:", error);
             });
         } else {
-            loginModal.style.display = 'flex';
+            if (loginModal) loginModal.style.display = 'flex';
         }
     }
 
     function signInWithProvider(provider) {
         signInWithPopup(auth, provider).then(result => {
             currentUser = result.user;
-            loginModal.style.display = 'none';
+            if (loginModal) loginModal.style.display = 'none';
             checkUsername();
         }).catch(error => {
             console.error(`Error during ${provider.providerId} login:`, error);
@@ -126,14 +128,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleAuthStateChange(user) {
         if (user) {
             currentUser = user;
-            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-            loginButton.setAttribute('aria-label', 'Logout');
+            if (loginButton) {
+                loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+                loginButton.setAttribute('aria-label', 'Logout');
+            }
             if (!hasSetUsername) {
                 checkUsername();
             }
         } else {
-            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-            loginButton.setAttribute('aria-label', 'Login');
+            if (loginButton) {
+                loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+                loginButton.setAttribute('aria-label', 'Login');
+            }
             currentUser = null;
             username = null;
             hasSetUsername = false;
@@ -163,16 +169,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showUsernameModal() {
-        usernameModal.style.display = 'flex';
-        usernameInput.focus();
+        if (usernameModal) {
+            usernameModal.style.display = 'flex';
+            if (usernameInput) usernameInput.focus();
+        }
     }
 
     function handleSetUsername() {
-        const newUsername = usernameInput.value.trim();
-        if (newUsername) {
-            saveUsername(newUsername);
-        } else {
-            showUsernameError(translations.usernameEmpty[currentLanguage]);
+        if (usernameInput) {
+            const newUsername = usernameInput.value.trim();
+            if (newUsername) {
+                saveUsername(newUsername);
+            } else {
+                showUsernameError(translations.usernameEmpty[currentLanguage]);
+            }
         }
     }
 
@@ -183,15 +193,17 @@ document.addEventListener('DOMContentLoaded', function() {
         get(usernameQuery).then(snapshot => {
             if (snapshot.exists()) {
                 showUsernameError(translations.usernameExists[currentLanguage]);
-                usernameInput.value = '';
-                usernameInput.focus();
+                if (usernameInput) {
+                    usernameInput.value = '';
+                    usernameInput.focus();
+                }
             } else {
                 set(ref(database, `users/${currentUser.uid}`), {
                     username: newUsername
                 }).then(() => {
                     username = newUsername;
                     hasSetUsername = true;
-                    usernameModal.style.display = 'none';
+                    if (usernameModal) usernameModal.style.display = 'none';
                     loadMessages();
                 }).catch(error => {
                     console.error("Error saving username:", error);
@@ -206,8 +218,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showUsernameError(message) {
         const errorElement = document.getElementById('username-error');
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
     }
 
     function loadMessages() {
@@ -239,14 +253,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function isScrolledToBottom() {
-        return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+        if (messagesList) {
+            return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+        }
+        return false;
     }
 
     function removeMessagesListener() {
         if (messagesRef) {
             messagesRef = null;
         }
-        messagesList.innerHTML = '';
+        if (messagesList) {
+            messagesList.innerHTML = '';
+        }
     }
 
     function convertToLocalTime(isoTimestamp) {
@@ -255,45 +274,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayMessage(message) {
-        const li = document.createElement('li');
-        li.className = message.sender === username ? 'sent' : 'received';
+        if (messagesList) {
+            const li = document.createElement('li');
+            li.className = message.sender === username ? 'sent' : 'received';
 
-        if (message.sender === developerUsername) {
-            li.classList.add('developer');
+            if (message.sender === developerUsername) {
+                li.classList.add('developer');
+            }
+
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+
+            const img = document.createElement('img');
+            img.src = message.avatar || 'default-avatar.png';
+            img.alt = message.sender;
+
+            const usernameSpan = document.createElement('span');
+            usernameSpan.className = 'username';
+            usernameSpan.textContent = message.sender;
+
+            messageHeader.appendChild(img);
+            messageHeader.appendChild(usernameSpan);
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = message.content;
+
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = convertToLocalTime(message.timestamp);
+
+            li.appendChild(messageHeader);
+            li.appendChild(messageContent);
+            li.appendChild(messageTime);
+
+            messagesList.appendChild(li);
+            scrollChatToBottom();
         }
-
-        const messageHeader = document.createElement('div');
-        messageHeader.className = 'message-header';
-
-        const img = document.createElement('img');
-        img.src = message.avatar || 'default-avatar.png';
-        img.alt = message.sender;
-
-        const usernameSpan = document.createElement('span');
-        usernameSpan.className = 'username';
-        usernameSpan.textContent = message.sender;
-
-        messageHeader.appendChild(img);
-        messageHeader.appendChild(usernameSpan);
-
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
-        messageContent.textContent = message.content;
-
-        const messageTime = document.createElement('div');
-        messageTime.className = 'message-time';
-        messageTime.textContent = convertToLocalTime(message.timestamp);
-
-        li.appendChild(messageHeader);
-        li.appendChild(messageContent);
-        li.appendChild(messageTime);
-
-        messagesList.appendChild(li);
-        scrollChatToBottom();
     }
 
     function sendMessage() {
-        if (username && messageInput.value.trim()) {
+        if (username && messageInput && messageInput.value.trim()) {
             const timestamp = new Date().toISOString();
 
             push(ref(database, 'messages'), {
@@ -319,12 +340,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function toggleTheme() {
-        if (body.getAttribute('data-theme') === 'light') {
-            body.setAttribute('data-theme', 'dark');
-        } else {
-            body.setAttribute('data-theme', 'light');
+        if (body) {
+            if (body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+            }
+            savePreferences();
         }
-        savePreferences();
     }
 
     function toggleLanguage() {
@@ -334,20 +357,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function savePreferences() {
-        localStorage.setItem('theme', body.getAttribute('data-theme'));
-        localStorage.setItem('language', currentLanguage);
+        if (body) {
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+            localStorage.setItem('language', currentLanguage);
+        }
     }
 
     function loadPreferences() {
-        const savedTheme = localStorage.getItem('theme');
-        const savedLanguage = localStorage.getItem('language');
+        if (body) {
+            const savedTheme = localStorage.getItem('theme');
+            const savedLanguage = localStorage.getItem('language');
 
-        if (savedTheme) {
-            body.setAttribute('data-theme', savedTheme);
-        }
-        if (savedLanguage) {
-            currentLanguage = savedLanguage;
-            translatePage();
+            if (savedTheme) {
+                body.setAttribute('data-theme', savedTheme);
+            }
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+                translatePage();
+            }
         }
     }
 
@@ -358,8 +385,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 element.textContent = translations[key][currentLanguage];
             }
         });
-        document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
-        document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+        if (messageInput) {
+            messageInput.placeholder = translations.typeAMessage[currentLanguage];
+        }
+        if (usernameInput) {
+            usernameInput.placeholder = translations.enterUsername[currentLanguage];
+        }
     }
 
     function handleGeneratorRedirect(e) {
@@ -405,12 +436,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showUnreadIndicator() {
         unreadMessages++;
-        document.querySelector('.chat-button .unread-dot').style.display = 'block';
+        const unreadDot = document.querySelector('.chat-button .unread-dot');
+        if (unreadDot) {
+            unreadDot.style.display = 'block';
+        }
     }
 
     function clearUnreadIndicator() {
         unreadMessages = 0;
-        document.querySelector('.chat-button .unread-dot').style.display = 'none';
+        const unreadDot = document.querySelector('.chat-button .unread-dot');
+        if (unreadDot) {
+            unreadDot.style.display = 'none';
+        }
     }
 
     window.addEventListener('focus', () => {
@@ -420,7 +457,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function scrollChatToBottom() {
-        messagesList.scrollTop = messagesList.scrollHeight;
+        if (messagesList) {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
     }
 
     const translations = {
