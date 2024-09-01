@@ -5,18 +5,701 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Datapack Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --background-color-light: #f0f0f0;
+            --background-color-dark: #1a1a1a;
+            --text-color-light: #333;
+            --text-color-dark: #ddd;
+            --panel-background-color-light: #ffffff;
+            --panel-background-color-dark: #2b2b2b;
+            --border-color-light: #ccc;
+            --border-color-dark: #444;
+            --primary-color: #55a630;
+            --primary-color-dark: #407f22;
+            --sent-message-bg: #55a630;
+            --received-message-bg: #4e4e4e;
+            --sent-message-text-color: white;
+            --received-message-text-color: white;
+            --developer-link-color: #0eb0f0;
+            --developer-message-bg: #ff4081;
+            --developer-message-text-color: white;
+            --time-username-spacing: 10px;
+            --footer-link-color: #55a630;
+            --footer-link-hover-color: #407f22;
+            --donate-link-color: #ff4081;
+            --donate-link-hover-color: #e73370;
+            --modal-background-color: rgba(0, 0, 0, 0.6);
+            --modal-content-background: var(--panel-background-color);
+            --accent-color: #ff4081;
+            --accent-color-dark: #c2185b;
+            --shadow-light: 0 8px 20px rgba(0, 0, 0, 0.1);
+            --shadow-dark: 0 8px 20px rgba(0, 0, 0, 0.5);
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            --background-color: var(--background-color-light);
+            --text-color: var(--text-color-light);
+            --panel-background-color: var(--panel-background-color-light);
+            --border-color: var(--border-color-light);
+            --scrollbar-color: #aaa;
+            --language-button-color: var(--primary-color);
+            --shadow: var(--shadow-light);
+        }
+
+        [data-theme="dark"] {
+            --background-color: var(--background-color-dark);
+            --text-color: var(--text-color-dark);
+            --panel-background-color: var(--panel-background-color-dark);
+            --border-color: var(--border-color-dark);
+            --scrollbar-color: #666;
+            --language-button-color: var(--primary-color-dark);
+            --shadow: var(--shadow-dark);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Minecraft', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--panel-background-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-color);
+            border-radius: 5px;
+            border: 2px solid var(--panel-background-color);
+        }
+
+        header, footer {
+            width: 100%;
+            background-color: var(--panel-background-color);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            z-index: 1000;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            top: 0;
+            left: 0;
+        }
+
+        footer {
+            bottom: 0;
+            left: 0;
+            color: var(--text-color);
+        }
+
+        header h1, footer p {
+            color: var(--primary-color);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .home-button, .dropdown-button, .button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            height: 41px;
+        }
+
+        .home-button:hover, .dropdown-button:hover, .button:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .home-button:active, .dropdown-button:active, .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--panel-background-color);
+            min-width: 160px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            border-radius: 8px;
+            top: 100%;
+            left: 0;
+        }
+
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        #theme-switcher, #language-switcher, #login-btn {
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        #theme-switcher:hover, #language-switcher:hover, #login-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .language-button {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            color: var(--language-button-color);
+        }
+
+        main {
+            padding-top: 60px;
+            padding-bottom: 50px;
+        }
+
+        .hero-section {
+            background-image: url('https://i.imgur.com/9fjG7UA.jpeg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .features-section {
+            padding: 5rem 2rem;
+            background-color: var(--background-color);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background-color: var(--panel-background-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .feature-description {
+            color: var(--text-color);
+        }
+
+        .generators-section {
+            padding: 5rem 2rem;
+            background-color: var(--panel-background-color);
+        }
+
+        .generators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .generator-card {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        .generator-card:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .generator-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .generator-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .footer-links a {
+            color: var(--footer-link-color);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a[aria-label="YouTube"] {
+            color: #FF0000;
+        }
+
+        .footer-links a[aria-label="Instagram"] {
+            color: #E1306C;
+        }
+
+        .footer-links a[aria-label="Discord"] {
+            color: #7289DA;
+        }
+
+        .footer-links a:hover {
+            transform: translateY(-2px);
+            text-decoration: underline;
+        }
+
+        #developer-link {
+            font-weight: bold;
+            color: var(--developer-link-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        #developer-link:hover {
+            transform: translateY(-2px);
+            text-decoration: underline;
+        }
+
+        .donate {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: var(--donate-link-color);
+            margin-left: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .donate i {
+            margin-right: 5px;
+        }
+
+        .donate:hover {
+            color: var(--donate-link-hover-color);
+            transform: translateY(-2px);
+        }
+
+        .chat-button {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-button .unread-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+        }
+
+        #chat-container {
+            width: 400px;
+            height: 500px;
+            position: fixed;
+            bottom: 140px;
+            right: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            display: none;
+            background-color: var(--panel-background-color);
+            z-index: 1002;
+            flex-direction: column;
+        }
+
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: var(--panel-background-color);
+            word-wrap: break-word;
+            word-break: break-word;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-messages::-webkit-scrollbar-track {
+            background: var(--panel-background-color);
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-color);
+            border-radius: 10px;
+        }
+
+        #chat-messages li {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        #chat-messages li.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        #chat-messages li.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        #chat-messages .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        #chat-messages li.sent .message-header {
+            flex-direction: row-reverse;
+        }
+
+        #chat-messages .message-header img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        #chat-messages li.sent .message-header img {
+            margin-left: 5px;
+            margin-right: 0;
+        }
+
+        #chat-messages li.received .message-header img {
+            margin-right: 5px;
+        }
+
+        #chat-messages .username {
+            font-weight: bold;
+        }
+
+        #chat-messages li.sent .username {
+            margin-right: 5px;
+            margin-left: 0;
+        }
+
+        #chat-messages li.received .username {
+            margin-left: 5px;
+        }
+
+        #chat-messages .message-content {
+            padding: 10px 15px;
+            border-radius: 10px;
+            background-color: var(--received-message-bg);
+            color: var(--received-message-text-color);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        #chat-messages li.sent .message-content {
+            background-color: var(--sent-message-bg);
+            color: var(--sent-message-text-color);
+        }
+
+        #chat-messages li.developer .message-content {
+            background-color: var(--developer-message-bg);
+            color: var(--developer-message-text-color);
+        }
+
+        #chat-messages li.developer .username {
+            color: var(--developer-link-color);
+        }
+
+        #chat-messages .message-time {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        #chat-messages li.sent .message-time {
+            align-self: flex-end;
+        }
+
+        #chat-messages li.received .message-time {
+            align-self: flex-start;
+        }
+
+        #chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: var(--panel-background-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        #chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-right: 10px;
+            background-color: var(--panel-background-color);
+            color: var(--text-color);
+        }
+
+        #chat-input button {
+            padding: 10px 20px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #chat-input button:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-2px);
+        }
+
+        #login-modal, #username-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-background-color);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #login-modal-content, #username-modal-content {
+            background-color: var(--modal-content-background);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #login-modal-content h3, #username-modal-content h3 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .login-method-button, #setUsernameBtn {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .login-method-button:hover, #setUsernameBtn:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-2px);
+        }
+
+        .close-modal {
+            margin-top: 20px;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 14px;
+            text-decoration: underline;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--primary-color);
+        }
+
+        #username-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--panel-background-color);
+            color: var(--text-color);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+            }
+
+            .features-grid,
+            .generators-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #chat-container {
+                width: 100%;
+                height: 100%;
+                right: 0;
+                bottom: 0;
+                border-radius: 0;
+            }
+
+            .header-right {
+                flex-wrap: wrap;
+            }
+
+            .home-button, .dropdown-button, .button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body data-theme="dark">
-    <!-- Header Section -->
     <header>
         <h1><i class="fas fa-cogs"></i> <span id="headerTitle">Minecraft Datapack Generator</span></h1>
         <div class="header-right">
-            <!-- Home Button -->
             <a href="https://nosmc.github.io" class="home-button" aria-label="Home">
                 <i class="fas fa-home"></i> <span id="home">Home</span>
             </a>
-            <!-- Generators Dropdown -->
             <div class="dropdown">
                 <button class="dropdown-button" aria-label="Generators"><i class="fas fa-caret-down"></i> <span id="generators">Generators</span></button>
                 <div class="dropdown-content">
@@ -25,31 +708,70 @@
                     <a href="#" data-generator="entity"><span id="generatorEntity">Entity</span></a>
                 </div>
             </div>
-            <!-- Language Switcher -->
             <button class="language-button" id="language-switcher" aria-label="Switch Language">
                 <i class="fas fa-language"></i>
             </button>
-            <!-- Theme Switcher -->
             <div id="theme-switcher" aria-label="Switch Theme"><i class="fas fa-adjust"></i></div>
-            <!-- Login Button -->
             <div id="login-btn" aria-label="Login"><i class="fas fa-user"></i></div>
         </div>
     </header>
 
-    <!-- Main Content Section -->
     <main>
+        <section class="hero-section">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title" id="heroTitle">Welcome to Minecraft Datapack Generator</h1>
+                <p class="hero-description" id="heroDescription">Create custom datapacks for Minecraft with ease. No coding knowledge required!</p>
+                <a href="#generators" class="cta-button" id="getStartedBtn">Get Started</a>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-magic"></i></div>
+                    <h3 class="feature-title" id="feature1Title">Easy to Use</h3>
+                    <p class="feature-description" id="feature1Description">Intuitive interface for creating datapacks without coding knowledge</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-cogs"></i></div>
+                    <h3 class="feature-title" id="feature2Title">Customizable</h3>
+                    <p class="feature-description" id="feature2Description">Tailor your datapacks to fit your specific needs</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-download"></i></div>
+                    <h3 class="feature-title" id="feature3Title">Export</h3>
+                    <p class="feature-description" id="feature3Description">Download your datapacks and use them in Minecraft</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="generators" class="generators-section">
+            <h2 class="section-title" id="generatorsTitle">Available Generators</h2>
+            <div class="generators-grid">
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-font"></i></div>
+                    <h3 class="generator-title" id="textGeneratorTitle">Text Generator</h3>
+                </div>
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-cube"></i></div>
+                    <h3 class="generator-title" id="itemGeneratorTitle">Item Generator</h3>
+                </div>
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-dragon"></i></div>
+                    <h3 class="generator-title" id="entityGeneratorTitle">Entity Generator</h3>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- Footer Section -->
     <footer>
         <div class="footer-links">
-            <!-- Social Media Links -->
             <a href="https://www.youtube.com/@n_os_" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i> <span id="youtube">YouTube</span></a>
             <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i> <span id="instagram">Instagram</span></a>
             <a href="https://discord.gg/Pah6vw36Tw" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> <span id="discord">Discord</span></a>
         </div>
         <p>
-            <!-- Developer Link and Donation -->
             <a id="developer-link" href="https://github.com/nosmc" target="_blank">&copy; <span id="developedBy">Developed by nos</span></a>
             <a href="https://donation-link.com" target="_blank" class="donate"><i class="fas fa-heart"></i> <span id="donate">Donate</span></a>
         </p>
@@ -57,15 +779,17 @@
 
     <!-- Chat Container -->
     <div id="chat-container">
+        <h2><i class="fas fa-comments"></i> <span id="chatTitle">Chat</span></h2>
         <ul id="chat-messages"></ul>
         <div id="chat-input">
-            <input type="text" id="message-input" placeholder="Type a message...">
+            <input type="text" id="message-input" placeholder="Type a message..." aria-label="Message Input">
             <button id="send-button"><span id="sendButtonText">Send</span></button>
         </div>
     </div>
-    <button class="chat-button">
+
+    <button class="chat-button" aria-label="Open Chat">
         <i class="fas fa-comments"></i>
-        <div class="unread-dot"></div>
+        <span class="unread-dot"></span>
     </button>
 
     <!-- Login Modal -->
@@ -89,7 +813,7 @@
         <div id="username-modal-content">
             <h3 id="setUsernameTitle">Set Your Username</h3>
             <input type="text" id="username-input" placeholder="Enter your username">
-            <p id="username-error" style="color: red; display: none;"></p>
+            <!-- The error message will be inserted here -->
             <button id="setUsernameBtn">Set Username</button>
             <div class="close-modal" id="close-username-modal">
                 <span id="cancelSetUsername">Cancel</span>
@@ -97,7 +821,633 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script type="module" src="scripts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
+            authDomain: "minecraft-generators.firebaseapp.com",
+            databaseURL: "https://minecraft-generators-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "minecraft-generators",
+            storageBucket: "minecraft-generators.appspot.com",
+            messagingSenderId: "191346462383",
+            appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
+            measurementId: "G-QJT1XPTPDZ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Global variables
+        let currentUser = null;
+        let username = null;
+        let messagesRef = null;
+        const developerUsername = "nos";
+        let currentLanguage = 'en';
+        let isSettingUsername = false;
+        let hasSetUsername = false;
+        let isChatOpen = false;
+        let unreadMessages = 0;
+
+        // DOM elements
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const messagesList = document.getElementById('chat-messages');
+        const chatContainer = document.getElementById('chat-container');
+        const chatButton = document.querySelector('.chat-button');
+        const loginButton = document.getElementById('login-btn');
+        const loginModal = document.getElementById('login-modal');
+        const closeLoginModal = document.getElementById('close-login-modal');
+        const googleLoginBtn = document.getElementById('login-google');
+        const githubLoginBtn = document.getElementById('login-github');
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const body = document.body;
+        const languageSwitcher = document.getElementById('language-switcher');
+        const usernameModal = document.getElementById('username-modal');
+        const usernameInput = document.getElementById('username-input');
+        const setUsernameBtn = document.getElementById('setUsernameBtn');
+        const closeUsernameModal = document.getElementById('close-username-modal');
+
+        // Auth Providers
+        const githubProvider = new GithubAuthProvider();
+        const googleProvider = new GoogleAuthProvider();
+
+        // Event Listeners
+        chatButton.addEventListener('click', toggleChat);
+        loginButton.addEventListener('click', handleLoginButtonClick);
+        closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+        googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+        githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', handleMessageInputKeypress);
+        themeSwitcher.addEventListener('click', toggleTheme);
+        languageSwitcher.addEventListener('click', toggleLanguage);
+        setUsernameBtn.addEventListener('click', handleSetUsername);
+        closeUsernameModal.addEventListener('click', () => {
+            usernameModal.style.display = 'none';
+            signOut(auth);
+        });
+
+        // Dropdown Menu Redirection
+        document.querySelectorAll('.dropdown-content a').forEach(link => {
+            link.addEventListener('click', handleGeneratorRedirect);
+        });
+
+        // Initialize the page
+        window.addEventListener('DOMContentLoaded', initializePage);
+
+        // Firebase Auth State Change
+        auth.onAuthStateChanged(handleAuthStateChange);
+
+        // Functions
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+            if (isChatOpen) {
+                scrollChatToBottom();
+                clearUnreadIndicator();
+            }
+        }
+
+        function handleLoginButtonClick() {
+            if (currentUser) {
+                signOut(auth).then(() => {
+                    currentUser = null;
+                    username = null;
+                    hasSetUsername = false;
+                    removeMessagesListener();
+                }).catch(error => {
+                    console.error("Error signing out:", error);
+                });
+            } else {
+                loginModal.style.display = 'flex';
+            }
+        }
+
+        function signInWithProvider(provider) {
+            signInWithPopup(auth, provider).then(result => {
+                currentUser = result.user;
+                loginModal.style.display = 'none';
+                checkUsername();
+            }).catch(error => {
+                console.error(`Error during ${provider.providerId} login:`, error);
+            });
+        }
+
+        function handleAuthStateChange(user) {
+            if (user) {
+                currentUser = user;
+                loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+                loginButton.setAttribute('aria-label', 'Logout');
+                if (!hasSetUsername) {
+                    checkUsername();
+                }
+            } else {
+                loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+                loginButton.setAttribute('aria-label', 'Login');
+                currentUser = null;
+                username = null;
+                hasSetUsername = false;
+                removeMessagesListener();
+            }
+        }
+
+        function checkUsername() {
+            if (isSettingUsername || hasSetUsername) return;
+            
+            isSettingUsername = true;
+            const userRef = ref(database, `users/${currentUser.uid}`);
+            get(userRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    username = snapshot.val().username;
+                    hasSetUsername = true;
+                    loadMessages();
+                } else {
+                    showUsernameModal();
+                }
+            }).catch(error => {
+                console.error("Error checking username:", error);
+                showUsernameModal();
+            }).finally(() => {
+                isSettingUsername = false;
+            });
+        }
+
+        function showUsernameModal() {
+            usernameModal.style.display = 'flex';
+            usernameInput.focus();
+        }
+
+        function handleSetUsername() {
+            const newUsername = usernameInput.value.trim();
+            if (newUsername) {
+                saveUsername(newUsername);
+            } else {
+                alert(translations[currentLanguage].usernameEmpty);
+            }
+        }
+
+        function saveUsername(newUsername) {
+            const usernamesRef = ref(database, 'users');
+            const usernameQuery = query(usernamesRef, orderByChild('username'), equalTo(newUsername));
+
+            get(usernameQuery).then(snapshot => {
+                if (snapshot.exists()) {
+                    showUsernameError(translations.usernameExists[currentLanguage]);
+                    usernameInput.value = '';
+                    usernameInput.focus();
+                } else {
+                    set(ref(database, `users/${currentUser.uid}`), {
+                        username: newUsername
+                    }).then(() => {
+                        username = newUsername;
+                        hasSetUsername = true;
+                        usernameModal.style.display = 'none';
+                        loadMessages();
+                    }).catch(error => {
+                        console.error("Error saving username:", error);
+                        showUsernameError(translations.errorSavingUsername[currentLanguage]);
+                    });
+                }
+            }).catch(error => {
+                console.error("Error checking username uniqueness:", error);
+                showUsernameError(translations.errorCheckingUsername[currentLanguage]);
+            });
+        }
+
+        function showUsernameError(message) {
+            const errorElement = document.getElementById('username-error');
+            if (!errorElement) {
+                const newErrorElement = document.createElement('p');
+                newErrorElement.id = 'username-error';
+                newErrorElement.style.color = 'red';
+                newErrorElement.style.marginTop = '10px';
+                document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+            }
+            document.getElementById('username-error').textContent = message;
+        }
+
+        function loadMessages() {
+            if (messagesRef) {
+                return;
+            }
+            messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+            
+            const loadTimestamp = new Date().getTime();
+            
+            onChildAdded(messagesRef, (snapshot) => {
+                const message = snapshot.val();
+                displayMessage(message);
+                
+                if (new Date(message.timestamp).getTime() > loadTimestamp) {
+                    handleNewMessage(message);
+                }
+            });
+        }
+
+        function handleNewMessage(message) {
+            if (!isChatOpen) {
+                showUnreadIndicator();
+            }
+            if (isChatOpen && isScrolledToBottom()) {
+                scrollChatToBottom();
+            }
+        }
+
+        function isScrolledToBottom() {
+            return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+        }
+
+        function removeMessagesListener() {
+            if (messagesRef) {
+                messagesRef = null;
+            }
+            messagesList.innerHTML = '';
+        }
+
+        function convertToLocalTime(isoTimestamp) {
+            const date = new Date(isoTimestamp);
+            return date.toLocaleString();
+        }
+
+        function displayMessage(message) {
+            const li = document.createElement('li');
+            li.className = message.sender === username ? 'sent' : 'received';
+
+            if (message.sender === developerUsername) {
+                li.classList.add('developer');
+            }
+
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+
+            const img = document.createElement('img');
+            img.src = message.avatar || 'default-avatar.png';
+            img.alt = message.sender;
+
+            const usernameSpan = document.createElement('span');
+            usernameSpan.className = 'username';
+            usernameSpan.textContent = message.sender;
+
+            messageHeader.appendChild(img);
+            messageHeader.appendChild(usernameSpan);
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = message.content;
+
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = convertToLocalTime(message.timestamp);
+
+            li.appendChild(messageHeader);
+            li.appendChild(messageContent);
+            li.appendChild(messageTime);
+
+            messagesList.appendChild(li);
+            scrollChatToBottom();
+        }
+
+        function sendMessage() {
+            if (username && messageInput.value.trim()) {
+                const timestamp = new Date().toISOString();
+
+                push(ref(database, 'messages'), {
+                    sender: username,
+                    avatar: currentUser?.photoURL || "default-avatar.png",
+                    content: messageInput.value,
+                    timestamp: timestamp
+                }).then(() => {
+                    messageInput.value = '';
+                    messageInput.focus();
+                }).catch(error => {
+                    console.error("Error sending message:", error);
+                });
+            }
+        }
+
+        function handleMessageInputKeypress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+                e.preventDefault();
+            }
+        }
+
+        function toggleTheme() {
+            if (body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+            }
+            savePreferences();
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+            translatePage();
+            savePreferences();
+        }
+
+        function savePreferences() {
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+            localStorage.setItem('language', currentLanguage);
+        }
+
+        function loadPreferences() {
+            const savedTheme = localStorage.getItem('theme');
+            const savedLanguage = localStorage.getItem('language');
+
+            if (savedTheme) {
+                body.setAttribute('data-theme', savedTheme);
+            }
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+                translatePage();
+            }
+        }
+
+        function translatePage() {
+            Object.keys(translations).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = translations[key][currentLanguage];
+                }
+            });
+            document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+            document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+            
+            // Update the error message if it exists
+            const errorElement = document.getElementById('username-error');
+            if (errorElement && errorElement.textContent) {
+                errorElement.textContent = translations.usernameExists[currentLanguage];
+            }
+        }
+
+        function handleGeneratorRedirect(e) {
+            e.preventDefault();
+            const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
+            if (generator) {
+                let targetUrl;
+                switch (generator) {
+                    case 'text':
+                        targetUrl = 'https://nosmc.github.io/generator/text';
+                        break;
+                    case 'item':
+                        targetUrl = 'https://nosmc.github.io/generator/item';
+                        break;
+                    case 'entity':
+                        targetUrl = 'https://nosmc.github.io/generator/entity';
+                        break;
+                    default:
+                        console.error('Unknown generator type:', generator);
+                        return;
+                }
+
+                function linkExists(url, callback) {
+                    fetch(url, { method: 'HEAD' })
+                        .then(response => callback(response.ok))
+                        .catch(() => callback(false));
+                }
+
+                linkExists(targetUrl, function(exists) {
+                    if (exists) {
+                        window.location.href = targetUrl;
+                    } else {
+                        window.location.href = 'https://nosmc.github.io/';
+                    }
+                });
+            }
+        }
+
+        function initializePage() {
+            loadPreferences();
+            translatePage();
+        }
+
+        function showUnreadIndicator() {
+            unreadMessages++;
+            document.querySelector('.chat-button .unread-dot').style.display = 'block';
+        }
+
+        function clearUnreadIndicator() {
+            unreadMessages = 0;
+            document.querySelector('.chat-button .unread-dot').style.display = 'none';
+        }
+
+        window.addEventListener('focus', () => {
+            if (isChatOpen) {
+                clearUnreadIndicator();
+            }
+        });
+
+        function scrollChatToBottom() {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        const translations = {
+            headerTitle: {
+                en: "Minecraft Datapack Generator",
+                zh: "Minecraft 資料包生成器"
+            },
+            home: {
+                en: "Home",
+                zh: "主頁"
+            },
+            generators: {
+                en: "Generators",
+                zh: "生成器"
+            },
+            generatorText: {
+                en: "Text",
+                zh: "文字"
+            },
+            generatorItem: {
+                en: "Item",
+                zh: "物品"
+            },
+            generatorEntity: {
+                en: "Entity",
+                zh: "實體"
+            },
+            heroTitle: {
+                en: "Welcome to Minecraft Datapack Generator",
+                zh: "歡迎使用 Minecraft 資料包生成器"
+            },
+            heroDescription: {
+                en: "Create custom datapacks for Minecraft with ease. No coding knowledge required!",
+                zh: "輕鬆創建自定義 Minecraft 資料包。無需編碼知識！"
+            },
+            getStartedBtn: {
+                en: "Get Started",
+                zh: "開始使用"
+            },
+            feature1Title: {
+                en: "Easy to Use",
+                zh: "易於使用"
+            },
+            feature1Description: {
+                en: "Intuitive interface for creating datapacks without coding knowledge",
+                zh: "直觀的界面，無需編碼知識即可創建資料包"
+            },
+            feature2Title: {
+                en: "Customizable",
+                zh: "可定制"
+            },
+            feature2Description: {
+                en: "Tailor your datapacks to fit your specific needs",
+                zh: "根據您的具體需求定制資料包"
+            },
+            feature3Title: {
+                en: "Export",
+                zh: "導出"
+            },
+            feature3Description: {
+                en: "Download your datapacks and use them in Minecraft",
+                zh: "下載您的資料包並在 Minecraft 中使用"
+            },
+            generatorsTitle: {
+                en: "Available Generators",
+                zh: "可用生成器"
+            },
+            textGeneratorTitle: {
+                en: "Text Generator",
+                zh: "文本生成器"
+            },
+            itemGeneratorTitle: {
+                en: "Item Generator",
+                zh: "物品生成器"
+            },
+            entityGeneratorTitle: {
+                en: "Entity Generator",
+                zh: "實體生成器"
+            },
+            chatTitle: {
+                en: "Chat",
+                zh: "聊天"
+            },
+            sendButtonText: {
+                en: "Send",
+                zh: "發送"
+            },
+            typeAMessage: {
+                en: "Type a message...",
+                zh: "輸入消息..."
+            },
+            chooseLoginMethod: {
+                en: "Choose a Login Method",
+                zh: "選擇登錄方式"
+            },
+            loginWithGoogle: {
+                en: "Login with Google",
+                zh: "使用 Google 登錄"
+            },
+            loginWithGithub: {
+                en: "Login with GitHub",
+                zh: "使用 GitHub 登錄"
+            },
+            cancelLogin: {
+                en: "Cancel",
+                zh: "取消"
+            },
+            youtube: {
+                en: "YouTube",
+                zh: "YouTube"
+            },
+            instagram: {
+                en: "Instagram",
+                zh: "Instagram"
+            },
+            discord: {
+                en: "Discord",
+                zh: "Discord"
+            },
+            developedBy: {
+                en: "Developed by nos",
+                zh: "由 nos 開發"
+            },
+            donate: {
+                en: "Donate",
+                zh: "捐贈"
+            },
+            setUsernameTitle: {
+                en: "Set Your Username",
+                zh: "設置您的用戶名"
+            },
+            enterUsername: {
+                en: "Enter your username",
+                zh: "輸入您的用戶名"
+            },
+            setUsernameBtn: {
+                en: "Set Username",
+                zh: "設置用戶名"
+            },
+            cancelSetUsername: {
+                en: "Cancel",
+                zh: "取消"
+            },
+            usernameEmpty: {
+                en: "Username cannot be empty",
+                zh: "用戶名不能為空"
+            },
+            usernameExists: {
+                en: "Username already exists. Please choose another one.",
+                zh: "用戶名已存在。請選擇另一個。"
+            },
+            errorSavingUsername: {
+                en: "Error saving username. Please try again.",
+                zh: "保存用戶名時出錯。請重試。"
+            },
+            errorCheckingUsername: {
+                en: "Error checking username. Please try again.",
+                zh: "檢查用戶名時出錯。請重試。"
+            }
+        };
+
+        // Replace the existing code for generator card click events with this:
+        document.querySelectorAll('.generator-card').forEach(card => {
+            card.addEventListener('click', () => {
+                let targetUrl;
+                const generatorTitle = card.querySelector('.generator-title').id;
+                
+                switch (generatorTitle) {
+                    case 'textGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/text';
+                        break;
+                    case 'itemGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/item';
+                        break;
+                    case 'entityGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/entity';
+                        break;
+                    default:
+                        targetUrl = 'https://nosmc.github.io/';
+                }
+
+                // Function to check if the link exists
+                function linkExists(url, callback) {
+                    fetch(url, { method: 'HEAD' })
+                        .then(response => callback(response.ok))
+                        .catch(() => callback(false));
+                }
+
+                // Check if the target URL exists
+                linkExists(targetUrl, function(exists) {
+                    if (exists) {
+                        window.location.href = targetUrl;
+                    } else {
+                        window.location.href = 'https://nosmc.github.io/';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

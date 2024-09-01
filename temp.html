@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Datapack Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="./common/styles.css">
+    <style>
+        main {
+            padding-top: 60px;
+            padding-bottom: 50px;
+        }
+
+        .hero-section {
+            background-image: url('https://i.imgur.com/9fjG7UA.jpeg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .features-section {
+            padding: 5rem 2rem;
+            background-color: var(--background-color);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background-color: var(--panel-background-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .feature-description {
+            color: var(--text-color);
+        }
+
+        .generators-section {
+            padding: 5rem 2rem;
+            background-color: var(--panel-background-color);
+        }
+
+        .generators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .generator-card {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        .generator-card:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .generator-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .generator-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- Header Section -->
+    <header>
+        <h1><i class="fas fa-cogs"></i> <span id="headerTitle">Minecraft Datapack Generator</span></h1>
+        <div class="header-right">
+            <!-- Home Button -->
+            <a href="https://nosmc.github.io" class="home-button" aria-label="Home">
+                <i class="fas fa-home"></i> <span id="home">Home</span>
+            </a>
+            <!-- Generators Dropdown -->
+            <div class="dropdown">
+                <button class="dropdown-button" aria-label="Generators"><i class="fas fa-caret-down"></i> <span id="generators">Generators</span></button>
+                <div class="dropdown-content">
+                    <a href="#" data-generator="text"><span id="generatorText">Text</span></a>
+                    <a href="#" data-generator="item"><span id="generatorItem">Item</span></a>
+                    <a href="#" data-generator="entity"><span id="generatorEntity">Entity</span></a>
+                </div>
+            </div>
+            <!-- Language Switcher -->
+            <button class="language-button" id="language-switcher" aria-label="Switch Language">
+                <i class="fas fa-language"></i>
+            </button>
+            <!-- Theme Switcher -->
+            <div id="theme-switcher" aria-label="Switch Theme"><i class="fas fa-adjust"></i></div>
+            <!-- Login Button -->
+            <div id="login-btn" aria-label="Login"><i class="fas fa-user"></i></div>
+        </div>
+    </header>
+
+    <!-- Main Content Section -->
+    <main>
+        <section class="hero-section">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title" id="heroTitle">Welcome to Minecraft Datapack Generator</h1>
+                <p class="hero-description" id="heroDescription">Create custom datapacks for Minecraft with ease. No coding knowledge required!</p>
+                <a href="#generators" class="cta-button" id="getStartedBtn">Get Started</a>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-magic"></i></div>
+                    <h3 class="feature-title" id="feature1Title">Easy to Use</h3>
+                    <p class="feature-description" id="feature1Description">Intuitive interface for creating datapacks without coding knowledge</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-cogs"></i></div>
+                    <h3 class="feature-title" id="feature2Title">Customizable</h3>
+                    <p class="feature-description" id="feature2Description">Tailor your datapacks to fit your specific needs</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-download"></i></div>
+                    <h3 class="feature-title" id="feature3Title">Export</h3>
+                    <p class="feature-description" id="feature3Description">Download your datapacks and use them in Minecraft</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="generators" class="generators-section">
+            <h2 class="section-title" id="generatorsTitle">Available Generators</h2>
+            <div class="generators-grid">
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-font"></i></div>
+                    <h3 class="generator-title" id="textGeneratorTitle">Text Generator</h3>
+                </div>
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-cube"></i></div>
+                    <h3 class="generator-title" id="itemGeneratorTitle">Item Generator</h3>
+                </div>
+                <div class="generator-card">
+                    <div class="generator-icon"><i class="fas fa-dragon"></i></div>
+                    <h3 class="generator-title" id="entityGeneratorTitle">Entity Generator</h3>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-links">
+            <!-- Social Media Links -->
+            <a href="https://www.youtube.com/@n_os_" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i> <span id="youtube">YouTube</span></a>
+            <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i> <span id="instagram">Instagram</span></a>
+            <a href="https://discord.gg/Pah6vw36Tw" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> <span id="discord">Discord</span></a>
+        </div>
+        <p>
+            <!-- Developer Link and Donation -->
+            <a id="developer-link" href="https://github.com/nosmc" target="_blank">&copy; <span id="developedBy">Developed by nos</span></a>
+            <a href="https://donation-link.com" target="_blank" class="donate"><i class="fas fa-heart"></i> <span id="donate">Donate</span></a>
+        </p>
+    </footer>
+
+    <!-- Chat Container -->
+    <div id="chat-container">
+        <ul id="chat-messages"></ul>
+        <div id="chat-input">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button id="send-button"><span id="sendButtonText">Send</span></button>
+        </div>
+    </div>
+    <button class="chat-button">
+        <i class="fas fa-comments"></i>
+        <div class="unread-dot"></div>
+    </button>
+
+    <!-- Login Modal -->
+    <div id="login-modal">
+        <div id="login-modal-content">
+            <h3 id="chooseLoginMethod">Choose a Login Method</h3>
+            <button id="login-google" class="login-method-button">
+                <span id="loginWithGoogle">Login with Google</span>
+            </button>
+            <button id="login-github" class="login-method-button">
+                <span id="loginWithGithub">Login with GitHub</span>
+            </button>
+            <div class="close-modal" id="close-login-modal">
+                <span id="cancelLogin">Cancel</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Username Modal -->
+    <div id="username-modal">
+        <div id="username-modal-content">
+            <h3 id="setUsernameTitle">Set Your Username</h3>
+            <input type="text" id="username-input" placeholder="Enter your username">
+            <p id="username-error" style="color: red; display: none;"></p>
+            <button id="setUsernameBtn">Set Username</button>
+            <div class="close-modal" id="close-username-modal">
+                <span id="cancelSetUsername">Cancel</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="./common/scripts.js">
+        // Replace the existing code for generator card click events with this:
+        document.querySelectorAll('.generator-card').forEach(card => {
+            card.addEventListener('click', () => {
+                let targetUrl;
+                const generatorTitle = card.querySelector('.generator-title').id;
+                
+                switch (generatorTitle) {
+                    case 'textGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/text';
+                        break;
+                    case 'itemGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/item';
+                        break;
+                    case 'entityGeneratorTitle':
+                        targetUrl = 'https://nosmc.github.io/generator/entity';
+                        break;
+                    default:
+                        targetUrl = 'https://nosmc.github.io/';
+                }
+
+                // Function to check if the link exists
+                function linkExists(url, callback) {
+                    fetch(url, { method: 'HEAD' })
+                        .then(response => callback(response.ok))
+                        .catch(() => callback(false));
+                }
+
+                // Check if the target URL exists
+                linkExists(targetUrl, function(exists) {
+                    if (exists) {
+                        window.location.href = targetUrl;
+                    } else {
+                        window.location.href = 'https://nosmc.github.io/';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

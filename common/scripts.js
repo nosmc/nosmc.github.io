@@ -82,6 +82,8 @@ window.addEventListener('DOMContentLoaded', initializePage);
 auth.onAuthStateChanged(handleAuthStateChange);
 
 // Functions
+
+// Toggle chat visibility
 function toggleChat() {
     isChatOpen = !isChatOpen;
     chatContainer.style.display = isChatOpen ? 'flex' : 'none';
@@ -91,6 +93,7 @@ function toggleChat() {
     }
 }
 
+// Handle login button click
 function handleLoginButtonClick() {
     if (currentUser) {
         signOut(auth).then(() => {
@@ -106,6 +109,7 @@ function handleLoginButtonClick() {
     }
 }
 
+// Sign in with a provider (Google or GitHub)
 function signInWithProvider(provider) {
     signInWithPopup(auth, provider).then(result => {
         currentUser = result.user;
@@ -116,6 +120,7 @@ function signInWithProvider(provider) {
     });
 }
 
+// Handle authentication state change
 function handleAuthStateChange(user) {
     if (user) {
         currentUser = user;
@@ -134,6 +139,7 @@ function handleAuthStateChange(user) {
     }
 }
 
+// Check if the user has a username set
 function checkUsername() {
     if (isSettingUsername || hasSetUsername) return;
     
@@ -155,11 +161,13 @@ function checkUsername() {
     });
 }
 
+// Show the username modal
 function showUsernameModal() {
     usernameModal.style.display = 'flex';
     usernameInput.focus();
 }
 
+// Handle setting a new username
 function handleSetUsername() {
     const newUsername = usernameInput.value.trim();
     if (newUsername) {
@@ -169,6 +177,7 @@ function handleSetUsername() {
     }
 }
 
+// Save the new username to the database
 function saveUsername(newUsername) {
     const usernamesRef = ref(database, 'users');
     const usernameQuery = query(usernamesRef, orderByChild('username'), equalTo(newUsername));
@@ -197,12 +206,20 @@ function saveUsername(newUsername) {
     });
 }
 
+// Show an error message for the username
 function showUsernameError(message) {
     const errorElement = document.getElementById('username-error');
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
+    if (!errorElement) {
+        const newErrorElement = document.createElement('p');
+        newErrorElement.id = 'username-error';
+        newErrorElement.style.color = 'red';
+        newErrorElement.style.marginTop = '10px';
+        document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+    }
+    document.getElementById('username-error').textContent = message;
 }
 
+// Load chat messages from the database
 function loadMessages() {
     if (messagesRef) {
         return;
@@ -221,6 +238,7 @@ function loadMessages() {
     });
 }
 
+// Handle a new chat message
 function handleNewMessage(message) {
     if (!isChatOpen) {
         showUnreadIndicator();
@@ -231,10 +249,12 @@ function handleNewMessage(message) {
     }
 }
 
+// Check if the chat is scrolled to the bottom
 function isScrolledToBottom() {
     return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
 }
 
+// Remove the messages listener
 function removeMessagesListener() {
     if (messagesRef) {
         messagesRef = null;
@@ -242,11 +262,13 @@ function removeMessagesListener() {
     messagesList.innerHTML = '';
 }
 
+// Convert ISO timestamp to local time
 function convertToLocalTime(isoTimestamp) {
     const date = new Date(isoTimestamp);
     return date.toLocaleString();
 }
 
+// Display a chat message
 function displayMessage(message) {
     const li = document.createElement('li');
     li.className = message.sender === username ? 'sent' : 'received';
@@ -285,6 +307,7 @@ function displayMessage(message) {
     scrollChatToBottom();
 }
 
+// Send a chat message
 function sendMessage() {
     if (username && messageInput.value.trim()) {
         const timestamp = new Date().toISOString();
@@ -304,6 +327,7 @@ function sendMessage() {
     }
 }
 
+// Handle keypress event in the message input
 function handleMessageInputKeypress(e) {
     if (e.key === 'Enter') {
         sendMessage();
@@ -311,6 +335,7 @@ function handleMessageInputKeypress(e) {
     }
 }
 
+// Toggle the theme between light and dark
 function toggleTheme() {
     if (body.getAttribute('data-theme') === 'light') {
         body.setAttribute('data-theme', 'dark');
@@ -320,17 +345,20 @@ function toggleTheme() {
     savePreferences();
 }
 
+// Toggle the language between English and Chinese
 function toggleLanguage() {
     currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
     translatePage();
     savePreferences();
 }
 
+// Save user preferences to localStorage
 function savePreferences() {
     localStorage.setItem('theme', body.getAttribute('data-theme'));
     localStorage.setItem('language', currentLanguage);
 }
 
+// Load user preferences from localStorage
 function loadPreferences() {
     const savedTheme = localStorage.getItem('theme');
     const savedLanguage = localStorage.getItem('language');
@@ -344,6 +372,7 @@ function loadPreferences() {
     }
 }
 
+// Translate the page content based on the current language
 function translatePage() {
     Object.keys(translations).forEach(key => {
         const element = document.getElementById(key);
@@ -353,8 +382,15 @@ function translatePage() {
     });
     document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
     document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+
+    // Update the error message if it exists
+    const errorElement = document.getElementById('username-error');
+    if (errorElement && errorElement.textContent) {
+        errorElement.textContent = translations.usernameExists[currentLanguage];
+    }
 }
 
+// Handle generator redirection
 function handleGeneratorRedirect(e) {
     e.preventDefault();
     const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
@@ -391,31 +427,30 @@ function handleGeneratorRedirect(e) {
     }
 }
 
+// Initialize the page
 function initializePage() {
     loadPreferences();
     translatePage();
 }
 
+// Show unread message indicator
 function showUnreadIndicator() {
     unreadMessages++;
     document.querySelector('.chat-button .unread-dot').style.display = 'block';
 }
 
+// Clear unread message indicator
 function clearUnreadIndicator() {
     unreadMessages = 0;
     document.querySelector('.chat-button .unread-dot').style.display = 'none';
 }
 
-window.addEventListener('focus', () => {
-    if (isChatOpen) {
-        clearUnreadIndicator();
-    }
-});
-
+// Scroll chat to the bottom
 function scrollChatToBottom() {
     messagesList.scrollTop = messagesList.scrollHeight;
 }
 
+// Translations for different languages
 const translations = {
     headerTitle: {
         en: "Minecraft Datapack Generator",
