@@ -358,6 +358,10 @@ header h1, footer p {
     margin-left: 0;
 }
 
+#chat-messages li.received .username {
+    margin-left: 5px;
+}
+
 #chat-messages .message-header {
     display: flex;
     align-items: center;
