@@ -33,49 +33,39 @@ let isChatOpen = false;
 
 // Function to initialize DOM-dependent code
 function initializeDOMElements() {
-    // DOM elements
+    // Event delegation for dynamic elements
+    document.body.addEventListener('click', function(event) {
+        if (event.target.matches('.chat-button')) {
+            toggleChat();
+        } else if (event.target.matches('#login-btn')) {
+            handleLoginButtonClick();
+        } else if (event.target.matches('#close-login-modal')) {
+            document.getElementById('login-modal').style.display = 'none';
+        } else if (event.target.matches('#login-google')) {
+            signInWithProvider(new GoogleAuthProvider());
+        } else if (event.target.matches('#login-github')) {
+            signInWithProvider(new GithubAuthProvider());
+        } else if (event.target.matches('#send-button')) {
+            sendMessage();
+        } else if (event.target.matches('#theme-switcher')) {
+            toggleTheme();
+        } else if (event.target.matches('#language-switcher')) {
+            toggleLanguage();
+        } else if (event.target.matches('#setUsernameBtn')) {
+            handleSetUsername();
+        } else if (event.target.matches('#close-username-modal')) {
+            document.getElementById('username-modal').style.display = 'none';
+            signOut(auth);
+        } else if (event.target.closest('.dropdown-content a')) {
+            handleGeneratorRedirect(event);
+        }
+    });
+
+    // Non-click event listeners
     const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const messagesList = document.getElementById('chat-messages');
-    const chatContainer = document.getElementById('chat-container');
-    const chatButton = document.querySelector('.chat-button');
-    const loginButton = document.getElementById('login-btn');
-    const loginModal = document.getElementById('login-modal');
-    const closeLoginModal = document.getElementById('close-login-modal');
-    const googleLoginBtn = document.getElementById('login-google');
-    const githubLoginBtn = document.getElementById('login-github');
-    const themeSwitcher = document.getElementById('theme-switcher');
-    const body = document.body;
-    const languageSwitcher = document.getElementById('language-switcher');
-    const usernameModal = document.getElementById('username-modal');
-    const usernameInput = document.getElementById('username-input');
-    const setUsernameBtn = document.getElementById('setUsernameBtn');
-    const closeUsernameModal = document.getElementById('close-username-modal');
-
-    // Auth Providers
-    const githubProvider = new GithubAuthProvider();
-    const googleProvider = new GoogleAuthProvider();
-
-    // Event Listeners
-    if (chatButton) chatButton.addEventListener('click', toggleChat);
-    if (loginButton) loginButton.addEventListener('click', handleLoginButtonClick);
-    if (closeLoginModal) closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-    if (googleLoginBtn) googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-    if (githubLoginBtn) githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-    if (sendButton) sendButton.addEventListener('click', sendMessage);
-    if (messageInput) messageInput.addEventListener('keypress', handleMessageInputKeypress);
-    if (themeSwitcher) themeSwitcher.addEventListener('click', toggleTheme);
-    if (languageSwitcher) languageSwitcher.addEventListener('click', toggleLanguage);
-    if (setUsernameBtn) setUsernameBtn.addEventListener('click', handleSetUsername);
-    if (closeUsernameModal) closeUsernameModal.addEventListener('click', () => {
-        usernameModal.style.display = 'none';
-        signOut(auth);
-    });
-
-    // Dropdown Menu Redirection
-    document.querySelectorAll('.dropdown-content a').forEach(link => {
-        link.addEventListener('click', handleGeneratorRedirect);
-    });
+    if (messageInput) {
+        messageInput.addEventListener('keypress', handleMessageInputKeypress);
+    }
 
     // Firebase Auth State Change
     auth.onAuthStateChanged(handleAuthStateChange);
@@ -89,11 +79,14 @@ document.addEventListener('DOMContentLoaded', initializeDOMElements);
 
 // Functions
 function toggleChat() {
-    isChatOpen = !isChatOpen;
-    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-    if (isChatOpen) {
-        scrollChatToBottom();
-        clearUnreadIndicator();
+    const chatContainer = document.getElementById('chat-container');
+    if (chatContainer) {
+        isChatOpen = !isChatOpen;
+        chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+        if (isChatOpen) {
+            scrollChatToBottom();
+            clearUnreadIndicator();
+        }
     }
 }
 
@@ -108,14 +101,20 @@ function handleLoginButtonClick() {
             console.error("Error signing out:", error);
         });
     } else {
-        loginModal.style.display = 'flex';
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) {
+            loginModal.style.display = 'flex';
+        }
     }
 }
 
 function signInWithProvider(provider) {
     signInWithPopup(auth, provider).then(result => {
         currentUser = result.user;
-        loginModal.style.display = 'none';
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) {
+            loginModal.style.display = 'none';
+        }
         checkUsername();
     }).catch(error => {
         console.error(`Error during ${provider.providerId} login:`, error);
@@ -125,14 +124,20 @@ function signInWithProvider(provider) {
 function handleAuthStateChange(user) {
     if (user) {
         currentUser = user;
-        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-        loginButton.setAttribute('aria-label', 'Logout');
+        const loginButton = document.getElementById('login-btn');
+        if (loginButton) {
+            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+            loginButton.setAttribute('aria-label', 'Logout');
+        }
         if (!hasSetUsername) {
             checkUsername();
         }
     } else {
-        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-        loginButton.setAttribute('aria-label', 'Login');
+        const loginButton = document.getElementById('login-btn');
+        if (loginButton) {
+            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+            loginButton.setAttribute('aria-label', 'Login');
+        }
         currentUser = null;
         username = null;
         hasSetUsername = false;
@@ -162,16 +167,25 @@ function checkUsername() {
 }
 
 function showUsernameModal() {
-    usernameModal.style.display = 'flex';
-    usernameInput.focus();
+    const usernameModal = document.getElementById('username-modal');
+    if (usernameModal) {
+        usernameModal.style.display = 'flex';
+        const usernameInput = document.getElementById('username-input');
+        if (usernameInput) {
+            usernameInput.focus();
+        }
+    }
 }
 
 function handleSetUsername() {
-    const newUsername = usernameInput.value.trim();
-    if (newUsername) {
-        saveUsername(newUsername);
-    } else {
-        showUsernameError(translations.usernameEmpty[currentLanguage]);
+    const usernameInput = document.getElementById('username-input');
+    if (usernameInput) {
+        const newUsername = usernameInput.value.trim();
+        if (newUsername) {
+            saveUsername(newUsername);
+        } else {
+            showUsernameError(translations.usernameEmpty[currentLanguage]);
+        }
     }
 }
 
@@ -182,15 +196,21 @@ function saveUsername(newUsername) {
     get(usernameQuery).then(snapshot => {
         if (snapshot.exists()) {
             showUsernameError(translations.usernameExists[currentLanguage]);
-            usernameInput.value = '';
-            usernameInput.focus();
+            const usernameInput = document.getElementById('username-input');
+            if (usernameInput) {
+                usernameInput.value = '';
+                usernameInput.focus();
+            }
         } else {
             set(ref(database, `users/${currentUser.uid}`), {
                 username: newUsername
             }).then(() => {
                 username = newUsername;
                 hasSetUsername = true;
-                usernameModal.style.display = 'none';
+                const usernameModal = document.getElementById('username-modal');
+                if (usernameModal) {
+                    usernameModal.style.display = 'none';
+                }
                 loadMessages();
             }).catch(error => {
                 console.error("Error saving username:", error);
@@ -205,8 +225,10 @@ function saveUsername(newUsername) {
 
 function showUsernameError(message) {
     const errorElement = document.getElementById('username-error');
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
 }
 
 function loadMessages() {
@@ -238,14 +260,21 @@ function handleNewMessage(message) {
 }
 
 function isScrolledToBottom() {
-    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+    const messagesList = document.getElementById('chat-messages');
+    if (messagesList) {
+        return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+    }
+    return false;
 }
 
 function removeMessagesListener() {
     if (messagesRef) {
         messagesRef = null;
     }
-    messagesList.innerHTML = '';
+    const messagesList = document.getElementById('chat-messages');
+    if (messagesList) {
+        messagesList.innerHTML = '';
+    }
 }
 
 function convertToLocalTime(isoTimestamp) {
@@ -254,45 +283,49 @@ function convertToLocalTime(isoTimestamp) {
 }
 
 function displayMessage(message) {
-    const li = document.createElement('li');
-    li.className = message.sender === username ? 'sent' : 'received';
+    const messagesList = document.getElementById('chat-messages');
+    if (messagesList) {
+        const li = document.createElement('li');
+        li.className = message.sender === username ? 'sent' : 'received';
 
-    if (message.sender === developerUsername) {
-        li.classList.add('developer');
+        if (message.sender === developerUsername) {
+            li.classList.add('developer');
+        }
+
+        const messageHeader = document.createElement('div');
+        messageHeader.className = 'message-header';
+
+        const img = document.createElement('img');
+        img.src = message.avatar || 'default-avatar.png';
+        img.alt = message.sender;
+
+        const usernameSpan = document.createElement('span');
+        usernameSpan.className = 'username';
+        usernameSpan.textContent = message.sender;
+
+        messageHeader.appendChild(img);
+        messageHeader.appendChild(usernameSpan);
+
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.textContent = message.content;
+
+        const messageTime = document.createElement('div');
+        messageTime.className = 'message-time';
+        messageTime.textContent = convertToLocalTime(message.timestamp);
+
+        li.appendChild(messageHeader);
+        li.appendChild(messageContent);
+        li.appendChild(messageTime);
+
+        messagesList.appendChild(li);
+        scrollChatToBottom();
     }
-
-    const messageHeader = document.createElement('div');
-    messageHeader.className = 'message-header';
-
-    const img = document.createElement('img');
-    img.src = message.avatar || 'default-avatar.png';
-    img.alt = message.sender;
-
-    const usernameSpan = document.createElement('span');
-    usernameSpan.className = 'username';
-    usernameSpan.textContent = message.sender;
-
-    messageHeader.appendChild(img);
-    messageHeader.appendChild(usernameSpan);
-
-    const messageContent = document.createElement('div');
-    messageContent.className = 'message-content';
-    messageContent.textContent = message.content;
-
-    const messageTime = document.createElement('div');
-    messageTime.className = 'message-time';
-    messageTime.textContent = convertToLocalTime(message.timestamp);
-
-    li.appendChild(messageHeader);
-    li.appendChild(messageContent);
-    li.appendChild(messageTime);
-
-    messagesList.appendChild(li);
-    scrollChatToBottom();
 }
 
 function sendMessage() {
-    if (username && messageInput.value.trim()) {
+    const messageInput = document.getElementById('message-input');
+    if (username && messageInput && messageInput.value.trim()) {
         const timestamp = new Date().toISOString();
 
         push(ref(database, 'messages'), {
@@ -318,12 +351,15 @@ function handleMessageInputKeypress(e) {
 }
 
 function toggleTheme() {
-    if (body.getAttribute('data-theme') === 'light') {
-        body.setAttribute('data-theme', 'dark');
-    } else {
-        body.setAttribute('data-theme', 'light');
+    const body = document.body;
+    if (body) {
+        if (body.getAttribute('data-theme') === 'light') {
+            body.setAttribute('data-theme', 'dark');
+        } else {
+            body.setAttribute('data-theme', 'light');
+        }
+        savePreferences();
     }
-    savePreferences();
 }
 
 function toggleLanguage() {
@@ -333,20 +369,26 @@ function toggleLanguage() {
 }
 
 function savePreferences() {
-    localStorage.setItem('theme', body.getAttribute('data-theme'));
-    localStorage.setItem('language', currentLanguage);
+    const body = document.body;
+    if (body) {
+        localStorage.setItem('theme', body.getAttribute('data-theme'));
+        localStorage.setItem('language', currentLanguage);
+    }
 }
 
 function loadPreferences() {
     const savedTheme = localStorage.getItem('theme');
     const savedLanguage = localStorage.getItem('language');
 
-    if (savedTheme) {
-        body.setAttribute('data-theme', savedTheme);
-    }
-    if (savedLanguage) {
-        currentLanguage = savedLanguage;
-        translatePage();
+    const body = document.body;
+    if (body) {
+        if (savedTheme) {
+            body.setAttribute('data-theme', savedTheme);
+        }
+        if (savedLanguage) {
+            currentLanguage = savedLanguage;
+            translatePage();
+        }
     }
 }
 
@@ -357,8 +399,14 @@ function translatePage() {
             element.textContent = translations[key][currentLanguage];
         }
     });
-    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
-    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+    const messageInput = document.getElementById('message-input');
+    if (messageInput) {
+        messageInput.placeholder = translations.typeAMessage[currentLanguage];
+    }
+    const usernameInput = document.getElementById('username-input');
+    if (usernameInput) {
+        usernameInput.placeholder = translations.enterUsername[currentLanguage];
+    }
 }
 
 function handleGeneratorRedirect(e) {
@@ -404,12 +452,18 @@ function initializePage() {
 
 function showUnreadIndicator() {
     unreadMessages++;
-    document.querySelector('.chat-button .unread-dot').style.display = 'block';
+    const unreadDot = document.querySelector('.chat-button .unread-dot');
+    if (unreadDot) {
+        unreadDot.style.display = 'block';
+    }
 }
 
 function clearUnreadIndicator() {
     unreadMessages = 0;
-    document.querySelector('.chat-button .unread-dot').style.display = 'none';
+    const unreadDot = document.querySelector('.chat-button .unread-dot');
+    if (unreadDot) {
+        unreadDot.style.display = 'none';
+    }
 }
 
 window.addEventListener('focus', () => {
@@ -419,7 +473,10 @@ window.addEventListener('focus', () => {
 });
 
 function scrollChatToBottom() {
-    messagesList.scrollTop = messagesList.scrollHeight;
+    const messagesList = document.getElementById('chat-messages');
+    if (messagesList) {
+        messagesList.scrollTop = messagesList.scrollHeight;
+    }
 }
 
 const translations = {
