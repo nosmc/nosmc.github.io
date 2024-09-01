@@ -8,60 +8,27 @@
     <link rel="stylesheet" href="common/styles.css">
 </head>
 <body data-theme="dark">
-    <!-- Include Header -->
     <div id="header-placeholder"></div>
 
-    <!-- Main Content -->
-    <main>
-        <!-- Your main content here -->
-    </main>
+    <!-- Your main content goes here -->
 
-    <!-- Include Footer -->
     <div id="footer-placeholder"></div>
-
-    <!-- Include Chat System -->
     <div id="chat-placeholder"></div>
 
-    <!-- Modals -->
-    <div id="login-modal">
-        <div id="login-modal-content">
-            <h3 id="chooseLoginMethod">Choose a Login Method</h3>
-            <button id="login-google" class="login-method-button">
-                <span id="loginWithGoogle">Login with Google</span>
-            </button>
-            <button id="login-github" class="login-method-button">
-                <span id="loginWithGithub">Login with GitHub</span>
-            </button>
-            <div class="close-modal" id="close-login-modal">
-                <span id="cancelLogin">Cancel</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="username-modal">
-        <div id="username-modal-content">
-            <h3 id="setUsernameTitle">Set Your Username</h3>
-            <input type="text" id="username-input" placeholder="Enter your username">
-            <p id="username-error" style="color: red; display: none;"></p>
-            <button id="setUsernameBtn">Set Username</button>
-            <div class="close-modal" id="close-username-modal">
-                <span id="cancelSetUsername">Cancel</span>
-            </div>
-        </div>
-    </div>
-
-    <script type="module" src="common/scripts.js"></script>
+    <script src="common/script.js"></script>
     <script>
-        // Load external HTML components
-        async function loadComponent(url, placeholderId) {
-            const response = await fetch(url);
-            const text = await response.text();
-            document.getElementById(placeholderId).innerHTML = text;
-        }
+        // Load header, footer, and chat
+        fetch('common/header.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('header-placeholder').innerHTML = data);
 
-        loadComponent('common/header.html', 'header-placeholder');
-        loadComponent('common/footer.html', 'footer-placeholder');
-        loadComponent('common/chat.html', 'chat-placeholder');
+        fetch('common/footer.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('footer-placeholder').innerHTML = data);
+
+        fetch('common/chat.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('chat-placeholder').innerHTML = data);
     </script>
 </body>
 </html>
