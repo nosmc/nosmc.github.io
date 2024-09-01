@@ -28,8 +28,8 @@ const developerUsername = "nos";
 let currentLanguage = 'en';
 let isSettingUsername = false;
 let hasSetUsername = false;
-let isChatOpen = false;
 let unreadMessages = 0;
+let isChatOpen = false;
 
 // DOM elements
 const messageInput = document.getElementById('message-input');
@@ -198,14 +198,7 @@ function saveUsername(newUsername) {
 }
 
 function showUsernameError(message) {
-    let errorElement = document.getElementById('username-error');
-    if (!errorElement) {
-        errorElement = document.createElement('p');
-        errorElement.id = 'username-error';
-        errorElement.style.color = 'red';
-        errorElement.style.marginTop = '10px';
-        document.getElementById('username-modal-content').insertBefore(errorElement, document.getElementById('setUsernameBtn'));
-    }
+    const errorElement = document.getElementById('username-error');
     errorElement.textContent = message;
     errorElement.style.display = 'block';
 }
@@ -232,6 +225,7 @@ function handleNewMessage(message) {
     if (!isChatOpen) {
         showUnreadIndicator();
     }
+    // If the chat is open and the user is at the bottom, scroll to the new message
     if (isChatOpen && isScrolledToBottom()) {
         scrollChatToBottom();
     }
@@ -303,6 +297,7 @@ function sendMessage() {
         }).then(() => {
             messageInput.value = '';
             messageInput.focus();
+            scrollChatToBottom();
         }).catch(error => {
             console.error("Error sending message:", error);
         });
@@ -319,8 +314,7 @@ function handleMessageInputKeypress(e) {
 function toggleTheme() {
     if (body.getAttribute('data-theme') === 'light') {
         body.setAttribute('data-theme', 'dark');
-    } else {
-        body.setAttribute('data-theme', 'light');
+    } else {body.setAttribute('data-theme', 'light');
     }
     savePreferences();
 }
@@ -358,12 +352,6 @@ function translatePage() {
     });
     document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
     document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
-    
-    // Update the error message if it exists
-    const errorElement = document.getElementById('username-error');
-    if (errorElement && errorElement.textContent) {
-        errorElement.textContent = translations.usernameExists[currentLanguage];
-    }
 }
 
 function handleGeneratorRedirect(e) {
@@ -478,7 +466,7 @@ const translations = {
     },
     cancelLogin: {
         en: "Cancel",
-        zh: "取消"
+        zh: "取"
     },
     youtube: {
         en: "YouTube",

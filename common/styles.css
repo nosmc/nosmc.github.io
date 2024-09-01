@@ -1,4 +1,3 @@
-/* Root Variables */
 :root {
     --background-color-light: #f0f0f0;
     --background-color-dark: #1a1a1a;
@@ -31,7 +30,6 @@
     --transition-speed: 0.3s;
 }
 
-/* Light Theme Variables */
 [data-theme="light"] {
     --background-color: var(--background-color-light);
     --text-color: var(--text-color-light);
@@ -42,7 +40,6 @@
     --shadow: var(--shadow-light);
 }
 
-/* Dark Theme Variables */
 [data-theme="dark"] {
     --background-color: var(--background-color-dark);
     --text-color: var(--text-color-dark);
@@ -53,7 +50,6 @@
     --shadow: var(--shadow-dark);
 }
 
-/* Global Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -68,7 +64,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Scrollbar Styles */
 ::-webkit-scrollbar {
     width: 10px;
 }
@@ -83,7 +78,6 @@ body {
     border: 2px solid var(--panel-background-color);
 }
 
-/* Header and Footer Styles */
 header, footer {
     width: 100%;
     background-color: var(--panel-background-color);
@@ -111,14 +105,12 @@ header h1, footer p {
     color: var(--primary-color);
 }
 
-/* Header Right Section */
 .header-right {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-/* Button Styles */
 .home-button, .dropdown-button, .button {
     background-color: var(--primary-color);
     color: white;
@@ -146,7 +138,6 @@ header h1, footer p {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Dropdown Menu Styles */
 .dropdown {
     position: relative;
     display: inline-block;
@@ -181,7 +172,6 @@ header h1, footer p {
     display: block;
 }
 
-/* Switcher and Login Button Styles */
 #theme-switcher, #language-switcher, #login-btn {
     font-size: 20px;
     cursor: pointer;
@@ -200,7 +190,6 @@ header h1, footer p {
     color: var(--language-button-color);
 }
 
-/* Footer Links Styles */
 .footer-links a {
     color: var(--footer-link-color);
     text-decoration: none;
@@ -226,7 +215,6 @@ header h1, footer p {
     text-decoration: underline;
 }
 
-/* Developer Link Styles */
 #developer-link {
     font-weight: bold;
     color: var(--developer-link-color);
@@ -239,7 +227,6 @@ header h1, footer p {
     text-decoration: underline;
 }
 
-/* Donate Button Styles */
 .donate {
     display: flex;
     align-items: center;
@@ -259,7 +246,6 @@ header h1, footer p {
     transform: translateY(-2px);
 }
 
-/* Chat Button Styles */
 .chat-button {
     position: fixed;
     bottom: 80px;
@@ -292,7 +278,6 @@ header h1, footer p {
     display: none;
 }
 
-/* Chat Container Styles */
 #chat-container {
     width: 400px;
     height: 500px;
@@ -307,7 +292,6 @@ header h1, footer p {
     flex-direction: column;
 }
 
-/* Chat Messages Styles */
 #chat-messages {
     flex: 1;
     overflow-y: auto;
@@ -356,10 +340,6 @@ header h1, footer p {
 #chat-messages li.sent .username {
     margin-right: 5px;
     margin-left: 0;
-}
-
-#chat-messages li.received .username {
-    margin-left: 5px;
 }
 
 #chat-messages .message-header {
@@ -430,7 +410,6 @@ header h1, footer p {
     align-self: flex-start; /* Align to the left for received messages */
 }
 
-/* Chat Input Styles */
 #chat-input {
     display: flex;
     padding: 10px;
@@ -463,7 +442,6 @@ header h1, footer p {
     transform: translateY(-2px);
 }
 
-/* Modal Styles */
 #login-modal, #username-modal {
     display: none;
     position: fixed;
@@ -531,7 +509,6 @@ header h1, footer p {
     color: var(--text-color);
 }
 
-/* Responsive Styles */
 @media (max-width: 768px) {
     #chat-container {
         width: 100%;

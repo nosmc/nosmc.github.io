@@ -5,18 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Datapack Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="./common/styles.css">
+    <style>
+    </style>
 </head>
 <body data-theme="dark">
-    <!-- Header Section -->
     <header>
         <h1><i class="fas fa-cogs"></i> <span id="headerTitle">Minecraft Datapack Generator</span></h1>
         <div class="header-right">
-            <!-- Home Button -->
             <a href="https://nosmc.github.io" class="home-button" aria-label="Home">
                 <i class="fas fa-home"></i> <span id="home">Home</span>
             </a>
-            <!-- Generators Dropdown -->
             <div class="dropdown">
                 <button class="dropdown-button" aria-label="Generators"><i class="fas fa-caret-down"></i> <span id="generators">Generators</span></button>
                 <div class="dropdown-content">
@@ -25,31 +23,24 @@
                     <a href="#" data-generator="entity"><span id="generatorEntity">Entity</span></a>
                 </div>
             </div>
-            <!-- Language Switcher -->
             <button class="language-button" id="language-switcher" aria-label="Switch Language">
                 <i class="fas fa-language"></i>
             </button>
-            <!-- Theme Switcher -->
             <div id="theme-switcher" aria-label="Switch Theme"><i class="fas fa-adjust"></i></div>
-            <!-- Login Button -->
             <div id="login-btn" aria-label="Login"><i class="fas fa-user"></i></div>
         </div>
     </header>
 
-    <!-- Main Content Section -->
     <main>
     </main>
 
-    <!-- Footer Section -->
     <footer>
         <div class="footer-links">
-            <!-- Social Media Links -->
             <a href="https://www.youtube.com/@n_os_" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i> <span id="youtube">YouTube</span></a>
             <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i> <span id="instagram">Instagram</span></a>
             <a href="https://discord.gg/Pah6vw36Tw" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> <span id="discord">Discord</span></a>
         </div>
         <p>
-            <!-- Developer Link and Donation -->
             <a id="developer-link" href="https://github.com/nosmc" target="_blank">&copy; <span id="developedBy">Developed by nos</span></a>
             <a href="https://donation-link.com" target="_blank" class="donate"><i class="fas fa-heart"></i> <span id="donate">Donate</span></a>
         </p>
@@ -60,13 +51,14 @@
         <h2><i class="fas fa-comments"></i> <span id="chatTitle">Chat</span></h2>
         <ul id="chat-messages"></ul>
         <div id="chat-input">
-            <input type="text" id="message-input" placeholder="Type a message...">
+            <input type="text" id="message-input" placeholder="Type a message..." aria-label="Message Input">
             <button id="send-button"><span id="sendButtonText">Send</span></button>
         </div>
     </div>
-    <button class="chat-button">
+
+    <button class="chat-button" aria-label="Open Chat">
         <i class="fas fa-comments"></i>
-        <div class="unread-dot"></div>
+        <span class="unread-dot"></span>
     </button>
 
     <!-- Login Modal -->
@@ -90,6 +82,7 @@
         <div id="username-modal-content">
             <h3 id="setUsernameTitle">Set Your Username</h3>
             <input type="text" id="username-input" placeholder="Enter your username">
+            <p id="username-error" style="color: red; display: none;"></p>
             <button id="setUsernameBtn">Set Username</button>
             <div class="close-modal" id="close-username-modal">
                 <span id="cancelSetUsername">Cancel</span>
@@ -97,7 +90,7 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script type="module" src="./common/scripts.js"></script>
+    <script type="module">
+    </script>
 </body>
 </html>
