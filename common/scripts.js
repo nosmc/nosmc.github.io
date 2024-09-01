@@ -165,7 +165,7 @@ function handleSetUsername() {
     if (newUsername) {
         saveUsername(newUsername);
     } else {
-        alert(translations[currentLanguage].usernameEmpty);
+        showUsernameError(translations.usernameEmpty[currentLanguage]);
     }
 }
 
@@ -198,15 +198,16 @@ function saveUsername(newUsername) {
 }
 
 function showUsernameError(message) {
-    const errorElement = document.getElementById('username-error');
+    let errorElement = document.getElementById('username-error');
     if (!errorElement) {
-        const newErrorElement = document.createElement('p');
-        newErrorElement.id = 'username-error';
-        newErrorElement.style.color = 'red';
-        newErrorElement.style.marginTop = '10px';
-        document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+        errorElement = document.createElement('p');
+        errorElement.id = 'username-error';
+        errorElement.style.color = 'red';
+        errorElement.style.marginTop = '10px';
+        document.getElementById('username-modal-content').insertBefore(errorElement, document.getElementById('setUsernameBtn'));
     }
-    document.getElementById('username-error').textContent = message;
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
 }
 
 function loadMessages() {
