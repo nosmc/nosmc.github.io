@@ -168,7 +168,8 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize the page
-    initializePage();
+    loadPreferences();
+    translatePage();
 });
 
 // Firebase Auth State Change
@@ -619,7 +620,7 @@ const translations = {
         zh: "捐贈"
     },
     setUsernameTitle: {
-        en: "Set Your Username",
+        en: "Set Your User Username",
         zh: "設置您的用戶名"
     },
     enterUsername: {
