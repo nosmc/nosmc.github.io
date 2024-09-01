@@ -3,11 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-console.log("Script started");
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded");
-    initializeDOMElements();
-});
+console.log("Script started loading");
 
 // Firebase configuration
 const firebaseConfig = {
@@ -26,6 +22,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
+console.log("Firebase initialized");
+
 // Global variables
 let currentUser = null;
 let username = null;
@@ -39,30 +37,45 @@ let isChatOpen = false;
 
 // Function to initialize DOM-dependent code
 function initializeDOMElements() {
+    console.log("Initializing DOM elements");
+
     // Event delegation for dynamic elements
     document.body.addEventListener('click', function(event) {
+        console.log("Click event detected on:", event.target);
+
         if (event.target.matches('.chat-button')) {
+            console.log("Chat button clicked");
             toggleChat();
         } else if (event.target.matches('#login-btn')) {
+            console.log("Login button clicked");
             handleLoginButtonClick();
         } else if (event.target.matches('#close-login-modal')) {
+            console.log("Close login modal clicked");
             document.getElementById('login-modal').style.display = 'none';
         } else if (event.target.matches('#login-google')) {
+            console.log("Google login clicked");
             signInWithProvider(new GoogleAuthProvider());
         } else if (event.target.matches('#login-github')) {
+            console.log("GitHub login clicked");
             signInWithProvider(new GithubAuthProvider());
         } else if (event.target.matches('#send-button')) {
+            console.log("Send button clicked");
             sendMessage();
         } else if (event.target.matches('#theme-switcher')) {
+            console.log("Theme switcher clicked");
             toggleTheme();
         } else if (event.target.matches('#language-switcher')) {
+            console.log("Language switcher clicked");
             toggleLanguage();
         } else if (event.target.matches('#setUsernameBtn')) {
+            console.log("Set username button clicked");
             handleSetUsername();
         } else if (event.target.matches('#close-username-modal')) {
+            console.log("Close username modal clicked");
             document.getElementById('username-modal').style.display = 'none';
             signOut(auth);
         } else if (event.target.closest('.dropdown-content a')) {
+            console.log("Generator link clicked");
             handleGeneratorRedirect(event);
         }
     });
@@ -71,38 +84,49 @@ function initializeDOMElements() {
     const messageInput = document.getElementById('message-input');
     if (messageInput) {
         messageInput.addEventListener('keypress', handleMessageInputKeypress);
+        console.log("Keypress listener added to message input");
     }
 
     // Firebase Auth State Change
     auth.onAuthStateChanged(handleAuthStateChange);
+    console.log("Auth state change listener added");
 
     // Initialize the page
     initializePage();
 }
 
 // Wait for the DOM to be fully loaded before initializing
-document.addEventListener('DOMContentLoaded', initializeDOMElements);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded");
+    initializeDOMElements();
+});
 
 // Functions
 function toggleChat() {
+    console.log("toggleChat function called");
     const chatContainer = document.getElementById('chat-container');
     if (chatContainer) {
         isChatOpen = !isChatOpen;
         chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+        console.log("Chat toggled:", isChatOpen);
         if (isChatOpen) {
             scrollChatToBottom();
             clearUnreadIndicator();
         }
+    } else {
+        console.log("Chat container not found");
     }
 }
 
 function handleLoginButtonClick() {
+    console.log("handleLoginButtonClick function called");
     if (currentUser) {
         signOut(auth).then(() => {
             currentUser = null;
             username = null;
             hasSetUsername = false;
             removeMessagesListener();
+            console.log("User signed out");
         }).catch(error => {
             console.error("Error signing out:", error);
         });
@@ -110,16 +134,21 @@ function handleLoginButtonClick() {
         const loginModal = document.getElementById('login-modal');
         if (loginModal) {
             loginModal.style.display = 'flex';
+            console.log("Login modal displayed");
+        } else {
+            console.log("Login modal not found");
         }
     }
 }
 
 function signInWithProvider(provider) {
+    console.log(`signInWithProvider function called with provider: ${provider.providerId}`);
     signInWithPopup(auth, provider).then(result => {
         currentUser = result.user;
         const loginModal = document.getElementById('login-modal');
         if (loginModal) {
             loginModal.style.display = 'none';
+            console.log("Login modal closed");
         }
         checkUsername();
     }).catch(error => {
@@ -128,12 +157,14 @@ function signInWithProvider(provider) {
 }
 
 function handleAuthStateChange(user) {
+    console.log("handleAuthStateChange function called with user:", user);
     if (user) {
         currentUser = user;
         const loginButton = document.getElementById('login-btn');
         if (loginButton) {
             loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
             loginButton.setAttribute('aria-label', 'Logout');
+            console.log("Login button updated to logout");
         }
         if (!hasSetUsername) {
             checkUsername();
@@ -143,6 +174,7 @@ function handleAuthStateChange(user) {
         if (loginButton) {
             loginButton.innerHTML = `<i class="fas fa-user"></i>`;
             loginButton.setAttribute('aria-label', 'Login');
+            console.log("Login button updated to login");
         }
         currentUser = null;
         username = null;
@@ -152,6 +184,7 @@ function handleAuthStateChange(user) {
 }
 
 function checkUsername() {
+    console.log("checkUsername function called");
     if (isSettingUsername || hasSetUsername) return;
     
     isSettingUsername = true;
@@ -161,6 +194,7 @@ function checkUsername() {
             username = snapshot.val().username;
             hasSetUsername = true;
             loadMessages();
+            console.log("Username loaded:", username);
         } else {
             showUsernameModal();
         }
@@ -173,17 +207,21 @@ function checkUsername() {
 }
 
 function showUsernameModal() {
+    console.log("showUsernameModal function called");
     const usernameModal = document.getElementById('username-modal');
     if (usernameModal) {
         usernameModal.style.display = 'flex';
+        console.log("Username modal displayed");
         const usernameInput = document.getElementById('username-input');
         if (usernameInput) {
             usernameInput.focus();
+            console.log("Username input focused");
         }
     }
 }
 
 function handleSetUsername() {
+    console.log("handleSetUsername function called");
     const usernameInput = document.getElementById('username-input');
     if (usernameInput) {
         const newUsername = usernameInput.value.trim();
@@ -196,6 +234,7 @@ function handleSetUsername() {
 }
 
 function saveUsername(newUsername) {
+    console.log("saveUsername function called with newUsername:", newUsername);
     const usernamesRef = ref(database, 'users');
     const usernameQuery = query(usernamesRef, orderByChild('username'), equalTo(newUsername));
 
@@ -206,6 +245,7 @@ function saveUsername(newUsername) {
             if (usernameInput) {
                 usernameInput.value = '';
                 usernameInput.focus();
+                console.log("Username input cleared and focused");
             }
         } else {
             set(ref(database, `users/${currentUser.uid}`), {
@@ -216,8 +256,10 @@ function saveUsername(newUsername) {
                 const usernameModal = document.getElementById('username-modal');
                 if (usernameModal) {
                     usernameModal.style.display = 'none';
+                    console.log("Username modal closed");
                 }
                 loadMessages();
+                console.log("Username saved and messages loaded");
             }).catch(error => {
                 console.error("Error saving username:", error);
                 showUsernameError(translations.errorSavingUsername[currentLanguage]);
@@ -230,14 +272,17 @@ function saveUsername(newUsername) {
 }
 
 function showUsernameError(message) {
+    console.log("showUsernameError function called with message:", message);
     const errorElement = document.getElementById('username-error');
     if (errorElement) {
         errorElement.textContent = message;
         errorElement.style.display = 'block';
+        console.log("Username error displayed");
     }
 }
 
 function loadMessages() {
+    console.log("loadMessages function called");
     if (messagesRef) {
         return;
     }
@@ -253,9 +298,11 @@ function loadMessages() {
             handleNewMessage(message);
         }
     });
+    console.log("Messages loaded");
 }
 
 function handleNewMessage(message) {
+    console.log("handleNewMessage function called with message:", message);
     if (!isChatOpen) {
         showUnreadIndicator();
     }
@@ -266,6 +313,7 @@ function handleNewMessage(message) {
 }
 
 function isScrolledToBottom() {
+    console.log("isScrolledToBottom function called");
     const messagesList = document.getElementById('chat-messages');
     if (messagesList) {
         return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
@@ -274,21 +322,25 @@ function isScrolledToBottom() {
 }
 
 function removeMessagesListener() {
+    console.log("removeMessagesListener function called");
     if (messagesRef) {
         messagesRef = null;
     }
     const messagesList = document.getElementById('chat-messages');
     if (messagesList) {
         messagesList.innerHTML = '';
+        console.log("Messages list cleared");
     }
 }
 
 function convertToLocalTime(isoTimestamp) {
+    console.log("convertToLocalTime function called with isoTimestamp:", isoTimestamp);
     const date = new Date(isoTimestamp);
     return date.toLocaleString();
 }
 
 function displayMessage(message) {
+    console.log("displayMessage function called with message:", message);
     const messagesList = document.getElementById('chat-messages');
     if (messagesList) {
         const li = document.createElement('li');
@@ -326,10 +378,12 @@ function displayMessage(message) {
 
         messagesList.appendChild(li);
         scrollChatToBottom();
+        console.log("Message displayed");
     }
 }
 
 function sendMessage() {
+    console.log("sendMessage function called");
     const messageInput = document.getElementById('message-input');
     if (username && messageInput && messageInput.value.trim()) {
         const timestamp = new Date().toISOString();
@@ -343,6 +397,7 @@ function sendMessage() {
             messageInput.value = '';
             messageInput.focus();
             scrollChatToBottom();
+            console.log("Message sent");
         }).catch(error => {
             console.error("Error sending message:", error);
         });
@@ -350,6 +405,7 @@ function sendMessage() {
 }
 
 function handleMessageInputKeypress(e) {
+    console.log("handleMessageInputKeypress function called with event:", e);
     if (e.key === 'Enter') {
         sendMessage();
         e.preventDefault();
@@ -357,32 +413,39 @@ function handleMessageInputKeypress(e) {
 }
 
 function toggleTheme() {
+    console.log("toggleTheme function called");
     const body = document.body;
     if (body) {
         if (body.getAttribute('data-theme') === 'light') {
             body.setAttribute('data-theme', 'dark');
+            console.log("Theme switched to dark");
         } else {
             body.setAttribute('data-theme', 'light');
+            console.log("Theme switched to light");
         }
         savePreferences();
     }
 }
 
 function toggleLanguage() {
+    console.log("toggleLanguage function called");
     currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
     translatePage();
     savePreferences();
 }
 
 function savePreferences() {
+    console.log("savePreferences function called");
     const body = document.body;
     if (body) {
         localStorage.setItem('theme', body.getAttribute('data-theme'));
         localStorage.setItem('language', currentLanguage);
+        console.log("Preferences saved");
     }
 }
 
 function loadPreferences() {
+    console.log("loadPreferences function called");
     const savedTheme = localStorage.getItem('theme');
     const savedLanguage = localStorage.getItem('language');
 
@@ -390,32 +453,39 @@ function loadPreferences() {
     if (body) {
         if (savedTheme) {
             body.setAttribute('data-theme', savedTheme);
+            console.log("Theme loaded:", savedTheme);
         }
         if (savedLanguage) {
             currentLanguage = savedLanguage;
             translatePage();
+            console.log("Language loaded:", savedLanguage);
         }
     }
 }
 
 function translatePage() {
+    console.log("translatePage function called");
     Object.keys(translations).forEach(key => {
         const element = document.getElementById(key);
         if (element) {
             element.textContent = translations[key][currentLanguage];
+            console.log(`Translated element with id ${key} to ${currentLanguage}`);
         }
     });
     const messageInput = document.getElementById('message-input');
     if (messageInput) {
         messageInput.placeholder = translations.typeAMessage[currentLanguage];
+        console.log("Translated message input placeholder");
     }
     const usernameInput = document.getElementById('username-input');
     if (usernameInput) {
         usernameInput.placeholder = translations.enterUsername[currentLanguage];
+        console.log("Translated username input placeholder");
     }
 }
 
 function handleGeneratorRedirect(e) {
+    console.log("handleGeneratorRedirect function called with event:", e);
     e.preventDefault();
     const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
     if (generator) {
@@ -436,6 +506,7 @@ function handleGeneratorRedirect(e) {
         }
 
         function linkExists(url, callback) {
+            console.log("linkExists function called with url:", url);
             fetch(url, { method: 'HEAD' })
                 .then(response => callback(response.ok))
                 .catch(() => callback(false));
@@ -444,44 +515,54 @@ function handleGeneratorRedirect(e) {
         linkExists(targetUrl, function(exists) {
             if (exists) {
                 window.location.href = targetUrl;
+                console.log("Redirected to:", targetUrl);
             } else {
                 window.location.href = 'https://nosmc.github.io/';
+                console.log("Redirected to home page");
             }
         });
     }
 }
 
 function initializePage() {
+    console.log("initializePage function called");
     loadPreferences();
     translatePage();
 }
 
 function showUnreadIndicator() {
+    console.log("showUnreadIndicator function called");
     unreadMessages++;
     const unreadDot = document.querySelector('.chat-button .unread-dot');
     if (unreadDot) {
         unreadDot.style.display = 'block';
+        console.log("Unread indicator displayed");
     }
 }
 
 function clearUnreadIndicator() {
+    console.log("clearUnreadIndicator function called");
     unreadMessages = 0;
     const unreadDot = document.querySelector('.chat-button .unread-dot');
     if (unreadDot) {
         unreadDot.style.display = 'none';
+        console.log("Unread indicator cleared");
     }
 }
 
 window.addEventListener('focus', () => {
+    console.log("Window focus event detected");
     if (isChatOpen) {
         clearUnreadIndicator();
     }
 });
 
 function scrollChatToBottom() {
+    console.log("scrollChatToBottom function called");
     const messagesList = document.getElementById('chat-messages');
     if (messagesList) {
         messagesList.scrollTop = messagesList.scrollHeight;
+        console.log("Chat scrolled to bottom");
     }
 }
 
@@ -594,3 +675,5 @@ const translations = {
 
 // Initialize the page
 initializePage();
+
+console.log("Script finished loading");
