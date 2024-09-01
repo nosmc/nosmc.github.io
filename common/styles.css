@@ -62,7 +62,7 @@ body {
     color: var(--text-color);
     line-height: 1.6;
     overflow-x: hidden;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
 ::-webkit-scrollbar {
@@ -527,4 +527,17 @@ header h1, footer p {
         padding: 8px 12px;
         font-size: 14px;
     }
+}
+
+#theme-switcher {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--text-color);
+    transition: color var(--transition-speed);
+}
+
+#theme-switcher:hover {
+    color: var(--primary-color);
 }
