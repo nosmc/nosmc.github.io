@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-const header = document.querySelector('.header')
+const header = document.querySelector('.header');
 fetch('./header.html')
 .then(res => res.text())
 .then(data => {
@@ -15,7 +15,8 @@ fetch('./header.html')
         eval(script.textContent);
     }
 });
-const footer = document.querySelector('.footer')
+
+const footer = document.querySelector('.footer');
 fetch('./footer.html')
 .then(res => res.text())
 .then(data => {
@@ -27,7 +28,8 @@ fetch('./footer.html')
         eval(script.textContent);
     }
 });
-const chat = document.querySelector('.chat')
+
+const chat = document.querySelector('.chat');
 fetch('./chat.html')
 .then(res => res.text())
 .then(data => {
@@ -39,7 +41,8 @@ fetch('./chat.html')
         eval(script.textContent);
     }
 });
-const login = document.querySelector('.login')
+
+const login = document.querySelector('.login');
 fetch('./login.html')
 .then(res => res.text())
 .then(data => {
@@ -51,7 +54,8 @@ fetch('./login.html')
         eval(script.textContent);
     }
 });
-const user = document.querySelector('.user')
+
+const user = document.querySelector('.user');
 fetch('./user.html')
 .then(res => res.text())
 .then(data => {
@@ -167,7 +171,9 @@ auth.onAuthStateChanged(handleAuthStateChange);
 // Functions
 function toggleChat() {
     isChatOpen = !isChatOpen;
-    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+    if (chatContainer) {
+        chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+    }
     if (isChatOpen) {
         scrollChatToBottom();
         clearUnreadIndicator();
@@ -185,14 +191,18 @@ function handleLoginButtonClick() {
             console.error("Error signing out:", error);
         });
     } else {
-        loginModal.style.display = 'flex';
+        if (loginModal) {
+            loginModal.style.display = 'flex';
+        }
     }
 }
 
 function signInWithProvider(provider) {
     signInWithPopup(auth, provider).then(result => {
         currentUser = result.user;
-        loginModal.style.display = 'none';
+        if (loginModal) {
+            loginModal.style.display = 'none';
+        }
         checkUsername();
     }).catch(error => {
         console.error(`Error during ${provider.providerId} login:`, error);
@@ -202,14 +212,18 @@ function signInWithProvider(provider) {
 function handleAuthStateChange(user) {
     if (user) {
         currentUser = user;
-        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-        loginButton.setAttribute('aria-label', 'Logout');
+        if (loginButton) {
+            loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+            loginButton.setAttribute('aria-label', 'Logout');
+        }
         if (!hasSetUsername) {
             checkUsername();
         }
     } else {
-        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-        loginButton.setAttribute('aria-label', 'Login');
+        if (loginButton) {
+            loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+            loginButton.setAttribute('aria-label', 'Login');
+        }
         currentUser = null;
         username = null;
         hasSetUsername = false;
@@ -239,8 +253,12 @@ function checkUsername() {
 }
 
 function showUsernameModal() {
-    usernameModal.style.display = 'flex';
-    usernameInput.focus();
+    if (usernameModal) {
+        usernameModal.style.display = 'flex';
+        if (usernameInput) {
+            usernameInput.focus();
+        }
+    }
 }
 
 function handleSetUsername() {
@@ -267,7 +285,9 @@ function saveUsername(newUsername) {
             }).then(() => {
                 username = newUsername;
                 hasSetUsername = true;
-                usernameModal.style.display = 'none';
+                if (usernameModal) {
+                    usernameModal.style.display = 'none';
+                }
                 loadMessages();
             }).catch(error => {
                 console.error("Error saving username:", error);
@@ -282,8 +302,10 @@ function saveUsername(newUsername) {
 
 function showUsernameError(message) {
     const errorElement = document.getElementById('username-error');
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
 }
 
 function loadMessages() {
@@ -315,14 +337,16 @@ function handleNewMessage(message) {
 }
 
 function isScrolledToBottom() {
-    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+    return messagesList && (messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1);
 }
 
 function removeMessagesListener() {
     if (messagesRef) {
         messagesRef = null;
     }
-    messagesList.innerHTML = '';
+    if (messagesList) {
+        messagesList.innerHTML = '';
+    }
 }
 
 function convertToLocalTime(isoTimestamp) {
@@ -331,6 +355,8 @@ function convertToLocalTime(isoTimestamp) {
 }
 
 function displayMessage(message) {
+    if (!messagesList) return;
+
     const li = document.createElement('li');
     li.className = message.sender === username ? 'sent' : 'received';
 
@@ -397,7 +423,8 @@ function handleMessageInputKeypress(e) {
 function toggleTheme() {
     if (body.getAttribute('data-theme') === 'light') {
         body.setAttribute('data-theme', 'dark');
-    } else {body.setAttribute('data-theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'light');
     }
     savePreferences();
 }
@@ -433,8 +460,14 @@ function translatePage() {
             element.textContent = translations[key][currentLanguage];
         }
     });
-    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
-    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+    const messageInputElement = document.getElementById('message-input');
+    if (messageInputElement) {
+        messageInputElement.placeholder = translations.typeAMessage[currentLanguage];
+    }
+    const usernameInputElement = document.getElementById('username-input');
+    if (usernameInputElement) {
+        usernameInputElement.placeholder = translations.enterUsername[currentLanguage];
+    }
 }
 
 function handleGeneratorRedirect(e) {
@@ -480,12 +513,18 @@ function initializePage() {
 
 function showUnreadIndicator() {
     unreadMessages++;
-    document.querySelector('.chat-button .unread-dot').style.display = 'block';
+    const unreadDot = document.querySelector('.chat-button .unread-dot');
+    if (unreadDot) {
+        unreadDot.style.display = 'block';
+    }
 }
 
 function clearUnreadIndicator() {
     unreadMessages = 0;
-    document.querySelector('.chat-button .unread-dot').style.display = 'none';
+    const unreadDot = document.querySelector('.chat-button .unread-dot');
+    if (unreadDot) {
+        unreadDot.style.display = 'none';
+    }
 }
 
 window.addEventListener('focus', () => {
