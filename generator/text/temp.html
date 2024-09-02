@@ -1029,9 +1029,16 @@ function loadMessages() {
         return;
     }
     messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+    
+    const loadTimestamp = new Date().getTime();
+    
     onChildAdded(messagesRef, (snapshot) => {
         const message = snapshot.val();
         displayMessage(message);
+        
+        if (new Date(message.timestamp).getTime() > loadTimestamp) {
+            handleNewMessage(message);
+        }
     });
 }
 
@@ -1933,7 +1940,7 @@ const translations = {
     },
     translatedText: {
         en: "Translated Text",
-        zh: "翻譯文本"
+        zh: "譯文本"
     },
     score: {
         en: "Score",
