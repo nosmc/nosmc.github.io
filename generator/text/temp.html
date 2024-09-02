@@ -814,7 +814,7 @@ textarea#json-area,
         <div id="username-modal-content">
             <h3 id="setUsernameTitle">Set Your Username</h3>
             <input type="text" id="username-input" placeholder="Enter your username">
-            <!-- The error message will be inserted here -->
+            <p id="username-error" style="color: red; display: none;"></p>
             <button id="setUsernameBtn">Set Username</button>
             <div class="close-modal" id="close-username-modal">
                 <span id="cancelSetUsername">Cancel</span>
@@ -937,10 +937,12 @@ auth.onAuthStateChanged(handleAuthStateChange);
 
 // Functions
 function toggleChat() {
-    const isChatOpen = chatContainer.style.display === 'flex';
-    chatContainer.style.display = isChatOpen ? 'none' : 'flex';
-    if (!isChatOpen) {
-        messagesList.scrollTop = messagesList.scrollHeight;
+    console.log('Toggling chat');
+    isChatOpen = !isChatOpen;
+    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+    if (isChatOpen) {
+        scrollChatToBottom();
+        clearUnreadIndicator();
     }
 }
 
@@ -1086,12 +1088,9 @@ function convertToLocalTime(isoTimestamp) {
 }
 
 function displayMessage(message) {
+    console.log('Displaying message', message);
     const li = document.createElement('li');
-    li.className = message.sender === username ? 'sent' : 'received';
-
-    if (message.sender === developerUsername) {
-        li.classList.add('developer');
-    }
+    li.className = message.sender === 'username' ? 'sent' : 'received'; // Replace 'username' with actual username
 
     const messageHeader = document.createElement('div');
     messageHeader.className = 'message-header';
@@ -1125,25 +1124,24 @@ function displayMessage(message) {
     li.appendChild(messageContent);
     messagesList.appendChild(li);
 
+    if (!isChatOpen) {
+        showUnreadIndicator();
+    }
+
     messagesList.scrollTop = messagesList.scrollHeight;
 }
 
 function sendMessage() {
-    if (username && messageInput.value.trim()) {
-        const timestamp = new Date().toISOString();
-
-        push(ref(database, 'messages'), {
-            sender: username,
-            avatar: currentUser?.photoURL || "default-avatar.png",
-            content: messageInput.value,
-            timestamp: timestamp
-        }).then(() => {
-            messageInput.value = '';
-            messageInput.focus();
-        }).catch(error => {
-            console.error("Error sending message:", error);
-        });
-    }
+    console.log('Sending message');
+    const message = {
+        sender: 'username', // Replace with actual username
+        avatar: 'default-avatar.png', // Replace with actual avatar URL
+        content: messageInput.value,
+        timestamp: new Date().toISOString()
+    };
+    displayMessage(message);
+    messageInput.value = '';
+    messageInput.focus();
 }
 
 function handleMessageInputKeypress(e) {
@@ -2267,7 +2265,7 @@ const translations = {
     },
     errorSavingUsername: {
         en: "Error saving username. Please try again.",
-        zh: "保存用戶名時出錯。請重。"
+        zh: "保存用戶名時出錯。請重"
     },
     errorCheckingUsername: {
         en: "Error checking username. Please try again.",
