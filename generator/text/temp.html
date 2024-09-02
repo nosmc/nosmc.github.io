@@ -1117,6 +1117,10 @@ function displayMessage(message) {
         messageHeader.insertBefore(img, usernameSpan);
     }
 
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = message.content;
+
     li.appendChild(messageHeader);
     li.appendChild(messageContent);
     messagesList.appendChild(li);
