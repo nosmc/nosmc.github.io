@@ -791,7 +791,19 @@ let isSettingUsername = false;
 let hasSetUsername = false;
 let contents = JSON.parse(localStorage.getItem('contents')) || [];
 let dragSrcIndex = null;
-let scrollInterval = null;
+let isChatOpen = false;
+let unreadMessages = 0;
+
+// DOM elements
+const body = document.body;
+const chatContainer = document.getElementById('chat-container');
+const messagesList = document.getElementById('chat-messages');
+const chatButton = document.querySelector('.chat-button');
+const loginButton = document.getElementById('login-button');
+const loginModal = document.getElementById('login-modal');
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const messageInput = document.getElementById('message-input');
 
 const minecraftColorMap = {
     black: '#000000',
@@ -812,70 +824,23 @@ const minecraftColorMap = {
     white: '#FFFFFF'
 };
 
-// DOM elements
-const messageInput = document.getElementById('message-input');
-const sendButton = document.getElementById('send-button');
-const messagesList = document.getElementById('chat-messages');
-const chatContainer = document.getElementById('chat-container');
-const chatButton = document.querySelector('.chat-button');
-const loginButton = document.getElementById('login-btn');
-const loginModal = document.getElementById('login-modal');
-const closeLoginModal = document.getElementById('close-login-modal');
-const googleLoginBtn = document.getElementById('login-google');
-const githubLoginBtn = document.getElementById('login-github');
-const themeSwitcher = document.getElementById('theme-switcher');
-const body = document.body;
-const languageSwitcher = document.getElementById('language-switcher');
-const usernameModal = document.getElementById('username-modal');
-const usernameInput = document.getElementById('username-input');
-const setUsernameBtn = document.getElementById('setUsernameBtn');
-const closeUsernameModal = document.getElementById('close-username-modal');
-
-// Auth Providers
-const githubProvider = new GithubAuthProvider();
-const googleProvider = new GoogleAuthProvider();
-
-// Event Listeners
-chatButton.addEventListener('click', toggleChat);
-loginButton.addEventListener('click', handleLoginButtonClick);
-closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
-githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-sendButton.addEventListener('click', sendMessage);
-messageInput.addEventListener('keypress', handleMessageInputKeypress);
-themeSwitcher.addEventListener('click', toggleTheme);
-languageSwitcher.addEventListener('click', toggleLanguage);
-document.getElementById('add-content-btn').addEventListener('click', () => {
-    const contentType = document.getElementById('content-type').value;
-    addContent(contentType);
-});
-document.getElementById('copy-json-btn').addEventListener('click', copyJsonToClipboard);
-document.getElementById('clear-all-btn').addEventListener('click', clearAll);
-document.getElementById('indentation').addEventListener('change', updateOutputAndPreview);
-setUsernameBtn.addEventListener('click', handleSetUsername);
-closeUsernameModal.addEventListener('click', () => {
-    usernameModal.style.display = 'none';
-    signOut(auth);
-});
-
-// Dropdown Menu Redirection
-document.querySelectorAll('.dropdown-content a').forEach(link => {
-    link.addEventListener('click', handleGeneratorRedirect);
-});
+const translations = {
+    // ... all translation key-value pairs ...
+};
 
 // Initialize the page
-window.addEventListener('DOMContentLoaded', initializePage);
+initializePage();
 
-// Firebase Auth State Change
-auth.onAuthStateChanged(handleAuthStateChange);
-
-// Functions
 function toggleChat() {
     isChatOpen = !isChatOpen;
-    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-    if (isChatOpen) {
-        scrollChatToBottom();
-        clearUnreadIndicator();
+    if (chatContainer) {
+        chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+        if (isChatOpen) {
+            scrollChatToBottom();
+            clearUnreadIndicator();
+        }
+    } else {
+        console.error("Chat container not found");
     }
 }
 
@@ -902,14 +867,12 @@ function clearUnreadIndicator() {
     document.querySelector('.chat-button .unread-dot').style.display = 'none';
 }
 
-window.addEventListener('focus', () => {
-    if (isChatOpen) {
-        clearUnreadIndicator();
-    }
-});
-
 function scrollChatToBottom() {
-    messagesList.scrollTop = messagesList.scrollHeight;
+    if (messagesList) {
+        messagesList.scrollTop = messagesList.scrollHeight;
+    } else {
+        console.error("Messages list not found");
+    }
 }
 
 function displayMessage(message) {
@@ -951,6 +914,10 @@ function displayMessage(message) {
 }
 
 function loadMessages() {
+    if (!chatContainer) {
+        console.error("Chat container not found");
+        return;
+    }
     if (messagesRef) {
         return;
     }
@@ -968,129 +935,153 @@ function loadMessages() {
     });
 }
 
-function handleLoginButtonClick() {
-    if (currentUser) {
-        signOut(auth).then(() => {
-            currentUser = null;
-            username = null;
-            hasSetUsername = false;
-            removeMessagesListener();
-        }).catch(error => {
-            console.error("Error signing out:", error);
-        });
-    } else {
-        loginModal.style.display = 'flex';
+function convertToLocalTime(isoTimestamp) {
+    const date = new Date(isoTimestamp);
+    return date.toLocaleString();
+}
+
+window.addEventListener('focus', () => {
+    if (isChatOpen) {
+        clearUnreadIndicator();
     }
-}
+});
 
-function signInWithProvider(provider) {
-    signInWithPopup(auth, provider).then(result => {
-        currentUser = result.user;
-        loginModal.style.display = 'none';
-        checkUsername();
-    }).catch(error => {
-        console.error(`Error during ${provider.providerId} login:`, error);
-    });
+if (chatButton) {
+    chatButton.addEventListener('click', toggleChat);
+} else {
+    console.error("Chat button not found");
 }
+    </script>
+</body>
+</html>
+const chatButton = document.querySelector('.chat-button');
+const loginButton = document.getElementById('login-button');
+const loginModal = document.getElementById('login-modal');
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const messageInput = document.getElementById('message-input');
 
-function handleAuthStateChange(user) {
-    if (user) {
-        currentUser = user;
-        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-        loginButton.setAttribute('aria-label', 'Logout');
-        if (!hasSetUsername) {
-            checkUsername();
+const minecraftColorMap = {
+    black: '#000000',
+    dark_blue: '#0000AA',
+    dark_green: '#00AA00',
+    dark_aqua: '#00AAAA',
+    dark_red: '#AA0000',
+    dark_purple: '#AA00AA',
+    gold: '#FFAA00',
+    gray: '#AAAAAA',
+    dark_gray: '#555555',
+    blue: '#5555FF',
+    green: '#55FF55',
+    aqua: '#55FFFF',
+    red: '#FF5555',
+    light_purple: '#FF55FF',
+    yellow: '#FFFF55',
+    white: '#FFFFFF'
+};
+
+function toggleChat() {
+    isChatOpen = !isChatOpen;
+    if (chatContainer) {
+        chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+        if (isChatOpen) {
+            scrollChatToBottom();
+            clearUnreadIndicator();
         }
     } else {
-        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
-        loginButton.setAttribute('aria-label', 'Login');
-        currentUser = null;
-        username = null;
-        hasSetUsername = false;
-        removeMessagesListener();
+        console.error("Chat container not found");
     }
 }
 
-function checkUsername() {
-    if (isSettingUsername || hasSetUsername) return;
-    
-    isSettingUsername = true;
-    const userRef = ref(database, `users/${currentUser.uid}`);
-    get(userRef).then(snapshot => {
-        if (snapshot.exists()) {
-            username = snapshot.val().username;
-            hasSetUsername = true;
-            loadMessages();
-        } else {
-            showUsernameModal();
-        }
-    }).catch(error => {
-        console.error("Error checking username:", error);
-        showUsernameModal();
-    }).finally(() => {
-        isSettingUsername = false;
-    });
+function handleNewMessage(message) {
+    if (!isChatOpen) {
+        showUnreadIndicator();
+    }
+    if (isChatOpen && isScrolledToBottom()) {
+        scrollChatToBottom();
+    }
 }
 
-function showUsernameModal() {
-    usernameModal.style.display = 'flex';
-    usernameInput.focus();
+function isScrolledToBottom() {
+    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
 }
 
-function handleSetUsername() {
-    const newUsername = usernameInput.value.trim();
-    if (newUsername) {
-        saveUsername(newUsername);
+function showUnreadIndicator() {
+    unreadMessages++;
+    document.querySelector('.chat-button .unread-dot').style.display = 'block';
+}
+
+function clearUnreadIndicator() {
+    unreadMessages = 0;
+    document.querySelector('.chat-button .unread-dot').style.display = 'none';
+}
+
+function scrollChatToBottom() {
+    if (messagesList) {
+        messagesList.scrollTop = messagesList.scrollHeight;
     } else {
-        alert(translations[currentLanguage].usernameEmpty);
+        console.error("Messages list not found");
     }
 }
 
-function saveUsername(newUsername) {
-    const usernamesRef = ref(database, 'users');
-    const usernameQuery = query(usernamesRef, orderByChild('username'), equalTo(newUsername));
+function displayMessage(message) {
+    const li = document.createElement('li');
+    li.className = message.sender === username ? 'sent' : 'received';
 
-    get(usernameQuery).then(snapshot => {
-        if (snapshot.exists()) {
-            showUsernameError(translations.usernameExists[currentLanguage]);
-            usernameInput.value = '';
-            usernameInput.focus();
-        } else {
-            set(ref(database, `users/${currentUser.uid}`), {
-                username: newUsername
-            }).then(() => {
-                username = newUsername;
-                hasSetUsername = true;
-                usernameModal.style.display = 'none';
-                loadMessages();
-            }).catch(error => {
-                console.error("Error saving username:", error);
-                showUsernameError(translations.errorSavingUsername[currentLanguage]);
-            });
-        }
-    }).catch(error => {
-        console.error("Error checking username uniqueness:", error);
-        showUsernameError(translations.errorCheckingUsername[currentLanguage]);
-    });
-}
-
-function showUsernameError(message) {
-    const errorElement = document.getElementById('username-error');
-    if (!errorElement) {
-        const newErrorElement = document.createElement('p');
-        newErrorElement.id = 'username-error';
-        newErrorElement.style.color = 'red';
-        newErrorElement.style.marginTop = '10px';
-        document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+    if (message.sender === developerUsername) {
+        li.classList.add('developer');
     }
-    document.getElementById('username-error').textContent = message;
+
+    const messageHeader = document.createElement('div');
+    messageHeader.className = 'message-header';
+
+    const img = document.createElement('img');
+    img.src = message.avatar || 'default-avatar.png';
+    img.alt = message.sender;
+
+    const usernameSpan = document.createElement('span');
+    usernameSpan.className = 'username';
+    usernameSpan.textContent = message.sender;
+
+    messageHeader.appendChild(img);
+    messageHeader.appendChild(usernameSpan);
+
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = message.content;
+
+    const messageTime = document.createElement('div');
+    messageTime.className = 'message-time';
+    messageTime.textContent = convertToLocalTime(message.timestamp);
+
+    li.appendChild(messageHeader);
+    li.appendChild(messageContent);
+    li.appendChild(messageTime);
+
+    messagesList.appendChild(li);
+    scrollChatToBottom();
 }
 
-function removeMessagesListener() {
+function loadMessages() {
+    if (!chatContainer) {
+        console.error("Chat container not found");
+        return;
+    }
     if (messagesRef) {
-        messagesRef = null;
+        return;
     }
-    messagesList.innerHTML = '';
+    messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+    
+    const loadTimestamp = new Date().getTime();
+    
+    onChildAdded(messagesRef, (snapshot) => {
+        const message = snapshot.val();
+        displayMessage(message);
+        
+        if (new Date(message.timestamp).getTime() > loadTimestamp) {
+            handleNewMessage(message);
+        }
+    });
 }
 
 function convertToLocalTime(isoTimestamp) {
@@ -1098,345 +1089,25 @@ function convertToLocalTime(isoTimestamp) {
     return date.toLocaleString();
 }
 
-function sendMessage() {
-    if (username && messageInput.value.trim()) {
-        const timestamp = new Date().toISOString();
-
-        push(ref(database, 'messages'), {
-            sender: username,
-            avatar: currentUser?.photoURL || "default-avatar.png",
-            content: messageInput.value,
-            timestamp: timestamp
-        }).then(() => {
-            messageInput.value = '';
-            messageInput.focus();
-        }).catch(error => {
-            console.error("Error sending message:", error);
-        });
+window.addEventListener('focus', () => {
+    if (isChatOpen) {
+        clearUnreadIndicator();
     }
+});
+
+if (chatButton) {
+    chatButton.addEventListener('click', toggleChat);
+} else {
+    console.error("Chat button not found");
 }
 
-function handleMessageInputKeypress(e) {
-    if (e.key === 'Enter') {
-        sendMessage();
-        e.preventDefault();
-    }
-}
+const translations = {
+    // ... all translation key-value pairs ...
+};
 
-function toggleTheme() {
-    if (body.getAttribute('data-theme') === 'light') {
-        body.setAttribute('data-theme', 'dark');
-    } else {
-        body.setAttribute('data-theme', 'light');
-    }
-    savePreferences();
-}
-
-function toggleLanguage() {
-    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
-    translatePage();
-    updateUI();
-    savePreferences();
-}
-
-function savePreferences() {
-    localStorage.setItem('theme', body.getAttribute('data-theme'));
-    localStorage.setItem('language', currentLanguage);
-}
-
-function loadPreferences() {
-    const savedTheme = localStorage.getItem('theme');
-    const savedLanguage = localStorage.getItem('language');
-
-    if (savedTheme) {
-        body.setAttribute('data-theme', savedTheme);
-    }
-    if (savedLanguage) {
-        currentLanguage = savedLanguage;
-        translatePage();
-    }
-}
-
-function translatePage() {
-    Object.keys(translations).forEach(key => {
-        const element = document.getElementById(key);
-        if (element) {
-            element.textContent = translations[key][currentLanguage];
-        }
-    });
-    
-    // Translate content type options
-    document.getElementById('plainTextOption').textContent = translations.plainText[currentLanguage];
-    document.getElementById('translatedTextOption').textContent = translations.translatedText[currentLanguage];
-    document.getElementById('scoreOption').textContent = translations.score[currentLanguage];
-    document.getElementById('selectorOption').textContent = translations.selector[currentLanguage];
-    document.getElementById('keybindOption').textContent = translations.keybind[currentLanguage];
-    document.getElementById('nbtOption').textContent = translations.nbt[currentLanguage];
-    document.getElementById('linebreakOption').textContent = translations.linebreak[currentLanguage];
-
-    // Translate JSON indentation options
-    const indentationSelect = document.getElementById('indentation');
-    indentationSelect.options[0].text = translations.none[currentLanguage];
-    indentationSelect.options[1].text = translations.twoSpaces[currentLanguage];
-    indentationSelect.options[2].text = translations.fourSpaces[currentLanguage];
-    
-    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
-    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
-    
-    // Update the error message if it exists
-    const errorElement = document.getElementById('username-error');
-    if (errorElement && errorElement.textContent) {
-        errorElement.textContent = translations.usernameExists[currentLanguage];
-    }
-}
-
-function handleGeneratorRedirect(e) {
-    e.preventDefault();
-    const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
-    if (generator) {
-        let targetUrl;
-        switch (generator) {
-            case 'text':
-                targetUrl = 'https://nosmc.github.io/generator/text';
-                break;
-            case 'item':
-                targetUrl = 'https://nosmc.github.io/generator/item';
-                break;
-            case 'entity':
-                targetUrl = 'https://nosmc.github.io/generator/entity';
-                break;
-            default:
-                console.error('Unknown generator type:', generator);
-                return;
-        }
-
-        function linkExists(url, callback) {
-            fetch(url, { method: 'HEAD' })
-                .then(response => callback(response.ok))
-                .catch(() => callback(false));
-        }
-
-        linkExists(targetUrl, function(exists) {
-            if (exists) {
-                window.location.href = targetUrl;
-            } else {
-                window.location.href = 'https://nosmc.github.io/';
-            }
-        });
-    }
-}
-
-function initializePage() {
-    loadPreferences();
-    translatePage();
-    updateUI();
-}
-
-function createContent(type, data = {}) {
-    return {
-        type: type,
-        data: {
-            text: data.text || '',
-            translate: data.translate || '',
-            with: data.with || [],
-            scoreName: data.scoreName || '',
-            scoreObjective: data.scoreObjective || '',
-            selector: data.selector || '',
-            keybind: data.keybind || '',
-            nbtPath: data.nbtPath || '',
-            nbtSource: data.nbtSource || 'entity',
-            storageSource: data.storageSource || '',
-            interpret: data.interpret || false,
-            color: data.color || 'none',
-            bold: data.bold || false,
-            italic: data.italic || false,
-            underlined: data.underlined || false,
-            strikethrough: data.strikethrough || false,
-            obfuscated: data.obfuscated || false
-        },
-        clickEvent: { action: '', value: '' },
-        hoverEvent: { action: '', contents: [] }
-    };
-}
-
-function addContent(type) {
-    let newContent;
-    if (type === 'translatedText') {
-        newContent = createContent(type, { translate: '', with: [] });
-    } else {
-        newContent = createContent(type);
-    }
-    contents.push(newContent);
-    updateUI();
-    saveContents();
-}
-
-function updateUI() {
-    const contentList = document.getElementById('content-list');
-    contentList.innerHTML = '';
-
-    contents.forEach((content, index) => {
-        const div = document.createElement('div');
-        div.className = 'content';
-        div.setAttribute('role', 'region');
-        div.setAttribute('aria-labelledby', `content-label-${index}`);
-        div.setAttribute('draggable', true);
-
-        const contentLabel = document.createElement('label');
-        contentLabel.className = 'content-label';
-        contentLabel.id = `content-label-${index}`;
-        const typeTranslation = translations[content.type] ? translations[content.type][currentLanguage] : content.type;
-        contentLabel.innerHTML = `<i class="fas fa-cube"></i> ${translations.contentLabel[currentLanguage].replace('{number}', index + 1).replace('{type}', typeTranslation)}`;
-        div.appendChild(contentLabel);
-
-        // Add input fields based on content type
-        if (content.type === 'plainText') {
-            addTextInput(div, content, 'text', translations.enterText[currentLanguage]);
-        } else if (content.type === 'translatedText') {
-            addTextInput(div, content, 'translate', translations.enterTranslationKey[currentLanguage]);
-            addWithInputs(div, content);
-        } else if (content.type === 'score') {
-            addTextInput(div, content, 'scoreName', translations.enterScoreName[currentLanguage]);
-            addTextInput(div, content, 'scoreObjective', translations.enterScoreObjective[currentLanguage]);
-        } else if (content.type === 'selector') {
-            addTextInput(div, content, 'selector', translations.enterSelector[currentLanguage]);
-        } else if (content.type === 'keybind') {
-            addTextInput(div, content, 'keybind', translations.enterKeybind[currentLanguage]);
-        } else if (content.type === 'nbt') {
-            addTextInput(div, content, 'nbtPath', translations.enterNbtPath[currentLanguage]);
-            addNbtSourceSelect(div, content);
-            addCheckbox(div, content, 'interpret', translations.interpret[currentLanguage]);
-        }
-
-        // Add formatting options
-        if (content.type !== 'linebreak') {
-            addFormattingOptions(div, content);
-            addEventOptions(div, content);
-        }
-
-        // Add control buttons
-        addControlButtons(div, index);
-
-        // Add drag-and-drop event listeners
-        addDragAndDropListeners(div, index);
-
-        contentList.appendChild(div);
-    });
-
-    updateOutputAndPreview();
-}
-
-function addTextInput(parent, content, field, placeholder) {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = placeholder;
-    input.value = content.data[field];
-    input.addEventListener('input', () => {
-        content.data[field] = input.value;
-        updateOutputAndPreview();
-        saveContents();
-    });
-    parent.appendChild(input);
-}
-
-function addWithInputs(parent, content) {
-    if (!Array.isArray(content.data.with)) {
-        content.data.with = [];
-    }
-    
-    content.data.with.forEach((withContent, withIndex) => {
-        const withDiv = document.createElement('div');
-        addTextInput(withDiv, withContent, 'text', `${translations.enterText[currentLanguage]} ${withIndex + 1}`);
-        const deleteWithButton = createButton(translations.delete[currentLanguage], 'fa-trash', () => {
-            content.data.with.splice(withIndex, 1);
-            updateUI();
-            saveContents();
-        });
-        withDiv.appendChild(deleteWithButton);
-        parent.appendChild(withDiv);
-    });
-
-    const addWithButton = createButton(translations.addContent[currentLanguage], 'fa-plus', () => {
-        content.data.with.push(createContent('plainText', { text: '' }));
-        updateUI();
-        saveContents();
-    });
-    parent.appendChild(addWithButton);
-}
-
-function addNbtSourceSelect(parent, content) {
-    const select = document.createElement('select');
-    ['entity', 'block', 'storage'].forEach(source => {
-        const option = document.createElement('option');
-        option.value = source;
-        option.textContent = translations[source][currentLanguage];
-        option.selected = content.data.nbtSource === source;
-        select.appendChild(option);
-    });
-    select.addEventListener('change', () => {
-        content.data.nbtSource = select.value;
-        updateOutputAndPreview();
-        saveContents();
-    });
-    parent.appendChild(select);
-
-    if (content.data.nbtSource === 'storage') {
-        addTextInput(parent, content, 'storageSource', translations.enterNbtPath[currentLanguage]);
-    }
-}
-
-function addCheckbox(parent, content, field, label) {
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = content.data && content.data[field] || false;
-    checkbox.addEventListener('change', () => {
-        if (!content.data) content.data = {};
-        content.data[field] = checkbox.checked;
-        updateOutputAndPreview();
-        saveContents();
-    });
-    const labelElement = document.createElement('label');
-    labelElement.appendChild(checkbox);
-    labelElement.appendChild(document.createTextNode(label));
-    parent.appendChild(labelElement);
-}
-
-function addFormattingOptions(parent, content) {
-    const formattingDiv = document.createElement('div');
-    formattingDiv.className = 'formatting-options';
-
-    // Color selection
-    const colorSelect = document.createElement('select');
-    
-    // Add "none" option
-    const noneOption = document.createElement('option');
-    noneOption.value = 'none';
-    noneOption.textContent = translations.none[currentLanguage];
-    noneOption.selected = !content.data.color || content.data.color === 'none';
-    colorSelect.appendChild(noneOption);
-
-    Object.keys(minecraftColorMap).forEach(color => {
-        const option = document.createElement('option');
-        option.value = color;
-        option.textContent = translations[color][currentLanguage];
-        option.selected = content.data && content.data.color === color;
-        colorSelect.appendChild(option);
-    });
-    colorSelect.addEventListener('change', () => {
-        if (!content.data) content.data = {};
-        content.data.color = colorSelect.value;
-        updateOutputAndPreview();
-        saveContents();
-    });
-    formattingDiv.appendChild(colorSelect);
-
-    // Text properties
-    ['bold', 'italic', 'underlined', 'strikethrough', 'obfuscated'].forEach(prop => {
-        addCheckbox(formattingDiv, content, prop, translations[prop][currentLanguage]);
-    });
-
-    parent.appendChild(formattingDiv);
-}
+// Initialize the page
+initializePage();
+</script>
 
 function addEventOptions(parent, content) {
     // Click event options
@@ -2247,6 +1918,3 @@ const translations = {
 
 // Initialize the page
 initializePage();
-    </script>
-</body>
-</html>
