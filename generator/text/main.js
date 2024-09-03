@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { translations } from "https://nosmc.github.io/common/translations.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -31,6 +32,8 @@ let hasSetUsername = false;
 let contents = JSON.parse(localStorage.getItem('contents')) || [];
 let dragSrcIndex = null;
 let scrollInterval = null;
+let unreadMessages = 0;
+let isChatOpen = false;
 
 const minecraftColorMap = {
     black: '#000000',
@@ -110,10 +113,11 @@ auth.onAuthStateChanged(handleAuthStateChange);
 
 // Functions
 function toggleChat() {
-    const isChatOpen = chatContainer.style.display === 'flex';
-    chatContainer.style.display = isChatOpen ? 'none' : 'flex';
-    if (!isChatOpen) {
-        messagesList.scrollTop = messagesList.scrollHeight;
+    isChatOpen = !isChatOpen;
+    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+    if (isChatOpen) {
+        scrollChatToBottom();
+        clearUnreadIndicator();
     }
 }
 
@@ -240,10 +244,30 @@ function loadMessages() {
         return;
     }
     messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+    
+    const loadTimestamp = new Date().getTime();
+    
     onChildAdded(messagesRef, (snapshot) => {
         const message = snapshot.val();
         displayMessage(message);
+        
+        if (new Date(message.timestamp).getTime() > loadTimestamp) {
+            handleNewMessage(message);
+        }
     });
+}
+
+function handleNewMessage(message) {
+    if (!isChatOpen) {
+        showUnreadIndicator();
+    }
+    if (isChatOpen && isScrolledToBottom()) {
+        scrollChatToBottom();
+    }
+}
+
+function isScrolledToBottom() {
+    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
 }
 
 function removeMessagesListener() {
@@ -266,39 +290,34 @@ function displayMessage(message) {
         li.classList.add('developer');
     }
 
+    const messageHeader = document.createElement('div');
+    messageHeader.className = 'message-header';
+
     const img = document.createElement('img');
     img.src = message.avatar || 'default-avatar.png';
     img.alt = message.sender;
-
-    const messageHeader = document.createElement('div');
-    messageHeader.className = 'message-header';
 
     const usernameSpan = document.createElement('span');
     usernameSpan.className = 'username';
     usernameSpan.textContent = message.sender;
 
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'time';
-    timeSpan.textContent = convertToLocalTime(message.timestamp);
+    messageHeader.appendChild(img);
+    messageHeader.appendChild(usernameSpan);
 
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content';
     messageContent.textContent = message.content;
 
-    messageHeader.appendChild(usernameSpan);
-    messageHeader.appendChild(timeSpan);
-
-    if (li.className.includes('sent')) {
-        messageHeader.appendChild(img);
-    } else {
-        messageHeader.insertBefore(img, usernameSpan);
-    }
+    const messageTime = document.createElement('div');
+    messageTime.className = 'message-time';
+    messageTime.textContent = convertToLocalTime(message.timestamp);
 
     li.appendChild(messageHeader);
     li.appendChild(messageContent);
-    messagesList.appendChild(li);
+    li.appendChild(messageTime);
 
-    messagesList.scrollTop = messagesList.scrollHeight;
+    messagesList.appendChild(li);
+    scrollChatToBottom();
 }
 
 function sendMessage() {
@@ -313,6 +332,7 @@ function sendMessage() {
         }).then(() => {
             messageInput.value = '';
             messageInput.focus();
+            scrollChatToBottom();
         }).catch(error => {
             console.error("Error sending message:", error);
         });
@@ -797,6 +817,29 @@ function stopAutoScroll() {
     clearInterval(scrollInterval);
 }
 
+function showUnreadIndicator() {
+    unreadMessages++;
+    document.querySelector('.chat-button .unread-dot').style.display = 'block';
+}
+
+function clearUnreadIndicator() {
+    unreadMessages = 0;
+    document.querySelector('.chat-button .unread-dot').style.display = 'none';
+}
+
+window.addEventListener('focus', () => {
+    if (isChatOpen) {
+        clearUnreadIndicator();
+    }
+});
+
+function scrollChatToBottom() {
+    messagesList.scrollTop = messagesList.scrollHeight;
+}
+
+// Initialize the page
+initializePage();
+
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.content:not(.dragging)')];
 
@@ -895,9 +938,35 @@ function updateOutputAndPreview() {
 
     const indentation = document.getElementById('indentation').value;
     const jsonOutput = JSON.stringify(output, null, indentation === 'none' ? 0 : parseInt(indentation));
-    document.getElementById('json-area').value = jsonOutput;
+    
+    // Update the JSON editor with highlighted content
+    const jsonEditor = document.getElementById('json-editor');
+    jsonEditor.innerHTML = highlightJson(jsonOutput);
 
     updatePreview(output);
+}
+
+function highlightJson(json) {
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?|[{}\[\]]|,|:)/g, function (match) {
+        let cls = 'number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'key';
+            } else {
+                cls = 'string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+        } else if (/null/.test(match)) {
+            cls = 'null';
+        } else if (/[{}\[\]]/.test(match)) {
+            cls = 'bracket';
+        } else if (/,|:/.test(match)) {
+            cls = 'punctuation';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+    }).split('\n').map(line => `<span class="line">${line}</span>`).join('\n');
 }
 
 function updatePreview(output) {
@@ -970,29 +1039,13 @@ function updatePreview(output) {
     });
 }
 
-function copyJsonToClipboard() {
-    const jsonArea = document.getElementById('json-area');
-    jsonArea.select();
-    document.execCommand('copy');
-}
-
-function clearAll() {
-    contents = [];
-    updateUI();
-    document.getElementById('json-area').value = '';
-    document.getElementById('preview-content').innerHTML = '';
-    localStorage.removeItem('contents');
-}
-
-function saveContents() {
-    localStorage.setItem('contents', JSON.stringify(contents));
-}
-
-// JSON input event listener
-document.getElementById('json-area').addEventListener('input', debounce(() => {
-    const jsonArea = document.getElementById('json-area').value;
+// Add an event listener for changes to the JSON editor
+document.getElementById('json-editor').addEventListener('input', debounce(() => {
+    const jsonEditor = document.getElementById('json-editor');
     try {
-        const parsedContents = JSON.parse(jsonArea);
+        // Remove highlighting when parsing
+        const jsonContent = jsonEditor.innerText;
+        const parsedContents = JSON.parse(jsonContent);
         contents = parsedContents.map(parseJsonContent).filter(Boolean);
         updateUI();
         saveContents();
@@ -1000,6 +1053,26 @@ document.getElementById('json-area').addEventListener('input', debounce(() => {
         console.error("Invalid JSON input", e);
     }
 }, 300));
+
+function copyJsonToClipboard() {
+    const jsonEditor = document.getElementById('json-editor');
+    const jsonContent = jsonEditor.innerText;
+    navigator.clipboard.writeText(jsonContent).then(() => {
+        alert('JSON copied to clipboard!');
+    });
+}
+
+function clearAll() {
+    contents = [];
+    updateUI();
+    document.getElementById('json-editor').innerHTML = '';
+    document.getElementById('preview-content').innerHTML = '';
+    localStorage.removeItem('contents');
+}
+
+function saveContents() {
+    localStorage.setItem('contents', JSON.stringify(contents));
+}
 
 function parseJsonContent(content) {
     if (typeof content === 'string' && content === '\n') {
@@ -1067,386 +1140,6 @@ function debounce(func, delay) {
         timeout = setTimeout(() => func.apply(this, args), delay);
     };
 }
-
-// Translations
-const translations = {
-    headerTitle: {
-        en: "Text Component Generator",
-        zh: "文本組件生成器"
-    },
-    home: {
-        en: "Home",
-        zh: "主頁"
-    },
-    generators: {
-        en: "Generators",
-        zh: "生成器"
-    },
-    generatorText: {
-        en: "Text",
-        zh: "文字"
-    },
-    generatorItem: {
-        en: "Item",
-        zh: "物品"
-    },
-    generatorEntity: {
-        en: "Entity",
-        zh: "實體"
-    },
-    contentList: {
-        en: "Content List",
-        zh: "內容列表"
-    },
-    addContent: {
-        en: "Add Content",
-        zh: "添加內容"
-    },
-    jsonEditor: {
-        en: "JSON Editor",
-        zh: "JSON 編輯器"
-    },
-    preview: {
-        en: "Preview",
-        zh: "預覽"
-    },
-    copyJson: {
-        en: "Copy JSON",
-        zh: "複製 JSON"
-    },
-    clearAll: {
-        en: "Clear All",
-        zh: "清除所有"
-    },
-    contentType: {
-        en: "Content Type:",
-        zh: "內容類型："
-    },
-    jsonIndentation: {
-        en: "JSON Indentation:",
-        zh: "JSON 縮進："
-    },
-    none: {
-        en: "None",
-        zh: "無"
-    },
-    twoSpaces: {
-        en: "2 Spaces",
-        zh: "2 個空格"
-    },
-    fourSpaces: {
-        en: "4 Spaces",
-        zh: "4 個空格"
-    },
-    plainText: {
-        en: "Plain Text",
-        zh: "純文本"
-    },
-    translatedText: {
-        en: "Translated Text",
-        zh: "翻譯文本"
-    },
-    score: {
-        en: "Score",
-        zh: "分數"
-    },
-    selector: {
-        en: "Selector",
-        zh: "選擇器"
-    },
-    keybind: {
-        en: "Keybind",
-        zh: "按鍵綁定"
-    },
-    nbt: {
-        en: "NBT",
-        zh: "NBT"
-    },
-    linebreak: {
-        en: "Line Break",
-        zh: "換行"
-    },
-    enterText: {
-        en: "Enter text",
-        zh: "輸入文本"
-    },
-    enterTranslationKey: {
-        en: "Enter translation key",
-        zh: "輸入翻譯鍵"
-    },
-    enterScoreName: {
-        en: "Enter score name",
-        zh: "輸入分數名稱"
-    },
-    enterScoreObjective: {
-        en: "Enter score objective",
-        zh: "輸入分數目標"
-    },
-    enterSelector: {
-        en: "Enter selector",
-        zh: "輸入選擇器"
-    },
-    enterKeybind: {
-        en: "Enter keybind",
-        zh: "輸入按鍵綁定"
-    },
-    enterNbtPath: {
-        en: "Enter NBT path",
-        zh: "輸入 NBT 路徑"
-    },
-    entity: {
-        en: "Entity",
-        zh: "實體"
-    },
-    block: {
-        en: "Block",
-        zh: "方塊"
-    },
-    storage: {
-        en: "Storage",
-        zh: "存儲"
-    },
-    interpret: {
-        en: "Interpret",
-        zh: "解釋"
-    },
-    noClickEvent: {
-        en: "No Click Event",
-        zh: "無點擊事件"
-    },
-    open_url: {
-        en: "Open URL",
-        zh: "打開 URL"
-    },
-    open_file: {
-        en: "Open File",
-        zh: "打開文件"
-    },
-    run_command: {
-        en: "Run Command",
-        zh: "運行命令"
-    },
-    suggest_command: {
-        en: "Suggest Command",
-        zh: "建議命令"
-    },
-    change_page: {
-        en: "Change Page",
-        zh: "更改頁面"
-    },
-    copy_to_clipboard: {
-        en: "Copy to Clipboard",
-        zh: "複製到剪貼板"
-    },
-    noHoverEvent: {
-        en: "No Hover Event",
-        zh: "無懸停事件"
-    },
-    show_text: {
-        en: "Show Text",
-        zh: "顯示文本"
-    },
-    show_item: {
-        en: "Show Item",
-        zh: "顯示物品"
-    },
-    show_entity: {
-        en: "Show Entity",
-        zh: "顯示實體"
-    },
-    bold: {
-        en: "Bold",
-        zh: "粗體"
-    },
-    italic: {
-        en: "Italic",
-        zh: "斜體"
-    },
-    underlined: {
-        en: "Underlined",
-        zh: "下劃線"
-    },
-    strikethrough: {
-        en: "Strikethrough",
-        zh: "刪除線"
-    },
-    obfuscated: {
-        en: "Obfuscated",
-        zh: "模糊"
-    },
-    clickEvent: {
-        en: "Click Event:",
-        zh: "點擊事件："
-    },
-    hoverEvent: {
-        en: "Hover Event:",
-        zh: "懸停事件："
-    },
-    moveUp: {
-        en: "Move Up",
-        zh: "上移"
-    },
-    moveDown: {
-        en: "Move Down",
-        zh: "下移"
-    },
-    duplicate: {
-        en: "Duplicate",
-        zh: "複製"
-    },
-    delete: {
-        en: "Delete",
-        zh: "刪除"
-    },
-    contentLabel: {
-        en: "Content {number} ({type})",
-        zh: "內容 {number} ({type})"
-    },
-    black: {
-        en: "Black",
-        zh: "黑色"
-    },
-    dark_blue: {
-        en: "Dark Blue",
-        zh: "深藍色"
-    },
-    dark_green: {
-        en: "Dark Green",
-        zh: "深綠色"
-    },
-    dark_aqua: {
-        en: "Dark Aqua",
-        zh: "深青色"
-    },
-    dark_red: {
-        en: "Dark Red",
-        zh: "深紅色"
-    },
-    dark_purple: {
-        en: "Dark Purple",
-        zh: "深紫色"
-    },
-    gold: {
-        en: "Gold",
-        zh: "金色"
-    },
-    gray: {
-        en: "Gray",
-        zh: "灰色"
-    },
-    dark_gray: {
-        en: "Dark Gray",
-        zh: "深灰色"
-    },
-    blue: {
-        en: "Blue",
-        zh: "藍色"
-    },
-    green: {
-        en: "Green",
-        zh: "綠色"
-    },
-    aqua: {
-        en: "Aqua",
-        zh: "青色"
-    },
-    red: {
-        en: "Red",
-        zh: "紅色"
-    },
-    light_purple: {
-        en: "Light Purple",
-        zh: "淺紫色"
-    },
-    yellow: {
-        en: "Yellow",
-        zh: "黃色"
-    },
-    white: {
-        en: "White",
-        zh: "白色"
-    },
-    chatTitle: {
-        en: "Chat",
-        zh: "聊天"
-    },
-    sendButtonText: {
-        en: "Send",
-        zh: "發送"
-    },
-    typeAMessage: {
-        en: "Type a message...",
-        zh: "輸入消息..."
-    },
-    chooseLoginMethod: {
-        en: "Choose a Login Method",
-        zh: "選擇登錄方式"
-    },
-    youtube: {
-        en: "YouTube",
-        zh: "YouTube"
-    },
-    instagram: {
-        en: "Instagram",
-        zh: "Instagram"
-    },
-    discord: {
-        en: "Discord",
-        zh: "Discord"
-    },
-    developedBy: {
-        en: "Developed by nos",
-        zh: "由 nos 開發"
-    },
-    donate: {
-        en: "Donate",
-        zh: "捐贈"
-    },
-    enterUsername: {
-        en: "Please set your username:",
-        zh: "請設置您的用戶名："
-    },
-    usernameExists: {
-        en: "Username already exists. Please choose another one.",
-        zh: "用戶名已存在。請選擇另一個。"
-    },
-    loginWithGoogle: {
-        en: "Login with Google",
-        zh: "使用 Google 登錄"
-    },
-    loginWithGithub: {
-        en: "Login with GitHub",
-        zh: "使用 GitHub 登錄"
-    },
-    cancelLogin: {
-        en: "Cancel",
-        zh: "取消"
-    },
-    setUsernameTitle: {
-        en: "Set Your Username",
-        zh: "設置您的用戶名"
-    },
-    setUsernameBtn: {
-        en: "Set Username",
-        zh: "設置用戶名"
-    },
-    cancelSetUsername: {
-        en: "Cancel",
-        zh: "取消"
-    },
-    usernameEmpty: {
-        en: "Username cannot be empty",
-        zh: "用戶名不能為空"
-    },
-    errorSavingUsername: {
-        en: "Error saving username. Please try again.",
-        zh: "保存用戶名時出錯。請重試。"
-    },
-    errorCheckingUsername: {
-        en: "Error checking username. Please try again.",
-        zh: "檢查用戶名時出錯。請重試。"
-    }
-};
 
 // Initialize the page
 initializePage();
