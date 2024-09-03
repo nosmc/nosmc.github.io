@@ -437,10 +437,10 @@ textarea#json-area,
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
-.chat-button .unread-dot {
+.unread-dot {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: 0;
+    right: 0;
     width: 10px;
     height: 10px;
     background-color: red;
@@ -489,75 +489,57 @@ textarea#json-area,
 #chat-messages li {
     margin-bottom: 20px;
     display: flex;
-    align-items: flex-start;
     flex-direction: column;
-    width: 100%;
+    max-width: 80%;
 }
 
 #chat-messages li.sent {
-    text-align: right;
+    align-self: flex-end;
     align-items: flex-end;
 }
 
-#chat-messages li.received {
-    text-align: left;
-    align-items: flex-start;
-}
-
-#chat-messages li.developer .message-content {
-    background-color: var(--developer-message-bg);
-    color: var(--developer-message-text-color);
-}
-
-#chat-messages li .message-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    width: 100%;
-}
-
 #chat-messages li.sent .message-header {
-    justify-content: flex-end;
-}
-
-#chat-messages li.received .message-header {
-    justify-content: flex-start;
-}
-
-#chat-messages li img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-
-#chat-messages li.sent .message-header .time {
-    order: 1;
-    margin-right: var(--time-username-spacing);
-}
-
-#chat-messages li.sent .message-header .username {
-    order: 2;
-    margin-right: var(--time-username-spacing);
+    flex-direction: row-reverse;
 }
 
 #chat-messages li.sent .message-header img {
-    order: 3;
+    margin-left: 5px;
     margin-right: 0;
-    margin-left: var(--time-username-spacing);
+}
+
+#chat-messages li.sent .username {
+    margin-right: 5px;
+    margin-left: 0;
+}
+
+#chat-messages .message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+#chat-messages .message-header img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
 }
 
 #chat-messages li.received .message-header img {
-    order: 1;
-    margin-right: var(--time-username-spacing);
+    margin-right: 5px;
 }
 
-#chat-messages li.received .message-header .username {
-    order: 2;
-    margin-right: var(--time-username-spacing);
+#chat-messages .username {
+    font-weight: bold;
 }
 
-#chat-messages li.received .message-header .time {
-    order: 3;
+#chat-messages li.received .username {
+    margin-left: 5px;
+}
+
+#chat-messages li.received {
+    align-self: flex-start;
+    align-items: flex-start;
 }
 
 #chat-messages .message-content {
@@ -565,7 +547,6 @@ textarea#json-area,
     border-radius: 10px;
     background-color: var(--received-message-bg);
     color: var(--received-message-text-color);
-    max-width: 100%;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
@@ -573,7 +554,30 @@ textarea#json-area,
 #chat-messages li.sent .message-content {
     background-color: var(--sent-message-bg);
     color: var(--sent-message-text-color);
-    margin-left: auto;
+}
+
+#chat-messages li.developer .message-content {
+    background-color: var(--developer-message-bg);
+    color: var(--developer-message-text-color);
+}
+
+#chat-messages li.developer .username {
+    color: var(--developer-link-color);
+}
+
+#chat-messages .message-time {
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 5px;
+    align-self: flex-end;
+}
+
+#chat-messages li.sent .message-time {
+    align-self: flex-end;
+}
+
+#chat-messages li.received .message-time {
+    align-self: flex-start;
 }
 
 #chat-input {
@@ -661,16 +665,6 @@ textarea#json-area,
 
 .close-modal:hover {
     color: var(--primary-color);
-}
-
-@media (max-width: 768px) {
-    #chat-container {
-        width: 100%;
-        height: 100%;
-        right: 0;
-        bottom: 0;
-        border-radius: 0;
-    }
 }
     </style>
 </head>
@@ -832,8 +826,6 @@ let hasSetUsername = false;
 let contents = JSON.parse(localStorage.getItem('contents')) || [];
 let dragSrcIndex = null;
 let scrollInterval = null;
-let unreadMessages = 0;
-let isChatOpen = false;
 
 const minecraftColorMap = {
     black: '#000000',
@@ -911,48 +903,13 @@ window.addEventListener('DOMContentLoaded', initializePage);
 // Firebase Auth State Change
 auth.onAuthStateChanged(handleAuthStateChange);
 
-// Add event listener for window focus
-window.addEventListener('focus', () => {
-    if (isChatOpen) {
-        clearUnreadIndicator();
-    }
-});
-
 // Functions
 function toggleChat() {
-    isChatOpen = !isChatOpen;
-    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-    if (isChatOpen) {
-        scrollChatToBottom();
-        clearUnreadIndicator();
-    }
-}
-
-function handleNewMessage(message) {
+    const isChatOpen = chatContainer.style.display === 'flex';
+    chatContainer.style.display = isChatOpen ? 'none' : 'flex';
     if (!isChatOpen) {
-        showUnreadIndicator();
+        messagesList.scrollTop = messagesList.scrollHeight;
     }
-    if (isChatOpen && isScrolledToBottom()) {
-        scrollChatToBottom();
-    }
-}
-
-function isScrolledToBottom() {
-    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
-}
-
-function showUnreadIndicator() {
-    unreadMessages++;
-    document.querySelector('.chat-button .unread-dot').style.display = 'block';
-}
-
-function clearUnreadIndicator() {
-    unreadMessages = 0;
-    document.querySelector('.chat-button .unread-dot').style.display = 'none';
-}
-
-function scrollChatToBottom() {
-    messagesList.scrollTop = messagesList.scrollHeight;
 }
 
 function handleLoginButtonClick() {
