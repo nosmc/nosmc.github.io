@@ -261,7 +261,6 @@ function handleNewMessage(message) {
     if (!isChatOpen) {
         showUnreadIndicator();
     }
-    // If the chat is open and the user is at the bottom, scroll to the new message
     if (isChatOpen && isScrolledToBottom()) {
         scrollChatToBottom();
     }
