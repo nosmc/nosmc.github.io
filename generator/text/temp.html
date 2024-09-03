@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Component Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
     <style>
         :root {
     --background-color-light: #f0f0f0;
@@ -86,13 +87,12 @@ header, footer {
     width: 100%;
     background-color: var(--panel-background-color);
     padding: 10px;
-    box-shadow: var(--shadow);
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: fixed;
     z-index: 1000;
-    transition: background-color var(--transition-speed), box-shadow var(--transition-speed), color var(--transition-speed);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 header {
@@ -103,7 +103,7 @@ header {
 footer {
     bottom: 0;
     left: 0;
-    color: var(--footer-link-color);
+    color: var(--text-color);
 }
 
 header h1, footer p {
@@ -437,17 +437,6 @@ textarea#json-area,
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
-.chat-button .unread-dot {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 10px;
-    height: 10px;
-    background-color: red;
-    border-radius: 50%;
-    display: none;
-}
-
 #chat-container {
     width: 400px;
     height: 500px;
@@ -660,6 +649,25 @@ textarea#json-area,
 .close-modal:hover {
     color: var(--primary-color);
 }
+
+@media (max-width: 768px) {
+    #chat-container {
+        width: 100%;
+        height: 100%;
+        right: 0;
+        bottom: 0;
+        border-radius: 0;
+    }
+
+    .header-right {
+        flex-wrap: wrap;
+    }
+
+    .home-button, .dropdown-button, .button {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
     </style>
 </head>
 <body data-theme="dark">
@@ -730,9 +738,9 @@ textarea#json-area,
 
     <footer>
         <div class="footer-links">
-            <a href="https://www.youtube.com/@n_os_" target="_blank" style="color: #FF0000;" aria-label="YouTube"><i class="fab fa-youtube"></i> <span id="youtube">YouTube</span></a>
-            <a href="https://www.instagram.com/" target="_blank" style="color: #E1306C;" aria-label="Instagram"><i class="fab fa-instagram"></i> <span id="instagram">Instagram</span></a>
-            <a href="https://discord.gg/Pah6vw36Tw" target="_blank" style="color: #7289DA;" aria-label="Discord"><i class="fab fa-discord"></i> <span id="discord">Discord</span></a>
+            <a href="https://www.youtube.com/@n_os_" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i> <span id="youtube">YouTube</span></a>
+            <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i> <span id="instagram">Instagram</span></a>
+            <a href="https://discord.gg/Pah6vw36Tw" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> <span id="discord">Discord</span></a>
         </div>
         <p>
             <a id="developer-link" href="https://github.com/nosmc" target="_blank">&copy; <span id="developedBy">Developed by nos</span></a>
@@ -788,30 +796,30 @@ textarea#json-area,
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
     <script type="module">
         // Import Firebase SDKs
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
-    authDomain: "minecraft-generators.firebaseapp.com",
-    databaseURL: "https://minecraft-generators-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "minecraft-generators",
-    storageBucket: "minecraft-generators.appspot.com",
-    messagingSenderId: "191346462383",
-    appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
-    measurementId: "G-QJT1XPTPDZ"
-};
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
+            authDomain: "minecraft-generators.firebaseapp.com",
+            databaseURL: "https://minecraft-generators-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "minecraft-generators",
+            storageBucket: "minecraft-generators.appspot.com",
+            messagingSenderId: "191346462383",
+            appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
+            measurementId: "G-QJT1XPTPDZ"
+        };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
 
-// Global variables
-let currentUser = null;
-let username = null;
+        // Global variables
+        let currentUser = null;
+        let username = null;
 let messagesRef = null;
 const developerUsername = "nos";
 let currentLanguage = 'en';
@@ -820,6 +828,8 @@ let hasSetUsername = false;
 let contents = JSON.parse(localStorage.getItem('contents')) || [];
 let dragSrcIndex = null;
 let scrollInterval = null;
+let unreadMessages = 0;
+let isChatOpen = false;
 
 const minecraftColorMap = {
     black: '#000000',
@@ -899,11 +909,39 @@ auth.onAuthStateChanged(handleAuthStateChange);
 
 // Functions
 function toggleChat() {
-    const isChatOpen = chatContainer.style.display === 'flex';
-    chatContainer.style.display = isChatOpen ? 'none' : 'flex';
-    if (!isChatOpen) {
-        messagesList.scrollTop = messagesList.scrollHeight;
+    isChatOpen = !isChatOpen;
+    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+    if (isChatOpen) {
+        scrollChatToBottom();
+        clearUnreadIndicator();
     }
+}
+
+function handleNewMessage(message) {
+    if (!isChatOpen) {
+        showUnreadIndicator();
+    }
+    if (isChatOpen && isScrolledToBottom()) {
+        scrollChatToBottom();
+    }
+}
+
+function isScrolledToBottom() {
+    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+}
+
+function showUnreadIndicator() {
+    unreadMessages++;
+    document.querySelector('.chat-button .unread-dot').style.display = 'block';
+}
+
+function clearUnreadIndicator() {
+    unreadMessages = 0;
+    document.querySelector('.chat-button .unread-dot').style.display = 'none';
+}
+
+function scrollChatToBottom() {
+    messagesList.scrollTop = messagesList.scrollHeight;
 }
 
 function handleLoginButtonClick() {
@@ -1029,16 +1067,9 @@ function loadMessages() {
         return;
     }
     messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
-    
-    const loadTimestamp = new Date().getTime();
-    
     onChildAdded(messagesRef, (snapshot) => {
         const message = snapshot.val();
         displayMessage(message);
-        
-        if (new Date(message.timestamp).getTime() > loadTimestamp) {
-            handleNewMessage(message);
-        }
     });
 }
 
@@ -1940,7 +1971,7 @@ const translations = {
     },
     translatedText: {
         en: "Translated Text",
-        zh: "譯文本"
+        zh: "翻譯文本"
     },
     score: {
         en: "Score",
