@@ -1,3 +1,40 @@
+// Import Firebase SDKs
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { translations } from "https://nosmc.github.io/common/translations.js";
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
+    authDomain: "minecraft-generators.firebaseapp.com",
+    databaseURL: "https://minecraft-generators-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "minecraft-generators",
+    storageBucket: "minecraft-generators.appspot.com",
+    messagingSenderId: "191346462383",
+    appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
+    measurementId: "G-QJT1XPTPDZ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// Global variables
+let currentUser = null;
+let username = null;
+let messagesRef = null;
+const developerUsername = "nos";
+let currentLanguage = 'en';
+let isSettingUsername = false;
+let hasSetUsername = false;
+let contents = JSON.parse(localStorage.getItem('contents')) || [];
+let dragSrcIndex = null;
+let scrollInterval = null;
+let unreadMessages = 0;
+let isChatOpen = false;
+
 const minecraftColorMap = {
     black: '#000000',
     dark_blue: '#0000AA',
@@ -17,10 +54,39 @@ const minecraftColorMap = {
     white: '#FFFFFF'
 };
 
-let contents = JSON.parse(localStorage.getItem('contents')) || [];
-let dragSrcIndex = null;
-let scrollInterval = null;
+// DOM elements
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const messagesList = document.getElementById('chat-messages');
+const chatContainer = document.getElementById('chat-container');
+const chatButton = document.querySelector('.chat-button');
+const loginButton = document.getElementById('login-btn');
+const loginModal = document.getElementById('login-modal');
+const closeLoginModal = document.getElementById('close-login-modal');
+const googleLoginBtn = document.getElementById('login-google');
+const githubLoginBtn = document.getElementById('login-github');
+const themeSwitcher = document.getElementById('theme-switcher');
+const body = document.body;
+const languageSwitcher = document.getElementById('language-switcher');
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const setUsernameBtn = document.getElementById('setUsernameBtn');
+const closeUsernameModal = document.getElementById('close-username-modal');
 
+// Auth Providers
+const githubProvider = new GithubAuthProvider();
+const googleProvider = new GoogleAuthProvider();
+
+// Event Listeners
+chatButton.addEventListener('click', toggleChat);
+loginButton.addEventListener('click', handleLoginButtonClick);
+closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', handleMessageInputKeypress);
+themeSwitcher.addEventListener('click', toggleTheme);
+languageSwitcher.addEventListener('click', toggleLanguage);
 document.getElementById('add-content-btn').addEventListener('click', () => {
     const contentType = document.getElementById('content-type').value;
     addContent(contentType);
@@ -28,6 +94,366 @@ document.getElementById('add-content-btn').addEventListener('click', () => {
 document.getElementById('copy-json-btn').addEventListener('click', copyJsonToClipboard);
 document.getElementById('clear-all-btn').addEventListener('click', clearAll);
 document.getElementById('indentation').addEventListener('change', updateOutputAndPreview);
+setUsernameBtn.addEventListener('click', handleSetUsername);
+closeUsernameModal.addEventListener('click', () => {
+    usernameModal.style.display = 'none';
+    signOut(auth);
+});
+
+// Dropdown Menu Redirection
+document.querySelectorAll('.dropdown-content a').forEach(link => {
+    link.addEventListener('click', handleGeneratorRedirect);
+});
+
+// Initialize the page
+window.addEventListener('DOMContentLoaded', initializePage);
+
+// Firebase Auth State Change
+auth.onAuthStateChanged(handleAuthStateChange);
+
+// Functions
+function toggleChat() {
+    isChatOpen = !isChatOpen;
+    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+    if (isChatOpen) {
+        scrollChatToBottom();
+        clearUnreadIndicator();
+    }
+}
+
+function handleLoginButtonClick() {
+    if (currentUser) {
+        signOut(auth).then(() => {
+            currentUser = null;
+            username = null;
+            hasSetUsername = false;
+            removeMessagesListener();
+        }).catch(error => {
+            console.error("Error signing out:", error);
+        });
+    } else {
+        loginModal.style.display = 'flex';
+    }
+}
+
+function signInWithProvider(provider) {
+    signInWithPopup(auth, provider).then(result => {
+        currentUser = result.user;
+        loginModal.style.display = 'none';
+        checkUsername();
+    }).catch(error => {
+        console.error(`Error during ${provider.providerId} login:`, error);
+    });
+}
+
+function handleAuthStateChange(user) {
+    if (user) {
+        currentUser = user;
+        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+        loginButton.setAttribute('aria-label', 'Logout');
+        if (!hasSetUsername) {
+            checkUsername();
+        }
+    } else {
+        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+        loginButton.setAttribute('aria-label', 'Login');
+        currentUser = null;
+        username = null;
+        hasSetUsername = false;
+        removeMessagesListener();
+    }
+}
+
+function checkUsername() {
+    if (isSettingUsername || hasSetUsername) return;
+    
+    isSettingUsername = true;
+    const userRef = ref(database, `users/${currentUser.uid}`);
+    get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+            username = snapshot.val().username;
+            hasSetUsername = true;
+            loadMessages();
+        } else {
+            showUsernameModal();
+        }
+    }).catch(error => {
+        console.error("Error checking username:", error);
+        showUsernameModal();
+    }).finally(() => {
+        isSettingUsername = false;
+    });
+}
+
+function showUsernameModal() {
+    usernameModal.style.display = 'flex';
+    usernameInput.focus();
+}
+
+function handleSetUsername() {
+    const newUsername = usernameInput.value.trim();
+    if (newUsername) {
+        saveUsername(newUsername);
+    } else {
+        alert(translations[currentLanguage].usernameEmpty);
+    }
+}
+
+function saveUsername(newUsername) {
+    const usernamesRef = ref(database, 'users');
+    const usernameQuery = query(usernamesRef, orderByChild('username'), equalTo(newUsername));
+
+    get(usernameQuery).then(snapshot => {
+        if (snapshot.exists()) {
+            showUsernameError(translations.usernameExists[currentLanguage]);
+            usernameInput.value = '';
+            usernameInput.focus();
+        } else {
+            set(ref(database, `users/${currentUser.uid}`), {
+                username: newUsername
+            }).then(() => {
+                username = newUsername;
+                hasSetUsername = true;
+                usernameModal.style.display = 'none';
+                loadMessages();
+            }).catch(error => {
+                console.error("Error saving username:", error);
+                showUsernameError(translations.errorSavingUsername[currentLanguage]);
+            });
+        }
+    }).catch(error => {
+        console.error("Error checking username uniqueness:", error);
+        showUsernameError(translations.errorCheckingUsername[currentLanguage]);
+    });
+}
+
+function showUsernameError(message) {
+    const errorElement = document.getElementById('username-error');
+    if (!errorElement) {
+        const newErrorElement = document.createElement('p');
+        newErrorElement.id = 'username-error';
+        newErrorElement.style.color = 'red';
+        newErrorElement.style.marginTop = '10px';
+        document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+    }
+    document.getElementById('username-error').textContent = message;
+}
+
+function loadMessages() {
+    if (messagesRef) {
+        return;
+    }
+    messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+    
+    const loadTimestamp = new Date().getTime();
+    
+    onChildAdded(messagesRef, (snapshot) => {
+        const message = snapshot.val();
+        displayMessage(message);
+        
+        if (new Date(message.timestamp).getTime() > loadTimestamp) {
+            handleNewMessage(message);
+        }
+    });
+}
+
+function handleNewMessage(message) {
+    if (!isChatOpen) {
+        showUnreadIndicator();
+    }
+    if (isChatOpen && isScrolledToBottom()) {
+        scrollChatToBottom();
+    }
+}
+
+function isScrolledToBottom() {
+    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+}
+
+function removeMessagesListener() {
+    if (messagesRef) {
+        messagesRef = null;
+    }
+    messagesList.innerHTML = '';
+}
+
+function convertToLocalTime(isoTimestamp) {
+    const date = new Date(isoTimestamp);
+    return date.toLocaleString();
+}
+
+function displayMessage(message) {
+    const li = document.createElement('li');
+    li.className = message.sender === username ? 'sent' : 'received';
+
+    if (message.sender === developerUsername) {
+        li.classList.add('developer');
+    }
+
+    const messageHeader = document.createElement('div');
+    messageHeader.className = 'message-header';
+
+    const img = document.createElement('img');
+    img.src = message.avatar || 'default-avatar.png';
+    img.alt = message.sender;
+
+    const usernameSpan = document.createElement('span');
+    usernameSpan.className = 'username';
+    usernameSpan.textContent = message.sender;
+
+    messageHeader.appendChild(img);
+    messageHeader.appendChild(usernameSpan);
+
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = message.content;
+
+    const messageTime = document.createElement('div');
+    messageTime.className = 'message-time';
+    messageTime.textContent = convertToLocalTime(message.timestamp);
+
+    li.appendChild(messageHeader);
+    li.appendChild(messageContent);
+    li.appendChild(messageTime);
+
+    messagesList.appendChild(li);
+    scrollChatToBottom();
+}
+
+function sendMessage() {
+    if (username && messageInput.value.trim()) {
+        const timestamp = new Date().toISOString();
+
+        push(ref(database, 'messages'), {
+            sender: username,
+            avatar: currentUser?.photoURL || "default-avatar.png",
+            content: messageInput.value,
+            timestamp: timestamp
+        }).then(() => {
+            messageInput.value = '';
+            messageInput.focus();
+            scrollChatToBottom();
+        }).catch(error => {
+            console.error("Error sending message:", error);
+        });
+    }
+}
+
+function handleMessageInputKeypress(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+        e.preventDefault();
+    }
+}
+
+function toggleTheme() {
+    if (body.getAttribute('data-theme') === 'light') {
+        body.setAttribute('data-theme', 'dark');
+    } else {
+        body.setAttribute('data-theme', 'light');
+    }
+    savePreferences();
+}
+
+function toggleLanguage() {
+    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+    translatePage();
+    updateUI();
+    savePreferences();
+}
+
+function savePreferences() {
+    localStorage.setItem('theme', body.getAttribute('data-theme'));
+    localStorage.setItem('language', currentLanguage);
+}
+
+function loadPreferences() {
+    const savedTheme = localStorage.getItem('theme');
+    const savedLanguage = localStorage.getItem('language');
+
+    if (savedTheme) {
+        body.setAttribute('data-theme', savedTheme);
+    }
+    if (savedLanguage) {
+        currentLanguage = savedLanguage;
+        translatePage();
+    }
+}
+
+function translatePage() {
+    Object.keys(translations).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            element.textContent = translations[key][currentLanguage];
+        }
+    });
+    
+    // Translate content type options
+    document.getElementById('plainTextOption').textContent = translations.plainText[currentLanguage];
+    document.getElementById('translatedTextOption').textContent = translations.translatedText[currentLanguage];
+    document.getElementById('scoreOption').textContent = translations.score[currentLanguage];
+    document.getElementById('selectorOption').textContent = translations.selector[currentLanguage];
+    document.getElementById('keybindOption').textContent = translations.keybind[currentLanguage];
+    document.getElementById('nbtOption').textContent = translations.nbt[currentLanguage];
+    document.getElementById('linebreakOption').textContent = translations.linebreak[currentLanguage];
+
+    // Translate JSON indentation options
+    const indentationSelect = document.getElementById('indentation');
+    indentationSelect.options[0].text = translations.none[currentLanguage];
+    indentationSelect.options[1].text = translations.twoSpaces[currentLanguage];
+    indentationSelect.options[2].text = translations.fourSpaces[currentLanguage];
+    
+    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+    
+    // Update the error message if it exists
+    const errorElement = document.getElementById('username-error');
+    if (errorElement && errorElement.textContent) {
+        errorElement.textContent = translations.usernameExists[currentLanguage];
+    }
+}
+
+function handleGeneratorRedirect(e) {
+    e.preventDefault();
+    const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
+    if (generator) {
+        let targetUrl;
+        switch (generator) {
+            case 'text':
+                targetUrl = 'https://nosmc.github.io/generator/text';
+                break;
+            case 'item':
+                targetUrl = 'https://nosmc.github.io/generator/item';
+                break;
+            case 'entity':
+                targetUrl = 'https://nosmc.github.io/generator/entity';
+                break;
+            default:
+                console.error('Unknown generator type:', generator);
+                return;
+        }
+
+        function linkExists(url, callback) {
+            fetch(url, { method: 'HEAD' })
+                .then(response => callback(response.ok))
+                .catch(() => callback(false));
+        }
+
+        linkExists(targetUrl, function(exists) {
+            if (exists) {
+                window.location.href = targetUrl;
+            } else {
+                window.location.href = 'https://nosmc.github.io/';
+            }
+        });
+    }
+}
+
+function initializePage() {
+    loadPreferences();
+    translatePage();
+    updateUI();
+}
 
 function createContent(type, data = {}) {
     return {
@@ -391,6 +817,29 @@ function stopAutoScroll() {
     clearInterval(scrollInterval);
 }
 
+function showUnreadIndicator() {
+    unreadMessages++;
+    document.querySelector('.chat-button .unread-dot').style.display = 'block';
+}
+
+function clearUnreadIndicator() {
+    unreadMessages = 0;
+    document.querySelector('.chat-button .unread-dot').style.display = 'none';
+}
+
+window.addEventListener('focus', () => {
+    if (isChatOpen) {
+        clearUnreadIndicator();
+    }
+});
+
+function scrollChatToBottom() {
+    messagesList.scrollTop = messagesList.scrollHeight;
+}
+
+// Initialize the page
+initializePage();
+
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.content:not(.dragging)')];
 
@@ -691,3 +1140,6 @@ function debounce(func, delay) {
         timeout = setTimeout(() => func.apply(this, args), delay);
     };
 }
+
+// Initialize the page
+initializePage();
