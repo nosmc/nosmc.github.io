@@ -473,6 +473,19 @@ textarea#json-area,
     flex-direction: column;
 }
 
+#chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+#chat-messages::-webkit-scrollbar-track {
+    background: var(--panel-background-color);
+}
+
+#chat-messages::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-color);
+    border-radius: 10px;
+}
+
 #chat-messages li {
     margin-bottom: 20px;
     display: flex;
@@ -489,6 +502,16 @@ textarea#json-area,
     flex-direction: row-reverse;
 }
 
+#chat-messages li.sent .message-header img {
+    margin-left: 5px;
+    margin-right: 0;
+}
+
+#chat-messages li.sent .username {
+    margin-right: 5px;
+    margin-left: 0;
+}
+
 #chat-messages .message-header {
     display: flex;
     align-items: center;
@@ -500,11 +523,18 @@ textarea#json-area,
     width: 24px;
     height: 24px;
     border-radius: 50%;
+}
+
+#chat-messages li.received .message-header img {
     margin-right: 5px;
 }
 
 #chat-messages .username {
     font-weight: bold;
+}
+
+#chat-messages li.received .username {
+    margin-left: 5px;
 }
 
 #chat-messages li.received {
@@ -535,102 +565,95 @@ textarea#json-area,
     color: var(--developer-link-color);
 }
 
-#chat-messages .message-time {
-    font-size: 0.8em;
-    color: #888;
-    margin-top: 5px;
-    align-self: flex-end;
-}
-
-#chat-messages li.received .message-time {
-    align-self: flex-start;
-}
-
 #chat-input {
     display: flex;
     padding: 10px;
-    background-color: var(--panel-background-color);
     border-top: 1px solid var(--border-color);
 }
 
-#chat-input input {
+#message-input {
     flex: 1;
-    padding: 10px;
+    padding: 8px;
     border: 1px solid var(--border-color);
-    border-radius: 5px;
+    border-radius: 4px;
     margin-right: 10px;
-    background-color: var(--panel-background-color);
-    color: var(--text-color);
 }
 
-#chat-input button {
-    padding: 10px 20px;
-    border: none;
+#send-button {
     background-color: var(--primary-color);
     color: white;
-    border-radius: 5px;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#chat-input button:hover {
-    background-color: var(--primary-color-dark);
-    transform: translateY(-2px);
 }
 
 #login-modal, #username-modal {
     display: none;
     position: fixed;
-    top: 0;
+    z-index: 1003;
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
     background-color: var(--modal-background-color);
-    z-index: 1100;
-    align-items: center;
     justify-content: center;
+    align-items: center;
 }
 
 #login-modal-content, #username-modal-content {
     background-color: var(--modal-content-background);
     padding: 20px;
     border-radius: 10px;
+    width: 300px;
     text-align: center;
 }
 
-#login-modal-content h3, #username-modal-content h3 {
-    margin-bottom: 20px;
-    color: var(--text-color);
-}
-
-.login-method-button, #setUsernameBtn {
-    margin: 10px;
-    padding: 10px 20px;
+.login-method-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
     background-color: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
-    transition: all 0.3s ease;
-}
-
-.login-method-button:hover, #setUsernameBtn:hover {
-    background-color: var(--primary-color-dark);
-    transform: translateY(-2px);
 }
 
 .close-modal {
-    margin-top: 20px;
-    cursor: pointer;
     color: var(--text-color);
-    font-size: 14px;
-    text-decoration: underline;
-    transition: all 0.3s ease;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-.close-modal:hover {
+.close-modal:hover,
+.close-modal:focus {
     color: var(--primary-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#username-input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+#setUsernameBtn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
     </style>
 </head>
@@ -748,7 +771,7 @@ textarea#json-area,
         <div id="username-modal-content">
             <h3 id="setUsernameTitle">Set Your Username</h3>
             <input type="text" id="username-input" placeholder="Enter your username">
-            <!-- The error message will be inserted here -->
+            <p id="username-error" style="color: red; display: none;"></p>
             <button id="setUsernameBtn">Set Username</button>
             <div class="close-modal" id="close-username-modal">
                 <span id="cancelSetUsername">Cancel</span>
@@ -786,484 +809,463 @@ let currentUser = null;
 let username = null;
 let messagesRef = null;
 const developerUsername = "nos";
-let currentLanguage = 'en';
 let isSettingUsername = false;
 let hasSetUsername = false;
-let contents = JSON.parse(localStorage.getItem('contents')) || [];
-let dragSrcIndex = null;
-let isChatOpen = false;
 let unreadMessages = 0;
+let isChatOpen = false;
 
 // DOM elements
-const body = document.body;
+const chatButton = document.querySelector('.chat-button');
 const chatContainer = document.getElementById('chat-container');
 const messagesList = document.getElementById('chat-messages');
-const chatButton = document.querySelector('.chat-button');
-const loginButton = document.getElementById('login-button');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const loginButton = document.getElementById('login-btn');
 const loginModal = document.getElementById('login-modal');
+const closeLoginModal = document.getElementById('close-login-modal');
+const googleLoginBtn = document.getElementById('login-google');
+const githubLoginBtn = document.getElementById('login-github');
 const usernameModal = document.getElementById('username-modal');
 const usernameInput = document.getElementById('username-input');
-const messageInput = document.getElementById('message-input');
+const setUsernameBtn = document.getElementById('setUsernameBtn');
+const closeUsernameModal = document.getElementById('close-username-modal');
+const unreadDot = document.querySelector('.unread-dot');
 
-const minecraftColorMap = {
-    black: '#000000',
-    dark_blue: '#0000AA',
-    dark_green: '#00AA00',
-    dark_aqua: '#00AAAA',
-    dark_red: '#AA0000',
-    dark_purple: '#AA00AA',
-    gold: '#FFAA00',
-    gray: '#AAAAAA',
-    dark_gray: '#555555',
-    blue: '#5555FF',
-    green: '#55FF55',
-    aqua: '#55FFFF',
-    red: '#FF5555',
-    light_purple: '#FF55FF',
-    yellow: '#FFFF55',
-    white: '#FFFFFF'
-};
+// Firebase providers
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
-const translations = {
-    // ... all translation key-value pairs ...
-};
-
-// Initialize the page
-initializePage();
-
-function toggleChat() {
-    isChatOpen = !isChatOpen;
-    if (chatContainer) {
-        chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-        if (isChatOpen) {
-            scrollChatToBottom();
-            clearUnreadIndicator();
-        }
-    } else {
-        console.error("Chat container not found");
-    }
-}
-
-function handleNewMessage(message) {
-    if (!isChatOpen) {
-        showUnreadIndicator();
-    }
-    if (isChatOpen && isScrolledToBottom()) {
-        scrollChatToBottom();
-    }
-}
-
-function isScrolledToBottom() {
-    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
-}
-
-function showUnreadIndicator() {
-    unreadMessages++;
-    document.querySelector('.chat-button .unread-dot').style.display = 'block';
-}
-
-function clearUnreadIndicator() {
-    unreadMessages = 0;
-    document.querySelector('.chat-button .unread-dot').style.display = 'none';
-}
-
-function scrollChatToBottom() {
-    if (messagesList) {
-        messagesList.scrollTop = messagesList.scrollHeight;
-    } else {
-        console.error("Messages list not found");
-    }
-}
-
-function displayMessage(message) {
-    const li = document.createElement('li');
-    li.className = message.sender === username ? 'sent' : 'received';
-
-    if (message.sender === developerUsername) {
-        li.classList.add('developer');
-    }
-
-    const messageHeader = document.createElement('div');
-    messageHeader.className = 'message-header';
-
-    const img = document.createElement('img');
-    img.src = message.avatar || 'default-avatar.png';
-    img.alt = message.sender;
-
-    const usernameSpan = document.createElement('span');
-    usernameSpan.className = 'username';
-    usernameSpan.textContent = message.sender;
-
-    messageHeader.appendChild(img);
-    messageHeader.appendChild(usernameSpan);
-
-    const messageContent = document.createElement('div');
-    messageContent.className = 'message-content';
-    messageContent.textContent = message.content;
-
-    const messageTime = document.createElement('div');
-    messageTime.className = 'message-time';
-    messageTime.textContent = convertToLocalTime(message.timestamp);
-
-    li.appendChild(messageHeader);
-    li.appendChild(messageContent);
-    li.appendChild(messageTime);
-
-    messagesList.appendChild(li);
-    scrollChatToBottom();
-}
-
-function loadMessages() {
-    if (!chatContainer) {
-        console.error("Chat container not found");
-        return;
-    }
-    if (messagesRef) {
-        return;
-    }
-    messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
-    
-    const loadTimestamp = new Date().getTime();
-    
-    onChildAdded(messagesRef, (snapshot) => {
-        const message = snapshot.val();
-        displayMessage(message);
-        
-        if (new Date(message.timestamp).getTime() > loadTimestamp) {
-            handleNewMessage(message);
-        }
-    });
-}
-
-function convertToLocalTime(isoTimestamp) {
-    const date = new Date(isoTimestamp);
-    return date.toLocaleString();
-}
-
-window.addEventListener('focus', () => {
-    if (isChatOpen) {
-        clearUnreadIndicator();
-    }
+// Event listeners
+chatButton.addEventListener('click', toggleChat);
+loginButton.addEventListener('click', handleLoginButtonClick);
+closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
+githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', handleMessageInputKeypress);
+setUsernameBtn.addEventListener('click', handleSetUsername);
+closeUsernameModal.addEventListener('click', () => {
+    usernameModal.style.display = 'none';
+    signOut(auth);
 });
 
-if (chatButton) {
-    chatButton.addEventListener('click', toggleChat);
-} else {
-    console.error("Chat button not found");
-}
-    </script>
-</body>
-</html>
-const chatButton = document.querySelector('.chat-button');
-const loginButton = document.getElementById('login-button');
-const loginModal = document.getElementById('login-modal');
-const usernameModal = document.getElementById('username-modal');
-const usernameInput = document.getElementById('username-input');
-const messageInput = document.getElementById('message-input');
-
-const minecraftColorMap = {
-    black: '#000000',
-    dark_blue: '#0000AA',
-    dark_green: '#00AA00',
-    dark_aqua: '#00AAAA',
-    dark_red: '#AA0000',
-    dark_purple: '#AA00AA',
-    gold: '#FFAA00',
-    gray: '#AAAAAA',
-    dark_gray: '#555555',
-    blue: '#5555FF',
-    green: '#55FF55',
-    aqua: '#55FFFF',
-    red: '#FF5555',
-    light_purple: '#FF55FF',
-    yellow: '#FFFF55',
-    white: '#FFFFFF'
-};
-
+// Functions
 function toggleChat() {
     isChatOpen = !isChatOpen;
-    if (chatContainer) {
-        chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-        if (isChatOpen) {
-            scrollChatToBottom();
-            clearUnreadIndicator();
-        }
-    } else {
-        console.error("Chat container not found");
-    }
-}
-
-function handleNewMessage(message) {
-    if (!isChatOpen) {
-        showUnreadIndicator();
-    }
-    if (isChatOpen && isScrolledToBottom()) {
-        scrollChatToBottom();
-    }
-}
-
-function isScrolledToBottom() {
-    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
-}
-
-function showUnreadIndicator() {
-    unreadMessages++;
-    document.querySelector('.chat-button .unread-dot').style.display = 'block';
-}
-
-function clearUnreadIndicator() {
-    unreadMessages = 0;
-    document.querySelector('.chat-button .unread-dot').style.display = 'none';
-}
-
-function scrollChatToBottom() {
-    if (messagesList) {
-        messagesList.scrollTop = messagesList.scrollHeight;
-    } else {
-        console.error("Messages list not found");
-    }
-}
-
-function displayMessage(message) {
-    const li = document.createElement('li');
-    li.className = message.sender === username ? 'sent' : 'received';
-
-    if (message.sender === developerUsername) {
-        li.classList.add('developer');
-    }
-
-    const messageHeader = document.createElement('div');
-    messageHeader.className = 'message-header';
-
-    const img = document.createElement('img');
-    img.src = message.avatar || 'default-avatar.png';
-    img.alt = message.sender;
-
-    const usernameSpan = document.createElement('span');
-    usernameSpan.className = 'username';
-    usernameSpan.textContent = message.sender;
-
-    messageHeader.appendChild(img);
-    messageHeader.appendChild(usernameSpan);
-
-    const messageContent = document.createElement('div');
-    messageContent.className = 'message-content';
-    messageContent.textContent = message.content;
-
-    const messageTime = document.createElement('div');
-    messageTime.className = 'message-time';
-    messageTime.textContent = convertToLocalTime(message.timestamp);
-
-    li.appendChild(messageHeader);
-    li.appendChild(messageContent);
-    li.appendChild(messageTime);
-
-    messagesList.appendChild(li);
-    scrollChatToBottom();
-}
-
-function loadMessages() {
-    if (!chatContainer) {
-        console.error("Chat container not found");
-        return;
-    }
-    if (messagesRef) {
-        return;
-    }
-    messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
-    
-    const loadTimestamp = new Date().getTime();
-    
-    onChildAdded(messagesRef, (snapshot) => {
-        const message = snapshot.val();
-        displayMessage(message);
-        
-        if (new Date(message.timestamp).getTime() > loadTimestamp) {
-            handleNewMessage(message);
-        }
-    });
-}
-
-function convertToLocalTime(isoTimestamp) {
-    const date = new Date(isoTimestamp);
-    return date.toLocaleString();
-}
-
-window.addEventListener('focus', () => {
+    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
     if (isChatOpen) {
+        messagesList.scrollTop = messagesList.scrollHeight;
         clearUnreadIndicator();
     }
-});
-
-if (chatButton) {
-    chatButton.addEventListener('click', toggleChat);
-} else {
-    console.error("Chat button not found");
 }
 
-const translations = {
-    // ... all translation key-value pairs ...
-};
-
-// Initialize the page
-initializePage();
-</script>
-
-function addEventOptions(parent, content) {
-    // Click event options
-    const clickEventDiv = document.createElement('div');
-    clickEventDiv.className = 'event-options';
-    const clickEventLabel = document.createElement('label');
-    clickEventLabel.textContent = translations.clickEvent[currentLanguage];
-    clickEventDiv.appendChild(clickEventLabel);
-
-    const clickEventSelect = document.createElement('select');
-    ['', 'open_url', 'open_file', 'run_command', 'suggest_command', 'change_page', 'copy_to_clipboard'].forEach(action => {
-        const option = document.createElement('option');
-        option.value = action;
-        option.textContent = translations[action || 'noClickEvent'][currentLanguage];
-        option.selected = content.clickEvent.action === action;
-        clickEventSelect.appendChild(option);
-    });
-    clickEventSelect.addEventListener('change', () => {
-        content.clickEvent.action = clickEventSelect.value;
-        updateClickAndHoverEventInputs(clickEventValueInput, clickEventSelect.value);
-        updateOutputAndPreview();
-        saveContents();
-    });
-    clickEventDiv.appendChild(clickEventSelect);
-
-    const clickEventValueInput = document.createElement('input');
-    clickEventValueInput.type = 'text';
-    clickEventValueInput.placeholder = translations.enterText[currentLanguage];
-    clickEventValueInput.value = content.clickEvent.value;
-    clickEventValueInput.style.display = content.clickEvent.action ? 'inline' : 'none';
-    clickEventValueInput.addEventListener('input', () => {
-        content.clickEvent.value = clickEventValueInput.value;
-        updateOutputAndPreview();
-        saveContents();
-    });
-    clickEventDiv.appendChild(clickEventValueInput);
-    parent.appendChild(clickEventDiv);
-
-    // Hover event options
-    const hoverEventDiv = document.createElement('div');
-    hoverEventDiv.className = 'event-options';
-    const hoverEventLabel = document.createElement('label');
-    hoverEventLabel.textContent = translations.hoverEvent[currentLanguage];
-    hoverEventDiv.appendChild(hoverEventLabel);
-
-    const hoverEventSelect = document.createElement('select');
-    ['', 'show_text', 'show_item', 'show_entity'].forEach(action => {
-        const option = document.createElement('option');
-        option.value = action;
-        option.textContent = translations[action || 'noHoverEvent'][currentLanguage];
-        option.selected = content.hoverEvent.action === action;
-        hoverEventSelect.appendChild(option);
-    });
-    hoverEventSelect.addEventListener('change', () => {
-        content.hoverEvent.action = hoverEventSelect.value;
-        updateClickAndHoverEventInputs(hoverEventContentsInput, hoverEventSelect.value);
-        updateOutputAndPreview();
-        saveContents();
-    });
-    hoverEventDiv.appendChild(hoverEventSelect);
-
-    const hoverEventContentsInput = document.createElement('input');
-    hoverEventContentsInput.type = 'text';
-    hoverEventContentsInput.placeholder = translations.enterText[currentLanguage];
-    hoverEventContentsInput.value = content.hoverEvent.contents.map(content => content.text).join(', ');
-    hoverEventContentsInput.style.display = content.hoverEvent.action ? 'inline' : 'none';
-    hoverEventContentsInput.addEventListener('input', () => {
-        content.hoverEvent.contents = hoverEventContentsInput.value.split(',').map(item => ({ text: item.trim() }));
-        updateOutputAndPreview();
-        saveContents();
-    });
-    hoverEventDiv.appendChild(hoverEventContentsInput);
-    parent.appendChild(hoverEventDiv);
+function handleLoginButtonClick() {
+    if (currentUser) {
+        signOut(auth).then(() => {
+            currentUser = null;
+            username = null;
+            hasSetUsername = false;
+            removeMessagesListener();
+        }).catch(error => {
+            console.error("Error signing out:", error);
+        });
+    } else {
+        loginModal.style.display = 'flex';
+    }
 }
 
-function addControlButtons(parent, index) {
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'content-controls';
-
-    const moveUpBtn = createButton(translations.moveUp[currentLanguage], 'fa-arrow-up', () => moveContent(index, -1));
-    const moveDownBtn = createButton(translations.moveDown[currentLanguage], 'fa-arrow-down', () => moveContent(index, 1));
-    const duplicateBtn = createButton(translations.duplicate[currentLanguage], 'fa-clone', () => duplicateContent(index));
-    const deleteBtn = createButton(translations.delete[currentLanguage], 'fa-trash', () => deleteContent(index));
-
-    controlsDiv.appendChild(moveUpBtn);
-    controlsDiv.appendChild(moveDownBtn);
-    controlsDiv.appendChild(duplicateBtn);
-    controlsDiv.appendChild(deleteBtn);
-
-    parent.appendChild(controlsDiv);
+function signInWithProvider(provider) {
+    signInWithPopup(auth, provider).then(result => {
+        currentUser = result.user;
+        loginModal.style.display = 'none';
+        checkUsername();
+    }).catch(error => {
+        console.error(`Error during ${provider.providerId} login:`, error);
+    });
 }
 
-function createButton(text, iconClass, onClick) {
-    const button = document.createElement('button');
-    button.className = 'button button-accent';
-    button.innerHTML = `<i class="fas ${iconClass}"></i> ${text}`;
-    button.addEventListener('click', onClick);
-    return button;
-}
-
-function addDragAndDropListeners(div, index) {
-    div.addEventListener('dragstart', () => {
-        dragSrcIndex = index;
-        div.classList.add('dragging');
-        startAutoScroll();
-    });
-
-    div.addEventListener('dragend', () => {
-        div.classList.remove('dragging');
-        stopAutoScroll();
-        updateUI();
-    });
-
-    div.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const draggingElement = document.querySelector('.dragging');
-        const contentList = document.getElementById('content-list');
-        const afterElement = getDragAfterElement(contentList, e.clientY);
-        if (afterElement == null) {
-            contentList.appendChild(draggingElement);
+function checkUsername() {
+    get(ref(database, `users/${currentUser.uid}/username`)).then(snapshot => {
+        if (snapshot.exists()) {
+            username = snapshot.val();
+            hasSetUsername = true;
+            loadMessages();
         } else {
-            contentList.insertBefore(draggingElement, afterElement);
+            usernameModal.style.display = 'flex';
         }
-    });
-
-    div.addEventListener('drop', () => {
-        const draggedContent = contents.splice(dragSrcIndex, 1)[0];
-        const dropIndex = Array.from(document.getElementById('content-list').children).indexOf(div);
-        contents.splice(dropIndex, 0, draggedContent);
-        updateUI();
-        saveContents();
+    }).catch(error => {
+        console.error("Error checking username:", error);
     });
 }
 
-function startAutoScroll() {
-    scrollInterval = setInterval(() => {
-        const container = document.querySelector('.left-panel');
-        const headerRect = document.querySelector('header').getBoundingClientRect();
-        const footerRect = document.querySelector('footer').getBoundingClientRect();
-        const draggingElement = document.querySelector('.dragging');
-        if (draggingElement) {
-            const draggingRect = draggingElement.getBoundingClientRect();
-            const scrollSpeed = 15;
+function handleSetUsername() {
+    const newUsername = usernameInput.value.trim();
+    if (newUsername) {
+        saveUsername(newUsername);
+    } else {
+        showUsernameError(translations.usernameEmpty[currentLanguage]);
+    }
+}
 
-            if (draggingRect.top < headerRect.bottom) {
-                container.scrollTop -= scrollSpeed;
-            } else if (draggingRect.bottom > footerRect.top) {
-                container.scrollTop += scrollSpeed;
-            }
+function saveUsername(newUsername) {
+    set(ref(database, `users/${currentUser.uid}/username`), newUsername).then(() => {
+        username = newUsername;
+        hasSetUsername = true;
+        usernameModal.style.display = 'none';
+        loadMessages();
+    }).catch(error => {
+        console.error("Error saving username:", error);
+    });
+}
+
+function showUsernameError(errorMessage) {
+    const usernameError = document.getElementById('username-error');
+    usernameError.textContent = errorMessage;
+    usernameError.style.display = 'block';
+}
+
+function loadMessages() {
+    messagesRef = ref(database, 'messages');
+    const messagesQuery = query(messagesRef, orderByChild('timestamp'));
+    onChildAdded(messagesQuery, snapshot => {
+        const message = snapshot.val();
+        displayMessage(message);
+    });
+}
+
+function displayMessage(message) {
+    const messageElement = document.createElement('li');
+    messageElement.classList.add(message.username === username ? 'sent' : 'received');
+    if (message.username === developerUsername) {
+        messageElement.classList.add('developer');
+    }
+    messageElement.innerHTML = `
+        <div class="message-header">
+            <img src="${message.photoURL}" alt="${message.username}'s avatar">
+            <span class="username">${message.username}</span>
+            <span class="time">${formatTimestamp(message.timestamp)}</span>
+        </div>
+        <div class="message-content">${message.text}</div>
+    `;
+    messagesList.appendChild(messageElement);
+    if (!isChatOpen) {
+        unreadMessages++;
+        showUnreadIndicator();
+    }
+    messagesList.scrollTop = messagesList.scrollHeight;
+}
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
+
+function showUnreadIndicator() {
+    unreadDot.style.display = 'block';
+    unreadDot.textContent = unreadMessages;
+}
+
+function clearUnreadIndicator() {
+    unreadMessages = 0;
+    unreadDot.style.display = 'none';
+}
+
+function sendMessage() {
+    const messageText = messageInput.value.trim();
+    if (messageText && hasSetUsername) {
+        const message = {
+            text: messageText,
+            username: username,
+            photoURL: currentUser.photoURL,
+            timestamp: Date.now()
+        };
+        push(messagesRef, message);
+        messageInput.value = '';
+    }
+}
+
+function handleMessageInputKeypress(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+function removeMessagesListener() {
+    if (messagesRef) {
+        off(messagesRef);
+        messagesRef = null;
+        messagesList.innerHTML = '';
+    }
+}
+
+// Translations
+const translations = {
+    en: {
+        headerTitle: "Text Component Generator",
+        home: "Home",
+        generators: "Generators",
+        generatorText: "Text",
+        generatorItem: "Item",
+        generatorEntity: "Entity",
+        contentList: "Content List",
+        contentType: "Content Type:",
+        plainTextOption: "Plain Text",
+        translatedTextOption: "Translated Text",
+        scoreOption: "Score",
+        selectorOption: "Selector",
+        keybindOption: "Keybind",
+        nbtOption: "NBT",
+        linebreakOption: "Line Break",
+        addContent: "Add Content",
+        jsonEditor: "JSON Editor",
+        jsonIndentation: "JSON Indentation:",
+        copyJson: "Copy JSON",
+        clearAll: "Clear All",
+        preview: "Preview",
+        youtube: "YouTube",
+        instagram: "Instagram",
+        discord: "Discord",
+        developedBy: "Developed by nos",
+        donate: "Donate",
+        chatTitle: "Chat",
+        sendButtonText: "Send",
+        chooseLoginMethod: "Choose a Login Method",
+        loginWithGoogle: "Login with Google",
+        loginWithGithub: "Login with GitHub",
+        cancelLogin: "Cancel",
+        setUsernameTitle: "Set Your Username",
+        setUsernameBtn: "Set Username",
+        cancelSetUsername: "Cancel",
+        usernameEmpty: "Username cannot be empty"
+    },
+    zh: {
+        headerTitle: "文本组件生成器",
+        home: "主页",
+        generators: "生成器",
+        generatorText: "文本",
+        generatorItem: "物品",
+        generatorEntity: "实体",
+        contentList: "内容列表",
+        contentType: "内容类型：",
+        plainTextOption: "普通文本",
+        translatedTextOption: "翻译文本",
+        scoreOption: "分数",
+        selectorOption: "选择器",
+        keybindOption: "快捷键",
+        nbtOption: "NBT",
+        linebreakOption: "换行",
+        addContent: "添加内容",
+        jsonEditor: "JSON编辑器",
+        jsonIndentation: "JSON缩进：",
+        copyJson: "复制JSON",
+        clearAll: "清空所有",
+        preview: "预览",
+        youtube: "YouTube",
+        instagram: "Instagram",
+        discord: "Discord",
+        developedBy: "由nos开发",
+        donate: "捐赠",
+        chatTitle: "聊天",
+        sendButtonText: "发送",
+        chooseLoginMethod: "选择登录方式",
+        loginWithGoogle: "使用Google登录",
+        loginWithGithub: "使用GitHub登录",
+        cancelLogin: "取消",
+        setUsernameTitle: "设置用户名",
+        setUsernameBtn: "设置用户名",
+        cancelSetUsername: "取消",
+        usernameEmpty: "用户名不能为空"
+    }
+};
+
+// Language switching
+const languageSwitcher = document.getElementById('language-switcher');
+const currentLanguage = localStorage.getItem('language') || 'en';
+languageSwitcher.addEventListener('click', () => {
+    const newLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+    localStorage.setItem('language', newLanguage);
+    updateLanguage(newLanguage);
+});
+
+function updateLanguage(language) {
+    for (const key in translations[language]) {
+        const element = document.getElementById(key);
+        if (element) {
+            element.textContent = translations[language][key];
         }
-    }, 50);
+    }
+    document.documentElement.lang = language;
 }
 
-function stopAutoScroll() {
-    clearInterval(scrollInterval);
+updateLanguage(currentLanguage);
+
+// Theme switching
+const themeSwitcher = document.getElementById('theme-switcher');
+const currentTheme = localStorage.getItem('theme') || 'dark';
+themeSwitcher.addEventListener('click', () => {
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    updateTheme(newTheme);
+});
+
+function updateTheme(theme) {
+    document.body.dataset.theme = theme;
+    themeSwitcher.innerHTML = `<i class="fas fa-${theme === 'dark' ? 'adjust' : 'sun'}"></i>`;
 }
+
+updateTheme(currentTheme);
+
+// Initialize CodeMirror
+const jsonArea = document.getElementById('json-area');
+const jsonEditor = CodeMirror.fromTextArea(jsonArea, {
+    mode: 'application/json',
+    lineNumbers: true,
+    theme: 'default',
+    indentUnit: 2,
+    indentWithTabs: false,
+    tabSize: 2,
+    lineWrapping: true,
+    autoCloseBrackets: true,
+    matchBrackets: true,
+    autoCloseTags: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+});
+
+jsonEditor.on('change', () => {
+    jsonArea.value = jsonEditor.getValue();
+});
+
+// Copy JSON to clipboard
+const copyJsonBtn = document.getElementById('copy-json-btn');
+copyJsonBtn.addEventListener('click', () => {
+    const jsonText = jsonEditor.getValue();
+    navigator.clipboard.writeText(jsonText).then(() => {
+        alert('JSON copied to clipboard!');
+    }).catch(err => {
+        console.error('Error copying JSON to clipboard:', err);
+    });
+});
+
+// Clear all
+const clearAllBtn = document.getElementById('clear-all-btn');
+clearAllBtn.addEventListener('click', () => {
+    jsonEditor.setValue('');
+    previewContent.innerHTML = '';
+    contentList.innerHTML = '';
+});
+
+// Preview
+const previewContent = document.getElementById('preview-content');
+const updatePreview = () => {
+    const json = jsonEditor.getValue();
+    try {
+        const parsedJson = JSON.parse(json);
+        previewContent.innerHTML = JSON.stringify(parsedJson, null, 2);
+    } catch (error) {
+        previewContent.innerHTML = 'Invalid JSON';
+    }
+};
+
+jsonEditor.on('change', updatePreview);
+
+// Content list
+const contentList = document.getElementById('content-list');
+const contentTypeSelect = document.getElementById('content-type');
+const addContentBtn = document.getElementById('add-content-btn');
+
+addContentBtn.addEventListener('click', () => {
+    const contentType = contentTypeSelect.value;
+    const content = createContentElement(contentType);
+    contentList.appendChild(content);
+});
+
+function createContentElement(contentType) {
+    const content = document.createElement('div');
+    content.classList.add('content');
+    content.draggable = true;
+
+    const contentControls = document.createElement('div');
+    contentControls.classList.add('content-controls');
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    deleteBtn.classList.add('button', 'button-accent');
+    deleteBtn.addEventListener('click', () => {
+        content.remove();
+    });
+
+    contentControls.appendChild(deleteBtn);
+
+    switch (contentType) {
+        case 'plainText':
+            const plainTextInput = document.createElement('input');
+            plainTextInput.type = 'text';
+            plainTextInput.placeholder = 'Enter plain text';
+            content.appendChild(plainTextInput);
+            break;
+        case 'translatedText':
+            const translatedTextInput = document.createElement('input');
+            translatedTextInput.type = 'text';
+            translatedTextInput.placeholder = 'Enter translated text';
+            content.appendChild(translatedTextInput);
+            break;
+        case 'score':
+            const scoreInput = document.createElement('input');
+            scoreInput.type = 'text';
+            scoreInput.placeholder = 'Enter score';
+            content.appendChild(scoreInput);
+            break;
+        case 'selector':
+            const selectorInput = document.createElement('input');
+            selectorInput.type = 'text';
+            selectorInput.placeholder = 'Enter selector';
+            content.appendChild(selectorInput);
+            break;
+        case 'keybind':
+            const keybindInput = document.createElement('input');
+            keybindInput.type = 'text';
+            keybindInput.placeholder = 'Enter keybind';
+            content.appendChild(keybindInput);
+            break;
+        case 'nbt':
+            const nbtInput = document.createElement('input');
+            nbtInput.type = 'text';
+            nbtInput.placeholder = 'Enter NBT';
+            content.appendChild(nbtInput);
+            break;
+        case 'linebreak':
+            const linebreakText = document.createElement('span');
+            linebreakText.textContent = 'Line Break';
+            content.appendChild(linebreakText);
+            break;
+    }
+
+    content.appendChild(contentControls);
+    return content;
+}
+
+// Drag and drop
+contentList.addEventListener('dragstart', (e) => {
+    e.target.classList.add('dragging');
+});
+
+contentList.addEventListener('dragend', (e) => {
+    e.target.classList.remove('dragging');
+});
+
+contentList.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const afterElement = getDragAfterElement(contentList, e.clientY);
+    const draggable = document.querySelector('.dragging');
+    if (afterElement == null) {
+        contentList.appendChild(draggable);
+    } else {
+        contentList.insertBefore(draggable, afterElement);
+    }
+});
 
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.content:not(.dragging)')];
@@ -1278,9 +1280,170 @@ function getDragAfterElement(container, y) {
         }
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
+    </script>
+</body>
+</html>
+const jsonArea = document.getElementById('json-area');
+const jsonEditor = CodeMirror.fromTextArea(jsonArea, {
+    mode: 'application/json',
+    lineNumbers: true,
+    theme: 'default',
+    indentUnit: 2,
+    indentWithTabs: false,
+    tabSize: 2,
+    lineWrapping: true,
+    autoCloseBrackets: true,
+    matchBrackets: true,
+    autoCloseTags: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+});
 
-function updateClickAndHoverEventInputs(inputElement, action) {
-    inputElement.style.display = action && action !== translations.noClickEvent[currentLanguage] && action !== translations.noHoverEvent[currentLanguage] ? 'inline' : 'none';
+jsonEditor.on('change', () => {
+    jsonArea.value = jsonEditor.getValue();
+});
+
+// Copy JSON to clipboard
+const copyJsonBtn = document.getElementById('copy-json-btn');
+copyJsonBtn.addEventListener('click', () => {
+    const jsonText = jsonEditor.getValue();
+    navigator.clipboard.writeText(jsonText).then(() => {
+        alert('JSON copied to clipboard!');
+    }).catch(err => {
+        console.error('Error copying JSON to clipboard:', err);
+    });
+});
+
+// Clear all
+const clearAllBtn = document.getElementById('clear-all-btn');
+clearAllBtn.addEventListener('click', () => {
+    jsonEditor.setValue('');
+    previewContent.innerHTML = '';
+    contentList.innerHTML = '';
+});
+
+// Preview
+const previewContent = document.getElementById('preview-content');
+const updatePreview = () => {
+    const json = jsonEditor.getValue();
+    try {
+        const parsedJson = JSON.parse(json);
+        previewContent.innerHTML = JSON.stringify(parsedJson, null, 2);
+    } catch (error) {
+        previewContent.innerHTML = 'Invalid JSON';
+    }
+};
+
+jsonEditor.on('change', updatePreview);
+
+// Content list
+const contentList = document.getElementById('content-list');
+const contentTypeSelect = document.getElementById('content-type');
+const addContentBtn = document.getElementById('add-content-btn');
+
+addContentBtn.addEventListener('click', () => {
+    const contentType = contentTypeSelect.value;
+    const content = createContentElement(contentType);
+    contentList.appendChild(content);
+});
+
+function createContentElement(contentType) {
+    const content = document.createElement('div');
+    content.classList.add('content');
+    content.draggable = true;
+
+    const contentControls = document.createElement('div');
+    contentControls.classList.add('content-controls');
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    deleteBtn.classList.add('button', 'button-accent');
+    deleteBtn.addEventListener('click', () => {
+        content.remove();
+    });
+
+    contentControls.appendChild(deleteBtn);
+
+    switch (contentType) {
+        case 'plainText':
+            const plainTextInput = document.createElement('input');
+            plainTextInput.type = 'text';
+            plainTextInput.placeholder = 'Enter plain text';
+            content.appendChild(plainTextInput);
+            break;
+        case 'translatedText':
+            const translatedTextInput = document.createElement('input');
+            translatedTextInput.type = 'text';
+            translatedTextInput.placeholder = 'Enter translated text';
+            content.appendChild(translatedTextInput);
+            break;
+        case 'score':
+            const scoreInput = document.createElement('input');
+            scoreInput.type = 'text';
+            scoreInput.placeholder = 'Enter score';
+            content.appendChild(scoreInput);
+            break;
+        case 'selector':
+            const selectorInput = document.createElement('input');
+            selectorInput.type = 'text';
+            selectorInput.placeholder = 'Enter selector';
+            content.appendChild(selectorInput);
+            break;
+        case 'keybind':
+            const keybindInput = document.createElement('input');
+            keybindInput.type = 'text';
+            keybindInput.placeholder = 'Enter keybind';
+            content.appendChild(keybindInput);
+            break;
+        case 'nbt':
+            const nbtInput = document.createElement('input');
+            nbtInput.type = 'text';
+            nbtInput.placeholder = 'Enter NBT';
+            content.appendChild(nbtInput);
+            break;
+        case 'linebreak':
+            const linebreakText = document.createElement('span');
+            linebreakText.textContent = 'Line Break';
+            content.appendChild(linebreakText);
+            break;
+    }
+
+    content.appendChild(contentControls);
+    return content;
+}
+
+// Drag and drop
+contentList.addEventListener('dragstart', (e) => {
+    e.target.classList.add('dragging');
+});
+
+contentList.addEventListener('dragend', (e) => {
+    e.target.classList.remove('dragging');
+});
+
+contentList.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const afterElement = getDragAfterElement(contentList, e.clientY);
+    const draggable = document.querySelector('.dragging');
+    if (afterElement == null) {
+        contentList.appendChild(draggable);
+    } else {
+        contentList.insertBefore(draggable, afterElement);
+    }
+});
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.content:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 function moveContent(index, direction) {
@@ -1540,11 +1703,11 @@ function debounce(func, delay) {
 const translations = {
     headerTitle: {
         en: "Text Component Generator",
-        zh: "文本組件生成器"
+        zh: "文本组件生成器"
     },
     home: {
         en: "Home",
-        zh: "主頁"
+        zh: "主页"
     },
     generators: {
         en: "Generators",
@@ -1560,27 +1723,27 @@ const translations = {
     },
     generatorEntity: {
         en: "Entity",
-        zh: "實體"
+        zh: "实体"
     },
     contentList: {
         en: "Content List",
-        zh: "內容列表"
+        zh: "内容列表"
     },
     addContent: {
         en: "Add Content",
-        zh: "添加內容"
+        zh: "添加内容"
     },
     jsonEditor: {
         en: "JSON Editor",
-        zh: "JSON 編輯器"
+        zh: "JSON 编辑器"
     },
     preview: {
         en: "Preview",
-        zh: "預覽"
+        zh: "预览"
     },
     copyJson: {
         en: "Copy JSON",
-        zh: "複製 JSON"
+        zh: "复制 JSON"
     },
     clearAll: {
         en: "Clear All",
@@ -1588,43 +1751,43 @@ const translations = {
     },
     contentType: {
         en: "Content Type:",
-        zh: "內容類型："
+        zh: "内容类型："
     },
     jsonIndentation: {
         en: "JSON Indentation:",
-        zh: "JSON 縮進："
+        zh: "JSON 缩进："
     },
     none: {
         en: "None",
-        zh: "無"
+        zh: "无"
     },
     twoSpaces: {
         en: "2 Spaces",
-        zh: "2 個空格"
+        zh: "2 个空格"
     },
     fourSpaces: {
         en: "4 Spaces",
-        zh: "4 個空格"
+        zh: "4 个空格"
     },
     plainText: {
         en: "Plain Text",
-        zh: "純文本"
+        zh: "纯文本"
     },
     translatedText: {
         en: "Translated Text",
-        zh: "翻譯文本"
+        zh: "翻译文本"
     },
     score: {
         en: "Score",
-        zh: "分數"
+        zh: "分数"
     },
     selector: {
         en: "Selector",
-        zh: "選擇器"
+        zh: "选择器"
     },
     keybind: {
         en: "Keybind",
-        zh: "按鍵綁定"
+        zh: "按键绑定"
     },
     nbt: {
         en: "NBT",
@@ -1632,111 +1795,111 @@ const translations = {
     },
     linebreak: {
         en: "Line Break",
-        zh: "換行"
+        zh: "换行"
     },
     enterText: {
         en: "Enter text",
-        zh: "輸入文本"
+        zh: "输入文本"
     },
     enterTranslationKey: {
         en: "Enter translation key",
-        zh: "輸入翻譯鍵"
+        zh: "输入翻译键"
     },
     enterScoreName: {
         en: "Enter score name",
-        zh: "輸入分數名稱"
+        zh: "输入分数名称"
     },
     enterScoreObjective: {
         en: "Enter score objective",
-        zh: "輸入分數目標"
+        zh: "输入分数目标"
     },
     enterSelector: {
         en: "Enter selector",
-        zh: "輸入選擇器"
+        zh: "输入选择器"
     },
     enterKeybind: {
         en: "Enter keybind",
-        zh: "輸入按鍵綁定"
+        zh: "输入按键绑定"
     },
     enterNbtPath: {
         en: "Enter NBT path",
-        zh: "輸入 NBT 路徑"
+        zh: "输入 NBT 路径"
     },
     entity: {
         en: "Entity",
-        zh: "實體"
+        zh: "实体"
     },
     block: {
         en: "Block",
-        zh: "方塊"
+        zh: "方块"
     },
     storage: {
         en: "Storage",
-        zh: "存儲"
+        zh: "存储"
     },
     interpret: {
         en: "Interpret",
-        zh: "解釋"
+        zh: "解释"
     },
     noClickEvent: {
         en: "No Click Event",
-        zh: "無點擊事件"
+        zh: "无点击事件"
     },
     open_url: {
         en: "Open URL",
-        zh: "打開 URL"
+        zh: "打开 URL"
     },
     open_file: {
         en: "Open File",
-        zh: "打開文件"
+        zh: "打开文件"
     },
     run_command: {
         en: "Run Command",
-        zh: "運行命令"
+        zh: "运行命令"
     },
     suggest_command: {
         en: "Suggest Command",
-        zh: "建議命令"
+        zh: "建议命令"
     },
     change_page: {
         en: "Change Page",
-        zh: "更改頁面"
+        zh: "更改页面"
     },
     copy_to_clipboard: {
         en: "Copy to Clipboard",
-        zh: "複製到剪貼板"
+        zh: "复制到剪贴板"
     },
     noHoverEvent: {
         en: "No Hover Event",
-        zh: "無懸停事件"
+        zh: "无悬停事件"
     },
     show_text: {
         en: "Show Text",
-        zh: "顯示文本"
+        zh: "显示文本"
     },
     show_item: {
         en: "Show Item",
-        zh: "顯示物品"
+        zh: "显示物品"
     },
     show_entity: {
         en: "Show Entity",
-        zh: "顯示實體"
+        zh: "显示实体"
     },
     bold: {
         en: "Bold",
-        zh: "粗體"
+        zh: "粗体"
     },
     italic: {
         en: "Italic",
-        zh: "斜體"
+        zh: "斜体"
     },
     underlined: {
         en: "Underlined",
-        zh: "下劃線"
+        zh: "下划线"
     },
     strikethrough: {
         en: "Strikethrough",
-        zh: "刪除線"
+        zh: "删除线"
     },
     obfuscated: {
         en: "Obfuscated",
@@ -1744,11 +1907,11 @@ const translations = {
     },
     clickEvent: {
         en: "Click Event:",
-        zh: "點擊事件："
+        zh: "点击事件："
     },
     hoverEvent: {
         en: "Hover Event:",
-        zh: "懸停事件："
+        zh: "悬停事件："
     },
     moveUp: {
         en: "Move Up",
@@ -1760,15 +1923,15 @@ const translations = {
     },
     duplicate: {
         en: "Duplicate",
-        zh: "複製"
+        zh: "复制"
     },
     delete: {
         en: "Delete",
-        zh: "刪除"
+        zh: "删除"
     },
     contentLabel: {
         en: "Content {number} ({type})",
-        zh: "內容 {number} ({type})"
+        zh: "内容 {number} ({type})"
     },
     black: {
         en: "Black",
@@ -1776,11 +1939,11 @@ const translations = {
     },
     dark_blue: {
         en: "Dark Blue",
-        zh: "深藍色"
+        zh: "深蓝色"
     },
     dark_green: {
         en: "Dark Green",
-        zh: "深綠色"
+        zh: "深绿色"
     },
     dark_aqua: {
         en: "Dark Aqua",
@@ -1788,7 +1951,7 @@ const translations = {
     },
     dark_red: {
         en: "Dark Red",
-        zh: "深紅色"
+        zh: "深红色"
     },
     dark_purple: {
         en: "Dark Purple",
@@ -1808,11 +1971,11 @@ const translations = {
     },
     blue: {
         en: "Blue",
-        zh: "藍色"
+        zh: "蓝色"
     },
     green: {
         en: "Green",
-        zh: "綠色"
+        zh: "绿色"
     },
     aqua: {
         en: "Aqua",
@@ -1820,15 +1983,15 @@ const translations = {
     },
     red: {
         en: "Red",
-        zh: "紅色"
+        zh: "红色"
     },
     light_purple: {
         en: "Light Purple",
-        zh: "淺紫色"
+        zh: "淡紫色"
     },
     yellow: {
         en: "Yellow",
-        zh: "黃色"
+        zh: "黄色"
     },
     white: {
         en: "White",
@@ -1840,15 +2003,15 @@ const translations = {
     },
     sendButtonText: {
         en: "Send",
-        zh: "發送"
+        zh: "发送"
     },
     typeAMessage: {
         en: "Type a message...",
-        zh: "輸入消息..."
+        zh: "输入消息..."
     },
     chooseLoginMethod: {
         en: "Choose a Login Method",
-        zh: "選擇登錄方式"
+        zh: "选择登录方式"
     },
     youtube: {
         en: "YouTube",
@@ -1864,27 +2027,27 @@ const translations = {
     },
     developedBy: {
         en: "Developed by nos",
-        zh: "由 nos 開發"
+        zh: "由 nos 开发"
     },
     donate: {
         en: "Donate",
-        zh: "捐贈"
+        zh: "捐赠"
     },
     enterUsername: {
         en: "Please set your username:",
-        zh: "請設置您的用戶名："
+        zh: "请设置您的用户名："
     },
     usernameExists: {
         en: "Username already exists. Please choose another one.",
-        zh: "用戶名已存在。請選擇另一個。"
+        zh: "用户名已存在。请选择另一个。"
     },
     loginWithGoogle: {
         en: "Login with Google",
-        zh: "使用 Google 登錄"
+        zh: "使用 Google 登录"
     },
     loginWithGithub: {
         en: "Login with GitHub",
-        zh: "使用 GitHub 登錄"
+        zh: "使用 GitHub 登录"
     },
     cancelLogin: {
         en: "Cancel",
@@ -1892,11 +2055,11 @@ const translations = {
     },
     setUsernameTitle: {
         en: "Set Your Username",
-        zh: "設置您的用戶名"
+        zh: "设置您的用户名"
     },
     setUsernameBtn: {
         en: "Set Username",
-        zh: "設置用戶名"
+        zh: "设置用户名"
     },
     cancelSetUsername: {
         en: "Cancel",
@@ -1904,17 +2067,20 @@ const translations = {
     },
     usernameEmpty: {
         en: "Username cannot be empty",
-        zh: "用戶名不能為空"
+        zh: "用户名不能为空"
     },
     errorSavingUsername: {
         en: "Error saving username. Please try again.",
-        zh: "保存用戶名時出錯。請重試。"
+        zh: "保存用户名时出错。请重试。"
     },
     errorCheckingUsername: {
         en: "Error checking username. Please try again.",
-        zh: "檢查用戶名時出錯。請重試。"
+        zh: "检查用户名时出错。请重试。"
     }
 };
 
 // Initialize the page
 initializePage();
+    </script>
+</body>
+</html>
