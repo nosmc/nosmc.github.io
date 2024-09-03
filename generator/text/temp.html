@@ -437,17 +437,6 @@ textarea#json-area,
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
-.chat-button .unread-dot {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 10px;
-    height: 10px;
-    background-color: red;
-    border-radius: 50%;
-    display: none;
-}
-
 #chat-container {
     width: 400px;
     height: 500px;
@@ -469,8 +458,6 @@ textarea#json-area,
     background-color: var(--panel-background-color);
     word-wrap: break-word;
     word-break: break-word;
-    display: flex;
-    flex-direction: column;
 }
 
 #chat-messages::-webkit-scrollbar {
@@ -489,71 +476,19 @@ textarea#json-area,
 #chat-messages li {
     margin-bottom: 20px;
     display: flex;
+    align-items: flex-start;
     flex-direction: column;
-    max-width: 80%;
+    width: 100%;
 }
 
 #chat-messages li.sent {
-    align-self: flex-end;
+    text-align: right;
     align-items: flex-end;
 }
 
-#chat-messages li.sent .message-header {
-    flex-direction: row-reverse;
-}
-
-#chat-messages li.sent .message-header img {
-    margin-left: 5px;
-    margin-right: 0;
-}
-
-#chat-messages li.sent .username {
-    margin-right: 5px;
-    margin-left: 0;
-}
-
-#chat-messages .message-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-}
-
-#chat-messages .message-header img {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-}
-
-#chat-messages li.received .message-header img {
-    margin-right: 5px;
-}
-
-#chat-messages .username {
-    font-weight: bold;
-}
-
-#chat-messages li.received .username {
-    margin-left: 5px;
-}
-
 #chat-messages li.received {
-    align-self: flex-start;
+    text-align: left;
     align-items: flex-start;
-}
-
-#chat-messages .message-content {
-    padding: 10px 15px;
-    border-radius: 10px;
-    background-color: var(--received-message-bg);
-    color: var(--received-message-text-color);
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-#chat-messages li.sent .message-content {
-    background-color: var(--sent-message-bg);
-    color: var(--sent-message-text-color);
 }
 
 #chat-messages li.developer .message-content {
@@ -561,99 +496,158 @@ textarea#json-area,
     color: var(--developer-message-text-color);
 }
 
-#chat-messages li.developer .username {
-    color: var(--developer-link-color);
+#chat-messages li .message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+#chat-messages li.sent .message-header {
+    justify-content: flex-end;
+}
+
+#chat-messages li.received .message-header {
+    justify-content: flex-start;
+}
+
+#chat-messages li img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+#chat-messages li.sent .message-header .time {
+    order: 1;
+    margin-right: var(--time-username-spacing);
+}
+
+#chat-messages li.sent .message-header .username {
+    order: 2;
+    margin-right: var(--time-username-spacing);
+}
+
+#chat-messages li.sent .message-header img {
+    order: 3;
+    margin-right: 0;
+    margin-left: var(--time-username-spacing);
+}
+
+#chat-messages li.received .message-header img {
+    order: 1;
+    margin-right: var(--time-username-spacing);
+}
+
+#chat-messages li.received .message-header .username {
+    order: 2;
+    margin-right: var(--time-username-spacing);
+}
+
+#chat-messages li.received .message-header .time {
+    order: 3;
+}
+
+#chat-messages .message-content {
+    padding: 10px 15px;
+    border-radius: 10px;
+    background-color: var(--received-message-bg);
+    color: var(--received-message-text-color);
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#chat-messages li.sent .message-content {
+    background-color: var(--sent-message-bg);
+    color: var(--sent-message-text-color);
+    margin-left: auto;
 }
 
 #chat-input {
     display: flex;
     padding: 10px;
+    background-color: var(--panel-background-color);
     border-top: 1px solid var(--border-color);
 }
 
-#message-input {
+#chat-input input {
     flex: 1;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 5px;
     margin-right: 10px;
+    background-color: var(--panel-background-color);
+    color: var(--text-color);
 }
 
-#send-button {
+#chat-input button {
+    padding: 10px 20px;
+    border: none;
     background-color: var(--primary-color);
     color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#chat-input button:hover {
+    background-color: var(--primary-color-dark);
+    transform: translateY(-2px);
 }
 
 #login-modal, #username-modal {
     display: none;
     position: fixed;
-    z-index: 1003;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background-color: var(--modal-background-color);
-    justify-content: center;
+    z-index: 1100;
     align-items: center;
+    justify-content: center;
 }
 
 #login-modal-content, #username-modal-content {
     background-color: var(--modal-content-background);
     padding: 20px;
     border-radius: 10px;
-    width: 300px;
     text-align: center;
 }
 
-.login-method-button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
+#login-modal-content h3, #username-modal-content h3 {
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+.login-method-button, #setUsernameBtn {
+    margin: 10px;
+    padding: 10px 20px;
     background-color: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.login-method-button:hover, #setUsernameBtn:hover {
+    background-color: var(--primary-color-dark);
+    transform: translateY(-2px);
 }
 
 .close-modal {
+    margin-top: 20px;
+    cursor: pointer;
     color: var(--text-color);
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
+    font-size: 14px;
+    text-decoration: underline;
+    transition: all 0.3s ease;
 }
 
-.close-modal:hover,
-.close-modal:focus {
+.close-modal:hover {
     color: var(--primary-color);
-    text-decoration: none;
-    cursor: pointer;
-}
-
-#username-input {
-    width: 100%;
-    padding: 8px;
-    margin-top: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-}
-
-#setUsernameBtn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
 }
     </style>
 </head>
@@ -745,10 +739,7 @@ textarea#json-area,
         </div>
     </div>
 
-    <button class="chat-button" aria-label="Open Chat">
-        <i class="fas fa-comments"></i>
-        <span class="unread-dot"></span>
-    </button>
+    <button class="chat-button" aria-label="Open Chat"><i class="fas fa-comments"></i></button>
 
     <!-- Login Modal -->
     <div id="login-modal">
@@ -771,7 +762,7 @@ textarea#json-area,
         <div id="username-modal-content">
             <h3 id="setUsernameTitle">Set Your Username</h3>
             <input type="text" id="username-input" placeholder="Enter your username">
-            <p id="username-error" style="color: red; display: none;"></p>
+            <!-- The error message will be inserted here -->
             <button id="setUsernameBtn">Set Username</button>
             <div class="close-modal" id="close-username-modal">
                 <span id="cancelSetUsername">Cancel</span>
@@ -809,33 +800,56 @@ let currentUser = null;
 let username = null;
 let messagesRef = null;
 const developerUsername = "nos";
+let currentLanguage = 'en';
 let isSettingUsername = false;
 let hasSetUsername = false;
-let unreadMessages = 0;
-let isChatOpen = false;
+let contents = JSON.parse(localStorage.getItem('contents')) || [];
+let dragSrcIndex = null;
+let scrollInterval = null;
+
+const minecraftColorMap = {
+    black: '#000000',
+    dark_blue: '#0000AA',
+    dark_green: '#00AA00',
+    dark_aqua: '#00AAAA',
+    dark_red: '#AA0000',
+    dark_purple: '#AA00AA',
+    gold: '#FFAA00',
+    gray: '#AAAAAA',
+    dark_gray: '#555555',
+    blue: '#5555FF',
+    green: '#55FF55',
+    aqua: '#55FFFF',
+    red: '#FF5555',
+    light_purple: '#FF55FF',
+    yellow: '#FFFF55',
+    white: '#FFFFFF'
+};
 
 // DOM elements
-const chatButton = document.querySelector('.chat-button');
-const chatContainer = document.getElementById('chat-container');
-const messagesList = document.getElementById('chat-messages');
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
+const messagesList = document.getElementById('chat-messages');
+const chatContainer = document.getElementById('chat-container');
+const chatButton = document.querySelector('.chat-button');
 const loginButton = document.getElementById('login-btn');
 const loginModal = document.getElementById('login-modal');
 const closeLoginModal = document.getElementById('close-login-modal');
 const googleLoginBtn = document.getElementById('login-google');
 const githubLoginBtn = document.getElementById('login-github');
+const themeSwitcher = document.getElementById('theme-switcher');
+const body = document.body;
+const languageSwitcher = document.getElementById('language-switcher');
 const usernameModal = document.getElementById('username-modal');
 const usernameInput = document.getElementById('username-input');
 const setUsernameBtn = document.getElementById('setUsernameBtn');
 const closeUsernameModal = document.getElementById('close-username-modal');
-const unreadDot = document.querySelector('.unread-dot');
 
-// Firebase providers
-const googleProvider = new GoogleAuthProvider();
+// Auth Providers
 const githubProvider = new GithubAuthProvider();
+const googleProvider = new GoogleAuthProvider();
 
-// Event listeners
+// Event Listeners
 chatButton.addEventListener('click', toggleChat);
 loginButton.addEventListener('click', handleLoginButtonClick);
 closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
@@ -843,19 +857,38 @@ googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider
 githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
 sendButton.addEventListener('click', sendMessage);
 messageInput.addEventListener('keypress', handleMessageInputKeypress);
+themeSwitcher.addEventListener('click', toggleTheme);
+languageSwitcher.addEventListener('click', toggleLanguage);
+document.getElementById('add-content-btn').addEventListener('click', () => {
+    const contentType = document.getElementById('content-type').value;
+    addContent(contentType);
+});
+document.getElementById('copy-json-btn').addEventListener('click', copyJsonToClipboard);
+document.getElementById('clear-all-btn').addEventListener('click', clearAll);
+document.getElementById('indentation').addEventListener('change', updateOutputAndPreview);
 setUsernameBtn.addEventListener('click', handleSetUsername);
 closeUsernameModal.addEventListener('click', () => {
     usernameModal.style.display = 'none';
     signOut(auth);
 });
 
+// Dropdown Menu Redirection
+document.querySelectorAll('.dropdown-content a').forEach(link => {
+    link.addEventListener('click', handleGeneratorRedirect);
+});
+
+// Initialize the page
+window.addEventListener('DOMContentLoaded', initializePage);
+
+// Firebase Auth State Change
+auth.onAuthStateChanged(handleAuthStateChange);
+
 // Functions
 function toggleChat() {
-    isChatOpen = !isChatOpen;
-    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
-    if (isChatOpen) {
+    const isChatOpen = chatContainer.style.display === 'flex';
+    chatContainer.style.display = isChatOpen ? 'none' : 'flex';
+    if (!isChatOpen) {
         messagesList.scrollTop = messagesList.scrollHeight;
-        clearUnreadIndicator();
     }
 }
 
@@ -884,18 +917,48 @@ function signInWithProvider(provider) {
     });
 }
 
+function handleAuthStateChange(user) {
+    if (user) {
+        currentUser = user;
+        loginButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+        loginButton.setAttribute('aria-label', 'Logout');
+        if (!hasSetUsername) {
+            checkUsername();
+        }
+    } else {
+        loginButton.innerHTML = `<i class="fas fa-user"></i>`;
+        loginButton.setAttribute('aria-label', 'Login');
+        currentUser = null;
+        username = null;
+        hasSetUsername = false;
+        removeMessagesListener();
+    }
+}
+
 function checkUsername() {
-    get(ref(database, `users/${currentUser.uid}/username`)).then(snapshot => {
+    if (isSettingUsername || hasSetUsername) return;
+    
+    isSettingUsername = true;
+    const userRef = ref(database, `users/${currentUser.uid}`);
+    get(userRef).then(snapshot => {
         if (snapshot.exists()) {
-            username = snapshot.val();
+            username = snapshot.val().username;
             hasSetUsername = true;
             loadMessages();
         } else {
-            usernameModal.style.display = 'flex';
+            showUsernameModal();
         }
     }).catch(error => {
         console.error("Error checking username:", error);
+        showUsernameModal();
+    }).finally(() => {
+        isSettingUsername = false;
     });
+}
+
+function showUsernameModal() {
+    usernameModal.style.display = 'flex';
+    usernameInput.focus();
 }
 
 function handleSetUsername() {
@@ -903,369 +966,611 @@ function handleSetUsername() {
     if (newUsername) {
         saveUsername(newUsername);
     } else {
-        showUsernameError(translations.usernameEmpty[currentLanguage]);
+        alert(translations[currentLanguage].usernameEmpty);
     }
 }
 
 function saveUsername(newUsername) {
-    set(ref(database, `users/${currentUser.uid}/username`), newUsername).then(() => {
-        username = newUsername;
-        hasSetUsername = true;
-        usernameModal.style.display = 'none';
-        loadMessages();
+    const usernamesRef = ref(database, 'users');
+    const usernameQuery = query(usernamesRef, orderByChild('username'), equalTo(newUsername));
+
+    get(usernameQuery).then(snapshot => {
+        if (snapshot.exists()) {
+            showUsernameError(translations.usernameExists[currentLanguage]);
+            usernameInput.value = '';
+            usernameInput.focus();
+        } else {
+            set(ref(database, `users/${currentUser.uid}`), {
+                username: newUsername
+            }).then(() => {
+                username = newUsername;
+                hasSetUsername = true;
+                usernameModal.style.display = 'none';
+                loadMessages();
+            }).catch(error => {
+                console.error("Error saving username:", error);
+                showUsernameError(translations.errorSavingUsername[currentLanguage]);
+            });
+        }
     }).catch(error => {
-        console.error("Error saving username:", error);
+        console.error("Error checking username uniqueness:", error);
+        showUsernameError(translations.errorCheckingUsername[currentLanguage]);
     });
 }
 
-function showUsernameError(errorMessage) {
-    const usernameError = document.getElementById('username-error');
-    usernameError.textContent = errorMessage;
-    usernameError.style.display = 'block';
+function showUsernameError(message) {
+    const errorElement = document.getElementById('username-error');
+    if (!errorElement) {
+        const newErrorElement = document.createElement('p');
+        newErrorElement.id = 'username-error';
+        newErrorElement.style.color = 'red';
+        newErrorElement.style.marginTop = '10px';
+        document.getElementById('username-modal-content').insertBefore(newErrorElement, document.getElementById('setUsernameBtn'));
+    }
+    document.getElementById('username-error').textContent = message;
 }
 
 function loadMessages() {
-    messagesRef = ref(database, 'messages');
-    const messagesQuery = query(messagesRef, orderByChild('timestamp'));
-    onChildAdded(messagesQuery, snapshot => {
+    if (messagesRef) {
+        return;
+    }
+    messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+    onChildAdded(messagesRef, (snapshot) => {
         const message = snapshot.val();
         displayMessage(message);
     });
 }
 
+function removeMessagesListener() {
+    if (messagesRef) {
+        messagesRef = null;
+    }
+    messagesList.innerHTML = '';
+}
+
+function convertToLocalTime(isoTimestamp) {
+    const date = new Date(isoTimestamp);
+    return date.toLocaleString();
+}
+
 function displayMessage(message) {
-    const messageElement = document.createElement('li');
-    messageElement.classList.add(message.username === username ? 'sent' : 'received');
-    if (message.username === developerUsername) {
-        messageElement.classList.add('developer');
+    const li = document.createElement('li');
+    li.className = message.sender === username ? 'sent' : 'received';
+
+    if (message.sender === developerUsername) {
+        li.classList.add('developer');
     }
-    messageElement.innerHTML = `
-        <div class="message-header">
-            <img src="${message.photoURL}" alt="${message.username}'s avatar">
-            <span class="username">${message.username}</span>
-            <span class="time">${formatTimestamp(message.timestamp)}</span>
-        </div>
-        <div class="message-content">${message.text}</div>
-    `;
-    messagesList.appendChild(messageElement);
-    if (!isChatOpen) {
-        unreadMessages++;
-        showUnreadIndicator();
+
+    const img = document.createElement('img');
+    img.src = message.avatar || 'default-avatar.png';
+    img.alt = message.sender;
+
+    const messageHeader = document.createElement('div');
+    messageHeader.className = 'message-header';
+
+    const usernameSpan = document.createElement('span');
+    usernameSpan.className = 'username';
+    usernameSpan.textContent = message.sender;
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'time';
+    timeSpan.textContent = convertToLocalTime(message.timestamp);
+
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = message.content;
+
+    messageHeader.appendChild(usernameSpan);
+    messageHeader.appendChild(timeSpan);
+
+    if (li.className.includes('sent')) {
+        messageHeader.appendChild(img);
+    } else {
+        messageHeader.insertBefore(img, usernameSpan);
     }
+
+    li.appendChild(messageHeader);
+    li.appendChild(messageContent);
+    messagesList.appendChild(li);
+
     messagesList.scrollTop = messagesList.scrollHeight;
 }
 
-function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-}
-
-function showUnreadIndicator() {
-    unreadDot.style.display = 'block';
-    unreadDot.textContent = unreadMessages;
-}
-
-function clearUnreadIndicator() {
-    unreadMessages = 0;
-    unreadDot.style.display = 'none';
-}
-
 function sendMessage() {
-    const messageText = messageInput.value.trim();
-    if (messageText && hasSetUsername) {
-        const message = {
-            text: messageText,
-            username: username,
-            photoURL: currentUser.photoURL,
-            timestamp: Date.now()
-        };
-        push(messagesRef, message);
-        messageInput.value = '';
+    if (username && messageInput.value.trim()) {
+        const timestamp = new Date().toISOString();
+
+        push(ref(database, 'messages'), {
+            sender: username,
+            avatar: currentUser?.photoURL || "default-avatar.png",
+            content: messageInput.value,
+            timestamp: timestamp
+        }).then(() => {
+            messageInput.value = '';
+            messageInput.focus();
+        }).catch(error => {
+            console.error("Error sending message:", error);
+        });
     }
 }
 
-function handleMessageInputKeypress(event) {
-    if (event.key === 'Enter') {
+function handleMessageInputKeypress(e) {
+    if (e.key === 'Enter') {
         sendMessage();
+        e.preventDefault();
     }
 }
 
-function removeMessagesListener() {
-    if (messagesRef) {
-        off(messagesRef);
-        messagesRef = null;
-        messagesList.innerHTML = '';
+function toggleTheme() {
+    if (body.getAttribute('data-theme') === 'light') {
+        body.setAttribute('data-theme', 'dark');
+    } else {
+        body.setAttribute('data-theme', 'light');
+    }
+    savePreferences();
+}
+
+function toggleLanguage() {
+    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+    translatePage();
+    updateUI();
+    savePreferences();
+}
+
+function savePreferences() {
+    localStorage.setItem('theme', body.getAttribute('data-theme'));
+    localStorage.setItem('language', currentLanguage);
+}
+
+function loadPreferences() {
+    const savedTheme = localStorage.getItem('theme');
+    const savedLanguage = localStorage.getItem('language');
+
+    if (savedTheme) {
+        body.setAttribute('data-theme', savedTheme);
+    }
+    if (savedLanguage) {
+        currentLanguage = savedLanguage;
+        translatePage();
     }
 }
 
-// Translations
-const translations = {
-    en: {
-        headerTitle: "Text Component Generator",
-        home: "Home",
-        generators: "Generators",
-        generatorText: "Text",
-        generatorItem: "Item",
-        generatorEntity: "Entity",
-        contentList: "Content List",
-        contentType: "Content Type:",
-        plainTextOption: "Plain Text",
-        translatedTextOption: "Translated Text",
-        scoreOption: "Score",
-        selectorOption: "Selector",
-        keybindOption: "Keybind",
-        nbtOption: "NBT",
-        linebreakOption: "Line Break",
-        addContent: "Add Content",
-        jsonEditor: "JSON Editor",
-        jsonIndentation: "JSON Indentation:",
-        copyJson: "Copy JSON",
-        clearAll: "Clear All",
-        preview: "Preview",
-        youtube: "YouTube",
-        instagram: "Instagram",
-        discord: "Discord",
-        developedBy: "Developed by nos",
-        donate: "Donate",
-        chatTitle: "Chat",
-        sendButtonText: "Send",
-        chooseLoginMethod: "Choose a Login Method",
-        loginWithGoogle: "Login with Google",
-        loginWithGithub: "Login with GitHub",
-        cancelLogin: "Cancel",
-        setUsernameTitle: "Set Your Username",
-        setUsernameBtn: "Set Username",
-        cancelSetUsername: "Cancel",
-        usernameEmpty: "Username cannot be empty"
-    },
-    zh: {
-        headerTitle: "文本组件生成器",
-        home: "主页",
-        generators: "生成器",
-        generatorText: "文本",
-        generatorItem: "物品",
-        generatorEntity: "实体",
-        contentList: "内容列表",
-        contentType: "内容类型：",
-        plainTextOption: "普通文本",
-        translatedTextOption: "翻译文本",
-        scoreOption: "分数",
-        selectorOption: "选择器",
-        keybindOption: "快捷键",
-        nbtOption: "NBT",
-        linebreakOption: "换行",
-        addContent: "添加内容",
-        jsonEditor: "JSON编辑器",
-        jsonIndentation: "JSON缩进：",
-        copyJson: "复制JSON",
-        clearAll: "清空所有",
-        preview: "预览",
-        youtube: "YouTube",
-        instagram: "Instagram",
-        discord: "Discord",
-        developedBy: "由nos开发",
-        donate: "捐赠",
-        chatTitle: "聊天",
-        sendButtonText: "发送",
-        chooseLoginMethod: "选择登录方式",
-        loginWithGoogle: "使用Google登录",
-        loginWithGithub: "使用GitHub登录",
-        cancelLogin: "取消",
-        setUsernameTitle: "设置用户名",
-        setUsernameBtn: "设置用户名",
-        cancelSetUsername: "取消",
-        usernameEmpty: "用户名不能为空"
-    }
-};
-
-// Language switching
-const languageSwitcher = document.getElementById('language-switcher');
-const currentLanguage = localStorage.getItem('language') || 'en';
-languageSwitcher.addEventListener('click', () => {
-    const newLanguage = currentLanguage === 'en' ? 'zh' : 'en';
-    localStorage.setItem('language', newLanguage);
-    updateLanguage(newLanguage);
-});
-
-function updateLanguage(language) {
-    for (const key in translations[language]) {
+function translatePage() {
+    Object.keys(translations).forEach(key => {
         const element = document.getElementById(key);
         if (element) {
-            element.textContent = translations[language][key];
+            element.textContent = translations[key][currentLanguage];
         }
-    }
-    document.documentElement.lang = language;
-}
-
-updateLanguage(currentLanguage);
-
-// Theme switching
-const themeSwitcher = document.getElementById('theme-switcher');
-const currentTheme = localStorage.getItem('theme') || 'dark';
-themeSwitcher.addEventListener('click', () => {
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('theme', newTheme);
-    updateTheme(newTheme);
-});
-
-function updateTheme(theme) {
-    document.body.dataset.theme = theme;
-    themeSwitcher.innerHTML = `<i class="fas fa-${theme === 'dark' ? 'adjust' : 'sun'}"></i>`;
-}
-
-updateTheme(currentTheme);
-
-// Initialize CodeMirror
-const jsonArea = document.getElementById('json-area');
-const jsonEditor = CodeMirror.fromTextArea(jsonArea, {
-    mode: 'application/json',
-    lineNumbers: true,
-    theme: 'default',
-    indentUnit: 2,
-    indentWithTabs: false,
-    tabSize: 2,
-    lineWrapping: true,
-    autoCloseBrackets: true,
-    matchBrackets: true,
-    autoCloseTags: true,
-    foldGutter: true,
-    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-});
-
-jsonEditor.on('change', () => {
-    jsonArea.value = jsonEditor.getValue();
-});
-
-// Copy JSON to clipboard
-const copyJsonBtn = document.getElementById('copy-json-btn');
-copyJsonBtn.addEventListener('click', () => {
-    const jsonText = jsonEditor.getValue();
-    navigator.clipboard.writeText(jsonText).then(() => {
-        alert('JSON copied to clipboard!');
-    }).catch(err => {
-        console.error('Error copying JSON to clipboard:', err);
     });
-});
+    
+    // Translate content type options
+    document.getElementById('plainTextOption').textContent = translations.plainText[currentLanguage];
+    document.getElementById('translatedTextOption').textContent = translations.translatedText[currentLanguage];
+    document.getElementById('scoreOption').textContent = translations.score[currentLanguage];
+    document.getElementById('selectorOption').textContent = translations.selector[currentLanguage];
+    document.getElementById('keybindOption').textContent = translations.keybind[currentLanguage];
+    document.getElementById('nbtOption').textContent = translations.nbt[currentLanguage];
+    document.getElementById('linebreakOption').textContent = translations.linebreak[currentLanguage];
 
-// Clear all
-const clearAllBtn = document.getElementById('clear-all-btn');
-clearAllBtn.addEventListener('click', () => {
-    jsonEditor.setValue('');
-    previewContent.innerHTML = '';
-    contentList.innerHTML = '';
-});
-
-// Preview
-const previewContent = document.getElementById('preview-content');
-const updatePreview = () => {
-    const json = jsonEditor.getValue();
-    try {
-        const parsedJson = JSON.parse(json);
-        previewContent.innerHTML = JSON.stringify(parsedJson, null, 2);
-    } catch (error) {
-        previewContent.innerHTML = 'Invalid JSON';
+    // Translate JSON indentation options
+    const indentationSelect = document.getElementById('indentation');
+    indentationSelect.options[0].text = translations.none[currentLanguage];
+    indentationSelect.options[1].text = translations.twoSpaces[currentLanguage];
+    indentationSelect.options[2].text = translations.fourSpaces[currentLanguage];
+    
+    document.getElementById('message-input').placeholder = translations.typeAMessage[currentLanguage];
+    document.getElementById('username-input').placeholder = translations.enterUsername[currentLanguage];
+    
+    // Update the error message if it exists
+    const errorElement = document.getElementById('username-error');
+    if (errorElement && errorElement.textContent) {
+        errorElement.textContent = translations.usernameExists[currentLanguage];
     }
-};
-
-jsonEditor.on('change', updatePreview);
-
-// Content list
-const contentList = document.getElementById('content-list');
-const contentTypeSelect = document.getElementById('content-type');
-const addContentBtn = document.getElementById('add-content-btn');
-
-addContentBtn.addEventListener('click', () => {
-    const contentType = contentTypeSelect.value;
-    const content = createContentElement(contentType);
-    contentList.appendChild(content);
-});
-
-function createContentElement(contentType) {
-    const content = document.createElement('div');
-    content.classList.add('content');
-    content.draggable = true;
-
-    const contentControls = document.createElement('div');
-    contentControls.classList.add('content-controls');
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-    deleteBtn.classList.add('button', 'button-accent');
-    deleteBtn.addEventListener('click', () => {
-        content.remove();
-    });
-
-    contentControls.appendChild(deleteBtn);
-
-    switch (contentType) {
-        case 'plainText':
-            const plainTextInput = document.createElement('input');
-            plainTextInput.type = 'text';
-            plainTextInput.placeholder = 'Enter plain text';
-            content.appendChild(plainTextInput);
-            break;
-        case 'translatedText':
-            const translatedTextInput = document.createElement('input');
-            translatedTextInput.type = 'text';
-            translatedTextInput.placeholder = 'Enter translated text';
-            content.appendChild(translatedTextInput);
-            break;
-        case 'score':
-            const scoreInput = document.createElement('input');
-            scoreInput.type = 'text';
-            scoreInput.placeholder = 'Enter score';
-            content.appendChild(scoreInput);
-            break;
-        case 'selector':
-            const selectorInput = document.createElement('input');
-            selectorInput.type = 'text';
-            selectorInput.placeholder = 'Enter selector';
-            content.appendChild(selectorInput);
-            break;
-        case 'keybind':
-            const keybindInput = document.createElement('input');
-            keybindInput.type = 'text';
-            keybindInput.placeholder = 'Enter keybind';
-            content.appendChild(keybindInput);
-            break;
-        case 'nbt':
-            const nbtInput = document.createElement('input');
-            nbtInput.type = 'text';
-            nbtInput.placeholder = 'Enter NBT';
-            content.appendChild(nbtInput);
-            break;
-        case 'linebreak':
-            const linebreakText = document.createElement('span');
-            linebreakText.textContent = 'Line Break';
-            content.appendChild(linebreakText);
-            break;
-    }
-
-    content.appendChild(contentControls);
-    return content;
 }
 
-// Drag and drop
-contentList.addEventListener('dragstart', (e) => {
-    e.target.classList.add('dragging');
-});
-
-contentList.addEventListener('dragend', (e) => {
-    e.target.classList.remove('dragging');
-});
-
-contentList.addEventListener('dragover', (e) => {
+function handleGeneratorRedirect(e) {
     e.preventDefault();
-    const afterElement = getDragAfterElement(contentList, e.clientY);
-    const draggable = document.querySelector('.dragging');
-    if (afterElement == null) {
-        contentList.appendChild(draggable);
-    } else {
-        contentList.insertBefore(draggable, afterElement);
+    const generator = e.target.closest('[data-generator]').getAttribute('data-generator');
+    if (generator) {
+        let targetUrl;
+        switch (generator) {
+            case 'text':
+                targetUrl = 'https://nosmc.github.io/generator/text';
+                break;
+            case 'item':
+                targetUrl = 'https://nosmc.github.io/generator/item';
+                break;
+            case 'entity':
+                targetUrl = 'https://nosmc.github.io/generator/entity';
+                break;
+            default:
+                console.error('Unknown generator type:', generator);
+                return;
+        }
+
+        function linkExists(url, callback) {
+            fetch(url, { method: 'HEAD' })
+                .then(response => callback(response.ok))
+                .catch(() => callback(false));
+        }
+
+        linkExists(targetUrl, function(exists) {
+            if (exists) {
+                window.location.href = targetUrl;
+            } else {
+                window.location.href = 'https://nosmc.github.io/';
+            }
+        });
     }
-});
+}
+
+function initializePage() {
+    loadPreferences();
+    translatePage();
+    updateUI();
+}
+
+function createContent(type, data = {}) {
+    return {
+        type: type,
+        data: {
+            text: data.text || '',
+            translate: data.translate || '',
+            with: data.with || [],
+            scoreName: data.scoreName || '',
+            scoreObjective: data.scoreObjective || '',
+            selector: data.selector || '',
+            keybind: data.keybind || '',
+            nbtPath: data.nbtPath || '',
+            nbtSource: data.nbtSource || 'entity',
+            storageSource: data.storageSource || '',
+            interpret: data.interpret || false,
+            color: data.color || 'none',
+            bold: data.bold || false,
+            italic: data.italic || false,
+            underlined: data.underlined || false,
+            strikethrough: data.strikethrough || false,
+            obfuscated: data.obfuscated || false
+        },
+        clickEvent: { action: '', value: '' },
+        hoverEvent: { action: '', contents: [] }
+    };
+}
+
+function addContent(type) {
+    let newContent;
+    if (type === 'translatedText') {
+        newContent = createContent(type, { translate: '', with: [] });
+    } else {
+        newContent = createContent(type);
+    }
+    contents.push(newContent);
+    updateUI();
+    saveContents();
+}
+
+function updateUI() {
+    const contentList = document.getElementById('content-list');
+    contentList.innerHTML = '';
+
+    contents.forEach((content, index) => {
+        const div = document.createElement('div');
+        div.className = 'content';
+        div.setAttribute('role', 'region');
+        div.setAttribute('aria-labelledby', `content-label-${index}`);
+        div.setAttribute('draggable', true);
+
+        const contentLabel = document.createElement('label');
+        contentLabel.className = 'content-label';
+        contentLabel.id = `content-label-${index}`;
+        const typeTranslation = translations[content.type] ? translations[content.type][currentLanguage] : content.type;
+        contentLabel.innerHTML = `<i class="fas fa-cube"></i> ${translations.contentLabel[currentLanguage].replace('{number}', index + 1).replace('{type}', typeTranslation)}`;
+        div.appendChild(contentLabel);
+
+        // Add input fields based on content type
+        if (content.type === 'plainText') {
+            addTextInput(div, content, 'text', translations.enterText[currentLanguage]);
+        } else if (content.type === 'translatedText') {
+            addTextInput(div, content, 'translate', translations.enterTranslationKey[currentLanguage]);
+            addWithInputs(div, content);
+        } else if (content.type === 'score') {
+            addTextInput(div, content, 'scoreName', translations.enterScoreName[currentLanguage]);
+            addTextInput(div, content, 'scoreObjective', translations.enterScoreObjective[currentLanguage]);
+        } else if (content.type === 'selector') {
+            addTextInput(div, content, 'selector', translations.enterSelector[currentLanguage]);
+        } else if (content.type === 'keybind') {
+            addTextInput(div, content, 'keybind', translations.enterKeybind[currentLanguage]);
+        } else if (content.type === 'nbt') {
+            addTextInput(div, content, 'nbtPath', translations.enterNbtPath[currentLanguage]);
+            addNbtSourceSelect(div, content);
+            addCheckbox(div, content, 'interpret', translations.interpret[currentLanguage]);
+        }
+
+        // Add formatting options
+        if (content.type !== 'linebreak') {
+            addFormattingOptions(div, content);
+            addEventOptions(div, content);
+        }
+
+        // Add control buttons
+        addControlButtons(div, index);
+
+        // Add drag-and-drop event listeners
+        addDragAndDropListeners(div, index);
+
+        contentList.appendChild(div);
+    });
+
+    updateOutputAndPreview();
+}
+
+function addTextInput(parent, content, field, placeholder) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = placeholder;
+    input.value = content.data[field];
+    input.addEventListener('input', () => {
+        content.data[field] = input.value;
+        updateOutputAndPreview();
+        saveContents();
+    });
+    parent.appendChild(input);
+}
+
+function addWithInputs(parent, content) {
+    if (!Array.isArray(content.data.with)) {
+        content.data.with = [];
+    }
+    
+    content.data.with.forEach((withContent, withIndex) => {
+        const withDiv = document.createElement('div');
+        addTextInput(withDiv, withContent, 'text', `${translations.enterText[currentLanguage]} ${withIndex + 1}`);
+        const deleteWithButton = createButton(translations.delete[currentLanguage], 'fa-trash', () => {
+            content.data.with.splice(withIndex, 1);
+            updateUI();
+            saveContents();
+        });
+        withDiv.appendChild(deleteWithButton);
+        parent.appendChild(withDiv);
+    });
+
+    const addWithButton = createButton(translations.addContent[currentLanguage], 'fa-plus', () => {
+        content.data.with.push(createContent('plainText', { text: '' }));
+        updateUI();
+        saveContents();
+    });
+    parent.appendChild(addWithButton);
+}
+
+function addNbtSourceSelect(parent, content) {
+    const select = document.createElement('select');
+    ['entity', 'block', 'storage'].forEach(source => {
+        const option = document.createElement('option');
+        option.value = source;
+        option.textContent = translations[source][currentLanguage];
+        option.selected = content.data.nbtSource === source;
+        select.appendChild(option);
+    });
+    select.addEventListener('change', () => {
+        content.data.nbtSource = select.value;
+        updateOutputAndPreview();
+        saveContents();
+    });
+    parent.appendChild(select);
+
+    if (content.data.nbtSource === 'storage') {
+        addTextInput(parent, content, 'storageSource', translations.enterNbtPath[currentLanguage]);
+    }
+}
+
+function addCheckbox(parent, content, field, label) {
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = content.data && content.data[field] || false;
+    checkbox.addEventListener('change', () => {
+        if (!content.data) content.data = {};
+        content.data[field] = checkbox.checked;
+        updateOutputAndPreview();
+        saveContents();
+    });
+    const labelElement = document.createElement('label');
+    labelElement.appendChild(checkbox);
+    labelElement.appendChild(document.createTextNode(label));
+    parent.appendChild(labelElement);
+}
+
+function addFormattingOptions(parent, content) {
+    const formattingDiv = document.createElement('div');
+    formattingDiv.className = 'formatting-options';
+
+    // Color selection
+    const colorSelect = document.createElement('select');
+    
+    // Add "none" option
+    const noneOption = document.createElement('option');
+    noneOption.value = 'none';
+    noneOption.textContent = translations.none[currentLanguage];
+    noneOption.selected = !content.data.color || content.data.color === 'none';
+    colorSelect.appendChild(noneOption);
+
+    Object.keys(minecraftColorMap).forEach(color => {
+        const option = document.createElement('option');
+        option.value = color;
+        option.textContent = translations[color][currentLanguage];
+        option.selected = content.data && content.data.color === color;
+        colorSelect.appendChild(option);
+    });
+    colorSelect.addEventListener('change', () => {
+        if (!content.data) content.data = {};
+        content.data.color = colorSelect.value;
+        updateOutputAndPreview();
+        saveContents();
+    });
+    formattingDiv.appendChild(colorSelect);
+
+    // Text properties
+    ['bold', 'italic', 'underlined', 'strikethrough', 'obfuscated'].forEach(prop => {
+        addCheckbox(formattingDiv, content, prop, translations[prop][currentLanguage]);
+    });
+
+    parent.appendChild(formattingDiv);
+}
+
+function addEventOptions(parent, content) {
+    // Click event options
+    const clickEventDiv = document.createElement('div');
+    clickEventDiv.className = 'event-options';
+    const clickEventLabel = document.createElement('label');
+    clickEventLabel.textContent = translations.clickEvent[currentLanguage];
+    clickEventDiv.appendChild(clickEventLabel);
+
+    const clickEventSelect = document.createElement('select');
+    ['', 'open_url', 'open_file', 'run_command', 'suggest_command', 'change_page', 'copy_to_clipboard'].forEach(action => {
+        const option = document.createElement('option');
+        option.value = action;
+        option.textContent = translations[action || 'noClickEvent'][currentLanguage];
+        option.selected = content.clickEvent.action === action;
+        clickEventSelect.appendChild(option);
+    });
+    clickEventSelect.addEventListener('change', () => {
+        content.clickEvent.action = clickEventSelect.value;
+        updateClickAndHoverEventInputs(clickEventValueInput, clickEventSelect.value);
+        updateOutputAndPreview();
+        saveContents();
+    });
+    clickEventDiv.appendChild(clickEventSelect);
+
+    const clickEventValueInput = document.createElement('input');
+    clickEventValueInput.type = 'text';
+    clickEventValueInput.placeholder = translations.enterText[currentLanguage];
+    clickEventValueInput.value = content.clickEvent.value;
+    clickEventValueInput.style.display = content.clickEvent.action ? 'inline' : 'none';
+    clickEventValueInput.addEventListener('input', () => {
+        content.clickEvent.value = clickEventValueInput.value;
+        updateOutputAndPreview();
+        saveContents();
+    });
+    clickEventDiv.appendChild(clickEventValueInput);
+    parent.appendChild(clickEventDiv);
+
+    // Hover event options
+    const hoverEventDiv = document.createElement('div');
+    hoverEventDiv.className = 'event-options';
+    const hoverEventLabel = document.createElement('label');
+    hoverEventLabel.textContent = translations.hoverEvent[currentLanguage];
+    hoverEventDiv.appendChild(hoverEventLabel);
+
+    const hoverEventSelect = document.createElement('select');
+    ['', 'show_text', 'show_item', 'show_entity'].forEach(action => {
+        const option = document.createElement('option');
+        option.value = action;
+        option.textContent = translations[action || 'noHoverEvent'][currentLanguage];
+        option.selected = content.hoverEvent.action === action;
+        hoverEventSelect.appendChild(option);
+    });
+    hoverEventSelect.addEventListener('change', () => {
+        content.hoverEvent.action = hoverEventSelect.value;
+        updateClickAndHoverEventInputs(hoverEventContentsInput, hoverEventSelect.value);
+        updateOutputAndPreview();
+        saveContents();
+    });
+    hoverEventDiv.appendChild(hoverEventSelect);
+
+    const hoverEventContentsInput = document.createElement('input');
+    hoverEventContentsInput.type = 'text';
+    hoverEventContentsInput.placeholder = translations.enterText[currentLanguage];
+    hoverEventContentsInput.value = content.hoverEvent.contents.map(content => content.text).join(', ');
+    hoverEventContentsInput.style.display = content.hoverEvent.action ? 'inline' : 'none';
+    hoverEventContentsInput.addEventListener('input', () => {
+        content.hoverEvent.contents = hoverEventContentsInput.value.split(',').map(item => ({ text: item.trim() }));
+        updateOutputAndPreview();
+        saveContents();
+    });
+    hoverEventDiv.appendChild(hoverEventContentsInput);
+    parent.appendChild(hoverEventDiv);
+}
+
+function addControlButtons(parent, index) {
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'content-controls';
+
+    const moveUpBtn = createButton(translations.moveUp[currentLanguage], 'fa-arrow-up', () => moveContent(index, -1));
+    const moveDownBtn = createButton(translations.moveDown[currentLanguage], 'fa-arrow-down', () => moveContent(index, 1));
+    const duplicateBtn = createButton(translations.duplicate[currentLanguage], 'fa-clone', () => duplicateContent(index));
+    const deleteBtn = createButton(translations.delete[currentLanguage], 'fa-trash', () => deleteContent(index));
+
+    controlsDiv.appendChild(moveUpBtn);
+    controlsDiv.appendChild(moveDownBtn);
+    controlsDiv.appendChild(duplicateBtn);
+    controlsDiv.appendChild(deleteBtn);
+
+    parent.appendChild(controlsDiv);
+}
+
+function createButton(text, iconClass, onClick) {
+    const button = document.createElement('button');
+    button.className = 'button button-accent';
+    button.innerHTML = `<i class="fas ${iconClass}"></i> ${text}`;
+    button.addEventListener('click', onClick);
+    return button;
+}
+
+function addDragAndDropListeners(div, index) {
+    div.addEventListener('dragstart', () => {
+        dragSrcIndex = index;
+        div.classList.add('dragging');
+        startAutoScroll();
+    });
+
+    div.addEventListener('dragend', () => {
+        div.classList.remove('dragging');
+        stopAutoScroll();
+        updateUI();
+    });
+
+    div.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const draggingElement = document.querySelector('.dragging');
+        const contentList = document.getElementById('content-list');
+        const afterElement = getDragAfterElement(contentList, e.clientY);
+        if (afterElement == null) {
+            contentList.appendChild(draggingElement);
+        } else {
+            contentList.insertBefore(draggingElement, afterElement);
+        }
+    });
+
+    div.addEventListener('drop', () => {
+        const draggedContent = contents.splice(dragSrcIndex, 1)[0];
+        const dropIndex = Array.from(document.getElementById('content-list').children).indexOf(div);
+        contents.splice(dropIndex, 0, draggedContent);
+        updateUI();
+        saveContents();
+    });
+}
+
+function startAutoScroll() {
+    scrollInterval = setInterval(() => {
+        const container = document.querySelector('.left-panel');
+        const headerRect = document.querySelector('header').getBoundingClientRect();
+        const footerRect = document.querySelector('footer').getBoundingClientRect();
+        const draggingElement = document.querySelector('.dragging');
+        if (draggingElement) {
+            const draggingRect = draggingElement.getBoundingClientRect();
+            const scrollSpeed = 15;
+
+            if (draggingRect.top < headerRect.bottom) {
+                container.scrollTop -= scrollSpeed;
+            } else if (draggingRect.bottom > footerRect.top) {
+                container.scrollTop += scrollSpeed;
+            }
+        }
+    }, 50);
+}
+
+function stopAutoScroll() {
+    clearInterval(scrollInterval);
+}
 
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.content:not(.dragging)')];
@@ -1280,170 +1585,9 @@ function getDragAfterElement(container, y) {
         }
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
-    </script>
-</body>
-</html>
-const jsonArea = document.getElementById('json-area');
-const jsonEditor = CodeMirror.fromTextArea(jsonArea, {
-    mode: 'application/json',
-    lineNumbers: true,
-    theme: 'default',
-    indentUnit: 2,
-    indentWithTabs: false,
-    tabSize: 2,
-    lineWrapping: true,
-    autoCloseBrackets: true,
-    matchBrackets: true,
-    autoCloseTags: true,
-    foldGutter: true,
-    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-});
 
-jsonEditor.on('change', () => {
-    jsonArea.value = jsonEditor.getValue();
-});
-
-// Copy JSON to clipboard
-const copyJsonBtn = document.getElementById('copy-json-btn');
-copyJsonBtn.addEventListener('click', () => {
-    const jsonText = jsonEditor.getValue();
-    navigator.clipboard.writeText(jsonText).then(() => {
-        alert('JSON copied to clipboard!');
-    }).catch(err => {
-        console.error('Error copying JSON to clipboard:', err);
-    });
-});
-
-// Clear all
-const clearAllBtn = document.getElementById('clear-all-btn');
-clearAllBtn.addEventListener('click', () => {
-    jsonEditor.setValue('');
-    previewContent.innerHTML = '';
-    contentList.innerHTML = '';
-});
-
-// Preview
-const previewContent = document.getElementById('preview-content');
-const updatePreview = () => {
-    const json = jsonEditor.getValue();
-    try {
-        const parsedJson = JSON.parse(json);
-        previewContent.innerHTML = JSON.stringify(parsedJson, null, 2);
-    } catch (error) {
-        previewContent.innerHTML = 'Invalid JSON';
-    }
-};
-
-jsonEditor.on('change', updatePreview);
-
-// Content list
-const contentList = document.getElementById('content-list');
-const contentTypeSelect = document.getElementById('content-type');
-const addContentBtn = document.getElementById('add-content-btn');
-
-addContentBtn.addEventListener('click', () => {
-    const contentType = contentTypeSelect.value;
-    const content = createContentElement(contentType);
-    contentList.appendChild(content);
-});
-
-function createContentElement(contentType) {
-    const content = document.createElement('div');
-    content.classList.add('content');
-    content.draggable = true;
-
-    const contentControls = document.createElement('div');
-    contentControls.classList.add('content-controls');
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-    deleteBtn.classList.add('button', 'button-accent');
-    deleteBtn.addEventListener('click', () => {
-        content.remove();
-    });
-
-    contentControls.appendChild(deleteBtn);
-
-    switch (contentType) {
-        case 'plainText':
-            const plainTextInput = document.createElement('input');
-            plainTextInput.type = 'text';
-            plainTextInput.placeholder = 'Enter plain text';
-            content.appendChild(plainTextInput);
-            break;
-        case 'translatedText':
-            const translatedTextInput = document.createElement('input');
-            translatedTextInput.type = 'text';
-            translatedTextInput.placeholder = 'Enter translated text';
-            content.appendChild(translatedTextInput);
-            break;
-        case 'score':
-            const scoreInput = document.createElement('input');
-            scoreInput.type = 'text';
-            scoreInput.placeholder = 'Enter score';
-            content.appendChild(scoreInput);
-            break;
-        case 'selector':
-            const selectorInput = document.createElement('input');
-            selectorInput.type = 'text';
-            selectorInput.placeholder = 'Enter selector';
-            content.appendChild(selectorInput);
-            break;
-        case 'keybind':
-            const keybindInput = document.createElement('input');
-            keybindInput.type = 'text';
-            keybindInput.placeholder = 'Enter keybind';
-            content.appendChild(keybindInput);
-            break;
-        case 'nbt':
-            const nbtInput = document.createElement('input');
-            nbtInput.type = 'text';
-            nbtInput.placeholder = 'Enter NBT';
-            content.appendChild(nbtInput);
-            break;
-        case 'linebreak':
-            const linebreakText = document.createElement('span');
-            linebreakText.textContent = 'Line Break';
-            content.appendChild(linebreakText);
-            break;
-    }
-
-    content.appendChild(contentControls);
-    return content;
-}
-
-// Drag and drop
-contentList.addEventListener('dragstart', (e) => {
-    e.target.classList.add('dragging');
-});
-
-contentList.addEventListener('dragend', (e) => {
-    e.target.classList.remove('dragging');
-});
-
-contentList.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    const afterElement = getDragAfterElement(contentList, e.clientY);
-    const draggable = document.querySelector('.dragging');
-    if (afterElement == null) {
-        contentList.appendChild(draggable);
-    } else {
-        contentList.insertBefore(draggable, afterElement);
-    }
-});
-
-function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.content:not(.dragging)')];
-
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
+function updateClickAndHoverEventInputs(inputElement, action) {
+    inputElement.style.display = action && action !== translations.noClickEvent[currentLanguage] && action !== translations.noHoverEvent[currentLanguage] ? 'inline' : 'none';
 }
 
 function moveContent(index, direction) {
@@ -1703,11 +1847,11 @@ function debounce(func, delay) {
 const translations = {
     headerTitle: {
         en: "Text Component Generator",
-        zh: "文本组件生成器"
+        zh: "文本組件生成器"
     },
     home: {
         en: "Home",
-        zh: "主页"
+        zh: "主頁"
     },
     generators: {
         en: "Generators",
@@ -1723,27 +1867,27 @@ const translations = {
     },
     generatorEntity: {
         en: "Entity",
-        zh: "实体"
+        zh: "實體"
     },
     contentList: {
         en: "Content List",
-        zh: "内容列表"
+        zh: "內容列表"
     },
     addContent: {
         en: "Add Content",
-        zh: "添加内容"
+        zh: "添加內容"
     },
     jsonEditor: {
         en: "JSON Editor",
-        zh: "JSON 编辑器"
+        zh: "JSON 編輯器"
     },
     preview: {
         en: "Preview",
-        zh: "预览"
+        zh: "預覽"
     },
     copyJson: {
         en: "Copy JSON",
-        zh: "复制 JSON"
+        zh: "複製 JSON"
     },
     clearAll: {
         en: "Clear All",
@@ -1751,43 +1895,43 @@ const translations = {
     },
     contentType: {
         en: "Content Type:",
-        zh: "内容类型："
+        zh: "內容類型："
     },
     jsonIndentation: {
         en: "JSON Indentation:",
-        zh: "JSON 缩进："
+        zh: "JSON 縮進："
     },
     none: {
         en: "None",
-        zh: "无"
+        zh: "無"
     },
     twoSpaces: {
         en: "2 Spaces",
-        zh: "2 个空格"
+        zh: "2 個空格"
     },
     fourSpaces: {
         en: "4 Spaces",
-        zh: "4 个空格"
+        zh: "4 個空格"
     },
     plainText: {
         en: "Plain Text",
-        zh: "纯文本"
+        zh: "純文本"
     },
     translatedText: {
         en: "Translated Text",
-        zh: "翻译文本"
+        zh: "翻譯文本"
     },
     score: {
         en: "Score",
-        zh: "分数"
+        zh: "分數"
     },
     selector: {
         en: "Selector",
-        zh: "选择器"
+        zh: "選擇器"
     },
     keybind: {
         en: "Keybind",
-        zh: "按键绑定"
+        zh: "按鍵綁定"
     },
     nbt: {
         en: "NBT",
@@ -1795,111 +1939,111 @@ const translations = {
     },
     linebreak: {
         en: "Line Break",
-        zh: "换行"
+        zh: "換行"
     },
     enterText: {
         en: "Enter text",
-        zh: "输入文本"
+        zh: "輸入文本"
     },
     enterTranslationKey: {
         en: "Enter translation key",
-        zh: "输入翻译键"
+        zh: "輸入翻譯鍵"
     },
     enterScoreName: {
         en: "Enter score name",
-        zh: "输入分数名称"
+        zh: "輸入分數名稱"
     },
     enterScoreObjective: {
         en: "Enter score objective",
-        zh: "输入分数目标"
+        zh: "輸入分數目標"
     },
     enterSelector: {
         en: "Enter selector",
-        zh: "输入选择器"
+        zh: "輸入選擇器"
     },
     enterKeybind: {
         en: "Enter keybind",
-        zh: "输入按键绑定"
+        zh: "輸入按鍵綁定"
     },
     enterNbtPath: {
         en: "Enter NBT path",
-        zh: "输入 NBT 路径"
+        zh: "輸入 NBT 路徑"
     },
     entity: {
         en: "Entity",
-        zh: "实体"
+        zh: "實體"
     },
     block: {
         en: "Block",
-        zh: "方块"
+        zh: "方塊"
     },
     storage: {
         en: "Storage",
-        zh: "存储"
+        zh: "存儲"
     },
     interpret: {
         en: "Interpret",
-        zh: "解释"
+        zh: "解釋"
     },
     noClickEvent: {
         en: "No Click Event",
-        zh: "无点击事件"
+        zh: "無點擊事件"
     },
     open_url: {
         en: "Open URL",
-        zh: "打开 URL"
+        zh: "打開 URL"
     },
     open_file: {
         en: "Open File",
-        zh: "打开文件"
+        zh: "打開文件"
     },
     run_command: {
         en: "Run Command",
-        zh: "运行命令"
+        zh: "運行命令"
     },
     suggest_command: {
         en: "Suggest Command",
-        zh: "建议命令"
+        zh: "建議命令"
     },
     change_page: {
         en: "Change Page",
-        zh: "更改页面"
+        zh: "更改頁面"
     },
     copy_to_clipboard: {
         en: "Copy to Clipboard",
-        zh: "复制到剪贴板"
+        zh: "複製到剪貼板"
     },
     noHoverEvent: {
         en: "No Hover Event",
-        zh: "无悬停事件"
+        zh: "無懸停事件"
     },
     show_text: {
         en: "Show Text",
-        zh: "显示文本"
+        zh: "顯示文本"
     },
     show_item: {
         en: "Show Item",
-        zh: "显示物品"
+        zh: "顯示物品"
     },
     show_entity: {
         en: "Show Entity",
-        zh: "显示实体"
+        zh: "顯示實體"
     },
     bold: {
         en: "Bold",
-        zh: "粗体"
+        zh: "粗體"
     },
     italic: {
         en: "Italic",
-        zh: "斜体"
+        zh: "斜體"
     },
     underlined: {
         en: "Underlined",
-        zh: "下划线"
+        zh: "下劃線"
     },
     strikethrough: {
         en: "Strikethrough",
-        zh: "删除线"
+        zh: "刪除線"
     },
     obfuscated: {
         en: "Obfuscated",
@@ -1907,11 +2051,11 @@ const translations = {
     },
     clickEvent: {
         en: "Click Event:",
-        zh: "点击事件："
+        zh: "點擊事件："
     },
     hoverEvent: {
         en: "Hover Event:",
-        zh: "悬停事件："
+        zh: "懸停事件："
     },
     moveUp: {
         en: "Move Up",
@@ -1923,15 +2067,15 @@ const translations = {
     },
     duplicate: {
         en: "Duplicate",
-        zh: "复制"
+        zh: "複製"
     },
     delete: {
         en: "Delete",
-        zh: "删除"
+        zh: "刪除"
     },
     contentLabel: {
         en: "Content {number} ({type})",
-        zh: "内容 {number} ({type})"
+        zh: "內容 {number} ({type})"
     },
     black: {
         en: "Black",
@@ -1939,11 +2083,11 @@ const translations = {
     },
     dark_blue: {
         en: "Dark Blue",
-        zh: "深蓝色"
+        zh: "深藍色"
     },
     dark_green: {
         en: "Dark Green",
-        zh: "深绿色"
+        zh: "深綠色"
     },
     dark_aqua: {
         en: "Dark Aqua",
@@ -1951,7 +2095,7 @@ const translations = {
     },
     dark_red: {
         en: "Dark Red",
-        zh: "深红色"
+        zh: "深紅色"
     },
     dark_purple: {
         en: "Dark Purple",
@@ -1971,11 +2115,11 @@ const translations = {
     },
     blue: {
         en: "Blue",
-        zh: "蓝色"
+        zh: "藍色"
     },
     green: {
         en: "Green",
-        zh: "绿色"
+        zh: "綠色"
     },
     aqua: {
         en: "Aqua",
@@ -1983,15 +2127,15 @@ const translations = {
     },
     red: {
         en: "Red",
-        zh: "红色"
+        zh: "紅色"
     },
     light_purple: {
         en: "Light Purple",
-        zh: "淡紫色"
+        zh: "淺紫色"
     },
     yellow: {
         en: "Yellow",
-        zh: "黄色"
+        zh: "黃色"
     },
     white: {
         en: "White",
@@ -2003,15 +2147,15 @@ const translations = {
     },
     sendButtonText: {
         en: "Send",
-        zh: "发送"
+        zh: "發送"
     },
     typeAMessage: {
         en: "Type a message...",
-        zh: "输入消息..."
+        zh: "輸入消息..."
     },
     chooseLoginMethod: {
         en: "Choose a Login Method",
-        zh: "选择登录方式"
+        zh: "選擇登錄方式"
     },
     youtube: {
         en: "YouTube",
@@ -2027,27 +2171,27 @@ const translations = {
     },
     developedBy: {
         en: "Developed by nos",
-        zh: "由 nos 开发"
+        zh: "由 nos 開發"
     },
     donate: {
         en: "Donate",
-        zh: "捐赠"
+        zh: "捐贈"
     },
     enterUsername: {
         en: "Please set your username:",
-        zh: "请设置您的用户名："
+        zh: "請設置您的用戶名："
     },
     usernameExists: {
         en: "Username already exists. Please choose another one.",
-        zh: "用户名已存在。请选择另一个。"
+        zh: "用戶名已存在。請選擇另一個。"
     },
     loginWithGoogle: {
         en: "Login with Google",
-        zh: "使用 Google 登录"
+        zh: "使用 Google 登錄"
     },
     loginWithGithub: {
         en: "Login with GitHub",
-        zh: "使用 GitHub 登录"
+        zh: "使用 GitHub 登錄"
     },
     cancelLogin: {
         en: "Cancel",
@@ -2055,11 +2199,11 @@ const translations = {
     },
     setUsernameTitle: {
         en: "Set Your Username",
-        zh: "设置您的用户名"
+        zh: "設置您的用戶名"
     },
     setUsernameBtn: {
         en: "Set Username",
-        zh: "设置用户名"
+        zh: "設置用戶名"
     },
     cancelSetUsername: {
         en: "Cancel",
@@ -2067,15 +2211,15 @@ const translations = {
     },
     usernameEmpty: {
         en: "Username cannot be empty",
-        zh: "用户名不能为空"
+        zh: "用戶名不能為空"
     },
     errorSavingUsername: {
         en: "Error saving username. Please try again.",
-        zh: "保存用户名时出错。请重试。"
+        zh: "保存用戶名時出錯。請重試。"
     },
     errorCheckingUsername: {
         en: "Error checking username. Please try again.",
-        zh: "检查用户名时出错。请重试。"
+        zh: "檢查用戶名時出錯。請重試。"
     }
 };
 
