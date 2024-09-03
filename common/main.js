@@ -1,7 +1,7 @@
 // Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut, off } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded, query, orderByChild, set, get, equalTo, off } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { translations  } from "https://nosmc.github.io/common/translations.js";
 // Firebase configuration
 const firebaseConfig = {
@@ -60,8 +60,8 @@ loginButton.addEventListener('click', handleLoginButtonClick);
 closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
 googleLoginBtn.addEventListener('click', () => signInWithProvider(googleProvider));
 githubLoginBtn.addEventListener('click', () => signInWithProvider(githubProvider));
-sendButton.addEventListener('click', sendMessage);
-messageInput.addEventListener('keypress', handleMessageInputKeypress);
+// sendButton.addEventListener('click', sendMessage);
+// messageInput.addEventListener('keypress', handleMessageInputKeypress);
 themeSwitcher.addEventListener('click', toggleTheme);
 languageSwitcher.addEventListener('click', toggleLanguage);
 setUsernameBtn.addEventListener('click', handleSetUsername);
@@ -205,7 +205,8 @@ function showUsernameError(message) {
 
 function loadMessages() {
     if (messagesRef) {
-        return;
+        // If messagesRef already exists, remove the existing listener
+        off(messagesRef);
     }
     messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
     
@@ -393,6 +394,13 @@ function handleGeneratorRedirect(e) {
 function initializePage() {
     loadPreferences();
     translatePage();
+    
+    // Add event listeners here to ensure they're only added once
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', handleMessageInputKeypress);
+    
+    // Ensure theme switcher is connected
+    themeSwitcher.addEventListener('click', toggleTheme);
 }
 
 function showUnreadIndicator() {
