@@ -437,10 +437,10 @@ textarea#json-area,
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
-.unread-dot {
+.chat-button .unread-dot {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -5px;
+    right: -5px;
     width: 10px;
     height: 10px;
     background-color: red;
@@ -473,19 +473,6 @@ textarea#json-area,
     flex-direction: column;
 }
 
-#chat-messages::-webkit-scrollbar {
-    width: 8px;
-}
-
-#chat-messages::-webkit-scrollbar-track {
-    background: var(--panel-background-color);
-}
-
-#chat-messages::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-color);
-    border-radius: 10px;
-}
-
 #chat-messages li {
     margin-bottom: 20px;
     display: flex;
@@ -502,16 +489,6 @@ textarea#json-area,
     flex-direction: row-reverse;
 }
 
-#chat-messages li.sent .message-header img {
-    margin-left: 5px;
-    margin-right: 0;
-}
-
-#chat-messages li.sent .username {
-    margin-right: 5px;
-    margin-left: 0;
-}
-
 #chat-messages .message-header {
     display: flex;
     align-items: center;
@@ -523,18 +500,11 @@ textarea#json-area,
     width: 24px;
     height: 24px;
     border-radius: 50%;
-}
-
-#chat-messages li.received .message-header img {
     margin-right: 5px;
 }
 
 #chat-messages .username {
     font-weight: bold;
-}
-
-#chat-messages li.received .username {
-    margin-left: 5px;
 }
 
 #chat-messages li.received {
@@ -569,10 +539,6 @@ textarea#json-area,
     font-size: 0.8em;
     color: #888;
     margin-top: 5px;
-    align-self: flex-end;
-}
-
-#chat-messages li.sent .message-time {
     align-self: flex-end;
 }
 
@@ -905,11 +871,101 @@ auth.onAuthStateChanged(handleAuthStateChange);
 
 // Functions
 function toggleChat() {
-    const isChatOpen = chatContainer.style.display === 'flex';
-    chatContainer.style.display = isChatOpen ? 'none' : 'flex';
-    if (!isChatOpen) {
-        messagesList.scrollTop = messagesList.scrollHeight;
+    isChatOpen = !isChatOpen;
+    chatContainer.style.display = isChatOpen ? 'flex' : 'none';
+    if (isChatOpen) {
+        scrollChatToBottom();
+        clearUnreadIndicator();
     }
+}
+
+function handleNewMessage(message) {
+    if (!isChatOpen) {
+        showUnreadIndicator();
+    }
+    if (isChatOpen && isScrolledToBottom()) {
+        scrollChatToBottom();
+    }
+}
+
+function isScrolledToBottom() {
+    return messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
+}
+
+function showUnreadIndicator() {
+    unreadMessages++;
+    document.querySelector('.chat-button .unread-dot').style.display = 'block';
+}
+
+function clearUnreadIndicator() {
+    unreadMessages = 0;
+    document.querySelector('.chat-button .unread-dot').style.display = 'none';
+}
+
+window.addEventListener('focus', () => {
+    if (isChatOpen) {
+        clearUnreadIndicator();
+    }
+});
+
+function scrollChatToBottom() {
+    messagesList.scrollTop = messagesList.scrollHeight;
+}
+
+function displayMessage(message) {
+    const li = document.createElement('li');
+    li.className = message.sender === username ? 'sent' : 'received';
+
+    if (message.sender === developerUsername) {
+        li.classList.add('developer');
+    }
+
+    const messageHeader = document.createElement('div');
+    messageHeader.className = 'message-header';
+
+    const img = document.createElement('img');
+    img.src = message.avatar || 'default-avatar.png';
+    img.alt = message.sender;
+
+    const usernameSpan = document.createElement('span');
+    usernameSpan.className = 'username';
+    usernameSpan.textContent = message.sender;
+
+    messageHeader.appendChild(img);
+    messageHeader.appendChild(usernameSpan);
+
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = message.content;
+
+    const messageTime = document.createElement('div');
+    messageTime.className = 'message-time';
+    messageTime.textContent = convertToLocalTime(message.timestamp);
+
+    li.appendChild(messageHeader);
+    li.appendChild(messageContent);
+    li.appendChild(messageTime);
+
+    messagesList.appendChild(li);
+    scrollChatToBottom();
+}
+
+function loadMessages() {
+    if (messagesRef) {
+        return;
+    }
+    messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
+    
+    const loadTimestamp = new Date().getTime();
+    
+    onChildAdded(messagesRef, (snapshot) => {
+        const message = snapshot.val();
+        displayMessage(message);
+        
+        if (new Date(message.timestamp).getTime() > loadTimestamp) {
+            handleNewMessage(message);
+        }
+    });
 }
 
 function handleLoginButtonClick() {
@@ -1030,17 +1086,6 @@ function showUsernameError(message) {
     document.getElementById('username-error').textContent = message;
 }
 
-function loadMessages() {
-    if (messagesRef) {
-        return;
-    }
-    messagesRef = query(ref(database, 'messages'), orderByChild('timestamp'));
-    onChildAdded(messagesRef, (snapshot) => {
-        const message = snapshot.val();
-        displayMessage(message);
-    });
-}
-
 function removeMessagesListener() {
     if (messagesRef) {
         messagesRef = null;
@@ -1051,49 +1096,6 @@ function removeMessagesListener() {
 function convertToLocalTime(isoTimestamp) {
     const date = new Date(isoTimestamp);
     return date.toLocaleString();
-}
-
-function displayMessage(message) {
-    const li = document.createElement('li');
-    li.className = message.sender === username ? 'sent' : 'received';
-
-    if (message.sender === developerUsername) {
-        li.classList.add('developer');
-    }
-
-    const img = document.createElement('img');
-    img.src = message.avatar || 'default-avatar.png';
-    img.alt = message.sender;
-
-    const messageHeader = document.createElement('div');
-    messageHeader.className = 'message-header';
-
-    const usernameSpan = document.createElement('span');
-    usernameSpan.className = 'username';
-    usernameSpan.textContent = message.sender;
-
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'time';
-    timeSpan.textContent = convertToLocalTime(message.timestamp);
-
-    const messageContent = document.createElement('div');
-    messageContent.className = 'message-content';
-    messageContent.textContent = message.content;
-
-    messageHeader.appendChild(usernameSpan);
-    messageHeader.appendChild(timeSpan);
-
-    if (li.className.includes('sent')) {
-        messageHeader.appendChild(img);
-    } else {
-        messageHeader.insertBefore(img, usernameSpan);
-    }
-
-    li.appendChild(messageHeader);
-    li.appendChild(messageContent);
-    messagesList.appendChild(li);
-
-    messagesList.scrollTop = messagesList.scrollHeight;
 }
 
 function sendMessage() {
