@@ -6,14 +6,12 @@
     <title>Cat Click Game</title>
     <style>
         /* styles.css */
-
         body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
             background-color: #f0f8ff;
         }
-
         .game-container {
             display: flex;
             flex-direction: column;
@@ -22,19 +20,16 @@
             height: 100vh;
             position: relative;
         }
-
         #cat-image {
             width: 200px;
             height: 200px;
             cursor: pointer;
             transition: transform 0.1s;
         }
-
         .score {
             margin-top: 20px;
             font-size: 24px;
         }
-
         .leaderboard {
             position: absolute;
             top: 20px;
@@ -44,33 +39,27 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
         .leaderboard h2 {
             margin-top: 0;
             text-align: center;
         }
-
         .leaderboard ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-
         .leaderboard li {
             padding: 5px 0;
             border-bottom: 1px solid #ddd;
         }
-
         .leaderboard li:last-child {
             border-bottom: none;
         }
-
         .auth-buttons {
             position: absolute;
             bottom: 20px;
             right: 20px;
         }
-
         .auth-buttons button {
             padding: 10px 20px;
             margin: 5px;
@@ -80,7 +69,6 @@
             cursor: pointer;
             border-radius: 5px;
         }
-
         .auth-buttons button:hover {
             background-color: #45a049;
         }
@@ -92,25 +80,23 @@
 </head>
 <body>
     <div class="leaderboard">
-        <h2>Leaderboard</h2>
+        <h2 id="leaderboard-title">Leaderboard</h2>
         <ul id="leaderboard-list">
             <!-- Leaderboard entries will be inserted here -->
         </ul>
     </div>
     <div class="game-container">
-        <!-- Enlaces a imágenes reales de gatos -->
+        <!-- Links to real cat images -->
         <img src="https://i.imgur.com/z4d4kWk.png" alt="Cat Closed" id="cat-image">
         <div class="score">Score: <span id="score">0</span></div>
     </div>
     <!-- Sign-In/Sign-Out Buttons -->
     <div class="auth-buttons">
-        <button id="sign-in-button">Sign In with Google</button>
+        <button id="sign-in-button">Sign In</button>
         <button id="sign-out-button" style="display: none;">Sign Out</button>
     </div>
 
     <script>
-        // script.js
-    
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
@@ -121,12 +107,12 @@
             appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
             measurementId: "G-QJT1XPTPDZ"
         };
-    
+
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-    
+
         // Elements
         const catImage = document.getElementById('cat-image');
         const scoreSpan = document.getElementById('score');
@@ -134,16 +120,16 @@
         const signInButton = document.getElementById('sign-in-button');
         const signOutButton = document.getElementById('sign-out-button');
         const leaderboardTitle = document.getElementById('leaderboard-title');
-    
+
         let score = 0;
         let userCountry = 'Unknown';
         let userId = null;
-    
-        // Imágenes de gato alternadas
-        const catClosedSrc = 'https://i.imgur.com/z4d4kWk.png'; // Imagen de gato cerrado
-        const catOpenSrc = 'https://i.imgur.com/OdL0XPt.png';   // Imagen de gato abierto
-    
-        // Detectar el idioma del navegador y cambiar el texto
+
+        // Alternate cat images
+        const catClosedSrc = 'https://i.imgur.com/z4d4kWk.png'; // Closed cat image
+        const catOpenSrc = 'https://i.imgur.com/OdL0XPt.png';   // Open cat image
+
+        // Detect browser language and change text accordingly
         const userLanguage = navigator.language || navigator.userLanguage;
         const translations = {
             en: {
@@ -152,41 +138,41 @@
                 signOut: "Sign Out",
                 score: "Score",
             },
-            es: {
-                leaderboard: "Tabla de Clasificación",
-                signIn: "Iniciar Sesión",
-                signOut: "Cerrar Sesión",
-                score: "Puntuación",
+            'zh-TW': {
+                leaderboard: "排行榜",
+                signIn: "登入",
+                signOut: "登出",
+                score: "分數",
             },
             // Add more languages as needed
         };
-    
-        // Establece el idioma predeterminado en inglés si no se encuentra la traducción
+
+        // Set the default language to English if no translation is found
         const lang = translations[userLanguage.split('-')[0]] || translations['en'];
-    
-        // Cambiar el texto a la lengua del usuario
+
+        // Update text to user's language
         leaderboardTitle.textContent = lang.leaderboard;
         signInButton.textContent = lang.signIn;
         signOutButton.textContent = lang.signOut;
-    
-        // Obtener País del Usuario
+
+        // Fetch user's country
         function fetchUserCountry() {
             fetch('https://ipapi.co/json/')
                 .then(response => response.json())
                 .then(data => {
                     userCountry = data.country_name || 'Unknown';
-                    // Después de obtener el país, configurar el documento del usuario
+                    // After obtaining the country, set up the user's document in Firestore
                     if (userId) {
                         setupUserDocument();
-                        fetchUserScore(); // Obtener el puntaje del usuario
+                        fetchUserScore(); // Fetch the user's score
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching country:', error);
                 });
         }
-    
-        // Configurar Documento del Usuario en Firestore
+
+        // Set up the user's Firestore document
         function setupUserDocument() {
             const userRef = db.collection('users').doc(userId);
             userRef.get().then(doc => {
@@ -198,8 +184,8 @@
                 }
             }).catch(error => console.error('Error fetching user document:', error));
         }
-    
-        // Obtener Puntaje del Usuario
+
+        // Fetch the user's score from Firestore
         function fetchUserScore() {
             const userRef = db.collection('users').doc(userId);
             userRef.get().then(doc => {
@@ -210,8 +196,8 @@
                 }
             }).catch(error => console.error('Error fetching user score:', error));
         }
-    
-        // Actualizar Leaderboard
+
+        // Update the leaderboard display
         function updateLeaderboard() {
             db.collection('users')
                 .orderBy('count', 'desc')
@@ -226,67 +212,67 @@
                     });
                 });
         }
-    
-        // Incrementar Puntaje y Actualizar Firestore
+
+        // Increment the score and update Firestore
         function incrementScore() {
             score += 1;
             scoreSpan.textContent = score;
-    
+
             if (!userId) return;
-    
+
             const userRef = db.collection('users').doc(userId);
-    
+
             userRef.update({
                 count: firebase.firestore.FieldValue.increment(1)
             }).catch(error => {
                 console.error('Error updating score:', error);
             });
         }
-    
-        // Manejar Eventos de Ratón
+
+        // Handle mouse events for clicking the cat image
         let isPressed = false;
-    
+
         catImage.addEventListener('mousedown', (e) => {
-            if (e.button === 0) { // Click izquierdo
+            if (e.button === 0) { // Left-click
                 isPressed = true;
                 catImage.src = catOpenSrc;
                 incrementScore();
             }
         });
-    
+
         document.addEventListener('mouseup', (e) => {
             if (isPressed && e.button === 0) {
                 isPressed = false;
                 catImage.src = catClosedSrc;
             }
         });
-    
-        // Autenticación de Firebase
-    
-        // Iniciar Sesión con Google
+
+        // Firebase Authentication
+
+        // Sign in with Google
         signInButton.addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
                 .then((result) => {
-                    console.log('Usuario autenticado:', result.user);
+                    console.log('User authenticated:', result.user);
                 })
                 .catch((error) => {
-                    console.error('Error al autenticar:', error);
+                    console.error('Error during authentication:', error);
                 });
         });
-    
-        // Cerrar Sesión
+
+        // Sign out
         signOutButton.addEventListener('click', () => {
             auth.signOut()
                 .then(() => {
-                    console.log('Usuario cerró sesión.');
+                    console.log('User signed out.');
                 })
                 .catch((error) => {
-                    console.error('Error al cerrar sesión:', error);
+                    console.error('Error signing out:', error);
                 });
         });
-    
-        // Cambio de Estado de Autenticación
+
+        // Monitor authentication state changes
         auth.onAuthStateChanged(user => {
             if (user) {
                 signInButton.style.display = 'none';
@@ -302,8 +288,8 @@
                 scoreSpan.textContent = score;
             }
         });
-    
-        // Cargar Leaderboard Inicial
+
+        // Load initial leaderboard
         updateLeaderboard();
     </script>
 </body>
