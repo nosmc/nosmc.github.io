@@ -57,8 +57,16 @@
         }
 
         .leaderboard li {
+            display: flex;
+            align-items: center;
             padding: 5px 0;
             border-bottom: 1px solid #ddd;
+        }
+
+        .leaderboard li img {
+            width: 20px;
+            height: 15px;
+            margin-right: 10px;
         }
 
         .leaderboard li:last-child {
@@ -92,7 +100,7 @@
 </head>
 <body>
     <div class="leaderboard">
-        <h2>Leaderboard</h2>
+        <h2 id="leaderboard-title">Leaderboard</h2>
         <ul id="leaderboard-list">
             <!-- Leaderboard entries will be inserted here -->
         </ul>
@@ -109,8 +117,6 @@
     </div>
 
     <script>
-        // script.js
-
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
@@ -133,6 +139,7 @@
         const leaderboardList = document.getElementById('leaderboard-list');
         const signInButton = document.getElementById('sign-in-button');
         const signOutButton = document.getElementById('sign-out-button');
+        const leaderboardTitle = document.getElementById('leaderboard-title');
 
         let score = 0;
         let userCountry = 'Unknown';
@@ -184,6 +191,11 @@
             }).catch(error => console.error('Error fetching user score:', error));
         }
 
+        // Obtener bandera del país
+        function getCountryFlag(countryCode) {
+            return `https://flagcdn.com/16x12/${countryCode.toLowerCase()}.png`;
+        }
+
         // Actualizar Leaderboard
         function updateLeaderboard() {
             db.collection('users')
@@ -194,7 +206,13 @@
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         const li = document.createElement('li');
-                        li.textContent = `${data.country}: ${data.count}`;
+                        const flagImg = document.createElement('img');
+                        const countryCode = data.country_code || 'unknown';
+                        flagImg.src = getCountryFlag(countryCode);
+                        flagImg.alt = data.country;
+
+                        li.appendChild(flagImg);
+                        li.appendChild(document.createTextNode(`${data.country}: ${data.count}`));
                         leaderboardList.appendChild(li);
                     });
                 });
@@ -276,7 +294,35 @@
             }
         });
 
-        // Cargar Leaderboard Inicial
+        // Cambiar el idioma del texto según el idioma del navegador
+        function setLanguageBasedContent() {
+            const userLang = navigator.language || 'en';
+            const translations = {
+                en: {
+                    leaderboard: 'Leaderboard',
+                    score: 'Score',
+                    signIn: 'Sign In with Google',
+                    signOut: 'Sign Out'
+                },
+                es: {
+                    leaderboard: 'Tabla de posiciones',
+                    score: 'Puntuación',
+                    signIn: 'Iniciar sesión con Google',
+                    signOut: 'Cerrar sesión'
+                },
+                // Add more languages as needed
+            };
+
+            const lang = translations[userLang.split('-')[0]] || translations['en'];
+
+            leaderboardTitle.textContent = lang.leaderboard;
+            document.querySelector('.score').firstChild.textContent = `${lang.score}: `;
+            signInButton.textContent = lang.signIn;
+            signOutButton.textContent = lang.signOut;
+        }
+
+        // Cargar Leaderboard Inicial y configurar idioma
+        setLanguageBasedContent();
         updateLeaderboard();
     </script>
 </body>
