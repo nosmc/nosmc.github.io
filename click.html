@@ -161,6 +161,7 @@
                 .then(data => {
                     userCountry = data.country_name || 'Unknown';
                     userCountryCode = data.country_code ? data.country_code.toLowerCase() : 'unknown';
+                    console.log(`Fetched country: ${userCountry}, code: ${userCountryCode}`); // Debugging
                     // After fetching country, set up user document
                     if (userId) {
                         setupUserDocument();
@@ -213,8 +214,11 @@
                         const flagImg = document.createElement('img');
                         flagImg.classList.add('flag');
                         if (data.country_code && data.country_code !== 'unknown') {
-                            flagImg.src = `https://flagcdn.com/20x15/${data.country_code}.png`;
+                            // Corrected FlagCDN URL format using 'w20'
+                            flagImg.src = `https://flagcdn.com/w20/${data.country_code}.png`;
                             flagImg.alt = `${data.country} Flag`;
+                            // Debugging: Log the flag URL
+                            console.log(`Flag URL: https://flagcdn.com/w20/${data.country_code}.png`);
                         } else {
                             // Placeholder for Unknown Flags
                             flagImg.src = `https://via.placeholder.com/20x15?text=?`;
