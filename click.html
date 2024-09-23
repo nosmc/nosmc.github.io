@@ -43,7 +43,7 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 200px;
+            max-width: 250px;
         }
 
         .leaderboard h2 {
@@ -73,6 +73,7 @@
             height: 15px;
             margin-right: 8px;
             border: 1px solid #ccc;
+            object-fit: cover;
         }
 
         .auth-buttons {
@@ -97,32 +98,14 @@
         }
     </style>
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-</head>
-<body>
-    <div class="leaderboard">
-        <h2>Leaderboard</h2>
-        <ul id="leaderboard-list">
-            <!-- Leaderboard entries will be inserted here -->
-        </ul>
-    </div>
-    <div class="game-container">
-        <!-- Real Cat Images -->
-        <img src="https://i.imgur.com/z4d4kWk.png" alt="Cat Closed" id="cat-image">
-        <div class="score">Score: <span id="score">0</span></div>
-    </div>
-    <!-- Sign-In/Sign-Out Buttons -->
-    <div class="auth-buttons">
-        <button id="sign-in-button">Sign In with Google</button>
-        <button id="sign-out-button" style="display: none;">Sign Out</button>
-    </div>
+    <!-- It's recommended to use the modular SDK for better performance and tree-shaking -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, orderBy, limit, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-    <script>
-        // script.js
-
-        // Firebase configuration
+        // Your Firebase configuration (replace with your actual config)
         const firebaseConfig = {
             apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
             authDomain: "minecraft-generators.firebaseapp.com",
@@ -134,9 +117,9 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // Elements
         const catImage = document.getElementById('cat-image');
@@ -155,102 +138,117 @@
         const catOpenSrc = 'https://i.imgur.com/OdL0XPt.png';   // Cat Open Image
 
         // Function to Fetch User's Country and Country Code
-        function fetchUserCountry() {
-            fetch('https://ipapi.co/json/')
-                .then(response => response.json())
-                .then(data => {
-                    userCountry = data.country_name || 'Unknown';
-                    userCountryCode = data.country_code ? data.country_code.toLowerCase() : 'unknown';
-                    console.log(`Fetched country: ${userCountry}, code: ${userCountryCode}`); // Debugging
-                    // After fetching country, set up user document
-                    if (userId) {
-                        setupUserDocument();
-                        fetchUserScore(); // Fetch user's score
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching country:', error);
-                });
+        async function fetchUserCountry() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                userCountry = data.country_name || 'Unknown';
+                userCountryCode = data.country_code ? data.country_code.toLowerCase() : 'unknown';
+                console.log(`Fetched country: ${userCountry}, code: ${userCountryCode}`);
+                // After fetching country, set up user document
+                if (userId) {
+                    await setupUserDocument();
+                    await fetchUserScore(); // Fetch user's score
+                }
+            } catch (error) {
+                console.error('Error fetching country:', error);
+            }
         }
 
         // Set Up User Document in Firestore
-        function setupUserDocument() {
-            const userRef = db.collection('users').doc(userId);
-            userRef.get().then(doc => {
-                if (!doc.exists) {
-                    userRef.set({
+        async function setupUserDocument() {
+            const userRef = doc(db, 'users', userId);
+            try {
+                const docSnap = await getDoc(userRef);
+                if (!docSnap.exists()) {
+                    await setDoc(userRef, {
                         country: userCountry,
                         country_code: userCountryCode,
                         count: 0
-                    }).catch(error => console.error('Error creating user document:', error));
+                    });
+                    console.log('User document created');
                 }
-            }).catch(error => console.error('Error fetching user document:', error));
+            } catch (error) {
+                console.error('Error setting up user document:', error);
+            }
         }
 
         // Fetch User's Score from Firestore
-        function fetchUserScore() {
-            const userRef = db.collection('users').doc(userId);
-            userRef.get().then(doc => {
-                if (doc.exists) {
-                    const data = doc.data();
+        async function fetchUserScore() {
+            const userRef = doc(db, 'users', userId);
+            try {
+                const docSnap = await getDoc(userRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
                     score = data.count || 0;
                     scoreSpan.textContent = score;
                 }
-            }).catch(error => console.error('Error fetching user score:', error));
+            } catch (error) {
+                console.error('Error fetching user score:', error);
+            }
         }
 
         // Update Leaderboard
         function updateLeaderboard() {
-            db.collection('users')
-                .orderBy('count', 'desc')
-                .limit(10)
-                .onSnapshot(snapshot => {
-                    leaderboardList.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const li = document.createElement('li');
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, orderBy('count', 'desc'), limit(10));
 
-                        // Create Flag Image Element
-                        const flagImg = document.createElement('img');
-                        flagImg.classList.add('flag');
-                        if (data.country_code && data.country_code !== 'unknown') {
-                            // Corrected FlagCDN URL format using 'w20'
-                            flagImg.src = `https://flagcdn.com/w20/${data.country_code}.png`;
-                            flagImg.alt = `${data.country} Flag`;
-                            // Debugging: Log the flag URL
-                            console.log(`Flag URL: https://flagcdn.com/w20/${data.country_code}.png`);
-                        } else {
-                            // Placeholder for Unknown Flags
-                            flagImg.src = `https://via.placeholder.com/20x15?text=?`;
-                            flagImg.alt = `Unknown Flag`;
-                        }
+            onSnapshot(q, (snapshot) => {
+                leaderboardList.innerHTML = '';
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const li = document.createElement('li');
 
-                        // Create Text Node for Country and Count
-                        const textNode = document.createTextNode(`${data.country}: ${data.count}`);
+                    // Create Flag Image Element
+                    const flagImg = document.createElement('img');
+                    flagImg.classList.add('flag');
+                    if (data.country_code && data.country_code !== 'unknown') {
+                        // Corrected FlagCDN URL format using 'w20'
+                        flagImg.src = `https://flagcdn.com/w20/${data.country_code}.png`;
+                        flagImg.alt = `${data.country} Flag`;
+                        // Debugging: Log the flag URL
+                        console.log(`Flag URL: https://flagcdn.com/w20/${data.country_code}.png`);
+                        // Handle flag image load errors
+                        flagImg.onerror = () => {
+                            flagImg.src = 'https://via.placeholder.com/20x15?text=?';
+                            flagImg.alt = 'Unknown Flag';
+                        };
+                    } else {
+                        // Placeholder for Unknown Flags
+                        flagImg.src = `https://via.placeholder.com/20x15?text=?`;
+                        flagImg.alt = `Unknown Flag`;
+                    }
 
-                        // Append Flag and Text to List Item
-                        li.appendChild(flagImg);
-                        li.appendChild(textNode);
+                    // Create Text Node for Country and Count
+                    const textNode = document.createTextNode(`${data.country}: ${data.count}`);
 
-                        leaderboardList.appendChild(li);
-                    });
+                    // Append Flag and Text to List Item
+                    li.appendChild(flagImg);
+                    li.appendChild(textNode);
+
+                    leaderboardList.appendChild(li);
                 });
+            }, (error) => {
+                console.error('Error updating leaderboard:', error);
+            });
         }
 
         // Increment Score and Update Firestore
-        function incrementScore() {
+        async function incrementScore() {
             score += 1;
             scoreSpan.textContent = score;
 
             if (!userId) return;
 
-            const userRef = db.collection('users').doc(userId);
+            const userRef = doc(db, 'users', userId);
 
-            userRef.update({
-                count: firebase.firestore.FieldValue.increment(1)
-            }).catch(error => {
+            try {
+                await updateDoc(userRef, {
+                    count: increment(1)
+                });
+            } catch (error) {
                 console.error('Error updating score:', error);
-            });
+            }
         }
 
         // Handle Mouse Events
@@ -274,30 +272,28 @@
         // Firebase Authentication
 
         // Sign In with Google
-        signInButton.addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    console.log('User signed in:', result.user);
-                })
-                .catch((error) => {
-                    console.error('Error signing in:', error);
-                });
+        signInButton.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                console.log('User signed in:', result.user);
+            } catch (error) {
+                console.error('Error signing in:', error);
+            }
         });
 
         // Sign Out
-        signOutButton.addEventListener('click', () => {
-            auth.signOut()
-                .then(() => {
-                    console.log('User signed out.');
-                })
-                .catch((error) => {
-                    console.error('Error signing out:', error);
-                });
+        signOutButton.addEventListener('click', async () => {
+            try {
+                await firebaseSignOut(auth);
+                console.log('User signed out.');
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
         });
 
         // Auth State Change
-        auth.onAuthStateChanged(user => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 signInButton.style.display = 'none';
                 signOutButton.style.display = 'inline-block';
@@ -316,6 +312,25 @@
 
         // Initial Leaderboard Load
         updateLeaderboard();
+
     </script>
+</head>
+<body>
+    <div class="leaderboard">
+        <h2>Leaderboard</h2>
+        <ul id="leaderboard-list">
+            <!-- Leaderboard entries will be inserted here -->
+        </ul>
+    </div>
+    <div class="game-container">
+        <!-- Real Cat Images -->
+        <img src="https://i.imgur.com/z4d4kWk.png" alt="Cat Closed" id="cat-image">
+        <div class="score">Score: <span id="score">0</span></div>
+    </div>
+    <!-- Sign-In/Sign-Out Buttons -->
+    <div class="auth-buttons">
+        <button id="sign-in-button">Sign In with Google</button>
+        <button id="sign-out-button" style="display: none;">Sign Out</button>
+    </div>
 </body>
 </html>
