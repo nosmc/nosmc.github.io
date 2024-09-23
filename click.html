@@ -39,11 +39,10 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.8);
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 200px;
         }
 
         .leaderboard h2 {
@@ -58,21 +57,12 @@
         }
 
         .leaderboard li {
-            display: flex;
-            align-items: center;
             padding: 5px 0;
             border-bottom: 1px solid #ddd;
         }
 
         .leaderboard li:last-child {
             border-bottom: none;
-        }
-
-        .leaderboard img.flag {
-            width: 20px;
-            height: 15px;
-            margin-right: 8px;
-            border: 1px solid #ccc;
         }
 
         .auth-buttons {
@@ -89,7 +79,6 @@
             color: white;
             cursor: pointer;
             border-radius: 5px;
-            font-size: 14px;
         }
 
         .auth-buttons button:hover {
@@ -109,7 +98,7 @@
         </ul>
     </div>
     <div class="game-container">
-        <!-- Real Cat Images -->
+        <!-- Enlaces a imágenes reales de gatos -->
         <img src="https://i.imgur.com/z4d4kWk.png" alt="Cat Closed" id="cat-image">
         <div class="score">Score: <span id="score">0</span></div>
     </div>
@@ -147,24 +136,22 @@
 
         let score = 0;
         let userCountry = 'Unknown';
-        let userCountryCode = 'unknown';
         let userId = null;
 
-        // Cat images URLs
-        const catClosedSrc = 'https://i.imgur.com/z4d4kWk.png'; // Cat Closed Image
-        const catOpenSrc = 'https://i.imgur.com/OdL0XPt.png';   // Cat Open Image
+        // Imágenes de gato alternadas
+        const catClosedSrc = 'https://i.imgur.com/z4d4kWk.png'; // Imagen de gato cerrado
+        const catOpenSrc = 'https://i.imgur.com/OdL0XPt.png';   // Imagen de gato abierto
 
-        // Function to Fetch User's Country and Country Code
+        // Obtener País del Usuario
         function fetchUserCountry() {
             fetch('https://ipapi.co/json/')
                 .then(response => response.json())
                 .then(data => {
                     userCountry = data.country_name || 'Unknown';
-                    userCountryCode = data.country_code ? data.country_code.toLowerCase() : 'unknown';
-                    // After fetching country, set up user document
+                    // Después de obtener el país, configurar el documento del usuario
                     if (userId) {
                         setupUserDocument();
-                        fetchUserScore(); // Fetch user's score
+                        fetchUserScore(); // Obtener el puntaje del usuario
                     }
                 })
                 .catch(error => {
@@ -172,21 +159,20 @@
                 });
         }
 
-        // Set Up User Document in Firestore
+        // Configurar Documento del Usuario en Firestore
         function setupUserDocument() {
             const userRef = db.collection('users').doc(userId);
             userRef.get().then(doc => {
                 if (!doc.exists) {
                     userRef.set({
                         country: userCountry,
-                        country_code: userCountryCode,
                         count: 0
                     }).catch(error => console.error('Error creating user document:', error));
                 }
             }).catch(error => console.error('Error fetching user document:', error));
         }
 
-        // Fetch User's Score from Firestore
+        // Obtener Puntaje del Usuario
         function fetchUserScore() {
             const userRef = db.collection('users').doc(userId);
             userRef.get().then(doc => {
@@ -198,7 +184,7 @@
             }).catch(error => console.error('Error fetching user score:', error));
         }
 
-        // Update Leaderboard
+        // Actualizar Leaderboard
         function updateLeaderboard() {
             db.collection('users')
                 .orderBy('count', 'desc')
@@ -208,32 +194,13 @@
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         const li = document.createElement('li');
-
-                        // Create Flag Image Element
-                        const flagImg = document.createElement('img');
-                        flagImg.classList.add('flag');
-                        if (data.country_code && data.country_code !== 'unknown') {
-                            flagImg.src = `https://flagcdn.com/20x15/${data.country_code}.png`;
-                            flagImg.alt = `${data.country} Flag`;
-                        } else {
-                            // Placeholder for Unknown Flags
-                            flagImg.src = `https://via.placeholder.com/20x15?text=?`;
-                            flagImg.alt = `Unknown Flag`;
-                        }
-
-                        // Create Text Node for Country and Count
-                        const textNode = document.createTextNode(`${data.country}: ${data.count}`);
-
-                        // Append Flag and Text to List Item
-                        li.appendChild(flagImg);
-                        li.appendChild(textNode);
-
+                        li.textContent = `${data.country}: ${data.count}`;
                         leaderboardList.appendChild(li);
                     });
                 });
         }
 
-        // Increment Score and Update Firestore
+        // Incrementar Puntaje y Actualizar Firestore
         function incrementScore() {
             score += 1;
             scoreSpan.textContent = score;
@@ -249,11 +216,11 @@
             });
         }
 
-        // Handle Mouse Events
+        // Manejar Eventos de Ratón
         let isPressed = false;
 
         catImage.addEventListener('mousedown', (e) => {
-            if (e.button === 0) { // Left click
+            if (e.button === 0) { // Click izquierdo
                 isPressed = true;
                 catImage.src = catOpenSrc;
                 incrementScore();
@@ -267,32 +234,32 @@
             }
         });
 
-        // Firebase Authentication
+        // Autenticación de Firebase
 
-        // Sign In with Google
+        // Iniciar Sesión con Google
         signInButton.addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
                 .then((result) => {
-                    console.log('User signed in:', result.user);
+                    console.log('Usuario autenticado:', result.user);
                 })
                 .catch((error) => {
-                    console.error('Error signing in:', error);
+                    console.error('Error al autenticar:', error);
                 });
         });
 
-        // Sign Out
+        // Cerrar Sesión
         signOutButton.addEventListener('click', () => {
             auth.signOut()
                 .then(() => {
-                    console.log('User signed out.');
+                    console.log('Usuario cerró sesión.');
                 })
                 .catch((error) => {
-                    console.error('Error signing out:', error);
+                    console.error('Error al cerrar sesión:', error);
                 });
         });
 
-        // Auth State Change
+        // Cambio de Estado de Autenticación
         auth.onAuthStateChanged(user => {
             if (user) {
                 signInButton.style.display = 'none';
@@ -304,13 +271,12 @@
                 signOutButton.style.display = 'none';
                 userId = null;
                 userCountry = 'Unknown';
-                userCountryCode = 'unknown';
                 score = 0;
                 scoreSpan.textContent = score;
             }
         });
 
-        // Initial Leaderboard Load
+        // Cargar Leaderboard Inicial
         updateLeaderboard();
     </script>
 </body>
