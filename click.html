@@ -7,83 +7,83 @@
     <style>
         /* styles.css */
 
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f0f8ff;
-}
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+        }
 
-.game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    position: relative;
-}
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            position: relative;
+        }
 
-#cat-image {
-    width: 200px;
-    height: 200px;
-    cursor: pointer;
-    transition: transform 0.1s;
-}
+        #cat-image {
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
 
-.score {
-    margin-top: 20px;
-    font-size: 24px;
-}
+        .score {
+            margin-top: 20px;
+            font-size: 24px;
+        }
 
-.leaderboard {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+        .leaderboard {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-.leaderboard h2 {
-    margin-top: 0;
-    text-align: center;
-}
+        .leaderboard h2 {
+            margin-top: 0;
+            text-align: center;
+        }
 
-.leaderboard ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+        .leaderboard ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-.leaderboard li {
-    padding: 5px 0;
-    border-bottom: 1px solid #ddd;
-}
+        .leaderboard li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
 
-.leaderboard li:last-child {
-    border-bottom: none;
-}
+        .leaderboard li:last-child {
+            border-bottom: none;
+        }
 
-.auth-buttons {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-}
+        .auth-buttons {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
 
-.auth-buttons button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-    border-radius: 5px;
-}
+        .auth-buttons button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-.auth-buttons button:hover {
-    background-color: #45a049;
-}
+        .auth-buttons button:hover {
+            background-color: #45a049;
+        }
     </style>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -98,7 +98,8 @@ body {
         </ul>
     </div>
     <div class="game-container">
-        <img src="cat_closed.png" alt="Cat" id="cat-image">
+        <!-- Enlaces a imágenes reales de gatos -->
+        <img src="https://i.imgur.com/z4d4kWk.png" alt="Cat Closed" id="cat-image">
         <div class="score">Score: <span id="score">0</span></div>
     </div>
     <!-- Sign-In/Sign-Out Buttons -->
@@ -110,154 +111,173 @@ body {
     <script>
         // script.js
 
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
-    authDomain: "minecraft-generators.firebaseapp.com",
-    projectId: "minecraft-generators",
-    storageBucket: "minecraft-generators.appspot.com",
-    messagingSenderId: "191346462383",
-    appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
-    measurementId: "G-QJT1XPTPDZ"
-};
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
+            authDomain: "minecraft-generators.firebaseapp.com",
+            projectId: "minecraft-generators",
+            storageBucket: "minecraft-generators.appspot.com",
+            messagingSenderId: "191346462383",
+            appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
+            measurementId: "G-QJT1XPTPDZ"
+        };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
 
-// Elements
-const catImage = document.getElementById('cat-image');
-const scoreSpan = document.getElementById('score');
-const leaderboardList = document.getElementById('leaderboard-list');
-const signInButton = document.getElementById('sign-in-button');
-const signOutButton = document.getElementById('sign-out-button');
+        // Elements
+        const catImage = document.getElementById('cat-image');
+        const scoreSpan = document.getElementById('score');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const signInButton = document.getElementById('sign-in-button');
+        const signOutButton = document.getElementById('sign-out-button');
 
-let score = 0;
-let userCountry = 'Unknown';
-let userId = null;
+        let score = 0;
+        let userCountry = 'Unknown';
+        let userId = null;
 
-// Get User Country
-function fetchUserCountry() {
-    fetch('https://ipapi.co/json/')
-        .then(response => response.json())
-        .then(data => {
-            userCountry = data.country_name || 'Unknown';
-            // After fetching country, set up user document
-            if (userId) {
-                setupUserDocument();
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching country:', error);
-        });
-}
+        // Imágenes de gato alternadas
+        const catClosedSrc = 'https://i.imgur.com/z4d4kWk.png'; // Imagen de gato cerrado
+        const catOpenSrc = 'https://i.imgur.com/OdL0XPt.png';   // Imagen de gato abierto
 
-// Set Up User Document in Firestore
-function setupUserDocument() {
-    const userRef = db.collection('users').doc(userId);
-    userRef.get().then(doc => {
-        if (!doc.exists) {
-            userRef.set({
-                country: userCountry,
-                count: 0
-            }).catch(error => console.error('Error creating user document:', error));
+        // Obtener País del Usuario
+        function fetchUserCountry() {
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    userCountry = data.country_name || 'Unknown';
+                    // Después de obtener el país, configurar el documento del usuario
+                    if (userId) {
+                        setupUserDocument();
+                        fetchUserScore(); // Obtener el puntaje del usuario
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching country:', error);
+                });
         }
-    }).catch(error => console.error('Error fetching user document:', error));
-}
 
-// Update Leaderboard
-function updateLeaderboard() {
-    db.collection('users')
-        .orderBy('count', 'desc')
-        .limit(10)
-        .onSnapshot(snapshot => {
-            leaderboardList.innerHTML = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const li = document.createElement('li');
-                li.textContent = `${data.country}: ${data.count}`;
-                leaderboardList.appendChild(li);
+        // Configurar Documento del Usuario en Firestore
+        function setupUserDocument() {
+            const userRef = db.collection('users').doc(userId);
+            userRef.get().then(doc => {
+                if (!doc.exists) {
+                    userRef.set({
+                        country: userCountry,
+                        count: 0
+                    }).catch(error => console.error('Error creating user document:', error));
+                }
+            }).catch(error => console.error('Error fetching user document:', error));
+        }
+
+        // Obtener Puntaje del Usuario
+        function fetchUserScore() {
+            const userRef = db.collection('users').doc(userId);
+            userRef.get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    score = data.count || 0;
+                    scoreSpan.textContent = score;
+                }
+            }).catch(error => console.error('Error fetching user score:', error));
+        }
+
+        // Actualizar Leaderboard
+        function updateLeaderboard() {
+            db.collection('users')
+                .orderBy('count', 'desc')
+                .limit(10)
+                .onSnapshot(snapshot => {
+                    leaderboardList.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const li = document.createElement('li');
+                        li.textContent = `${data.country}: ${data.count}`;
+                        leaderboardList.appendChild(li);
+                    });
+                });
+        }
+
+        // Incrementar Puntaje y Actualizar Firestore
+        function incrementScore() {
+            score += 1;
+            scoreSpan.textContent = score;
+
+            if (!userId) return;
+
+            const userRef = db.collection('users').doc(userId);
+
+            userRef.update({
+                count: firebase.firestore.FieldValue.increment(1)
+            }).catch(error => {
+                console.error('Error updating score:', error);
             });
+        }
+
+        // Manejar Eventos de Ratón
+        let isPressed = false;
+
+        catImage.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // Click izquierdo
+                isPressed = true;
+                catImage.src = catOpenSrc;
+                incrementScore();
+            }
         });
-}
 
-// Increment Score and Update Firestore
-function incrementScore() {
-    score += 1;
-    scoreSpan.textContent = score;
-
-    if (!userId) return;
-
-    const userRef = db.collection('users').doc(userId);
-
-    userRef.update({
-        count: firebase.firestore.FieldValue.increment(1)
-    }).catch(error => {
-        console.error('Error updating score:', error);
-    });
-}
-
-// Handle Mouse Events
-let isPressed = false;
-
-catImage.addEventListener('mousedown', (e) => {
-    if (e.button === 0) { // Left click
-        isPressed = true;
-        catImage.src = 'cat_open.png';
-        incrementScore();
-    }
-});
-
-document.addEventListener('mouseup', (e) => {
-    if (isPressed && e.button === 0) {
-        isPressed = false;
-        catImage.src = 'cat_closed.png';
-    }
-});
-
-// Firebase Authentication
-
-// Sign In with Google
-signInButton.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-        .then((result) => {
-            console.log('User signed in:', result.user);
-        })
-        .catch((error) => {
-            console.error('Error signing in:', error);
+        document.addEventListener('mouseup', (e) => {
+            if (isPressed && e.button === 0) {
+                isPressed = false;
+                catImage.src = catClosedSrc;
+            }
         });
-});
 
-// Sign Out
-signOutButton.addEventListener('click', () => {
-    auth.signOut()
-        .then(() => {
-            console.log('User signed out.');
-        })
-        .catch((error) => {
-            console.error('Error signing out:', error);
+        // Autenticación de Firebase
+
+        // Iniciar Sesión con Google
+        signInButton.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    console.log('Usuario autenticado:', result.user);
+                })
+                .catch((error) => {
+                    console.error('Error al autenticar:', error);
+                });
         });
-});
 
-// Auth State Change
-auth.onAuthStateChanged(user => {
-    if (user) {
-        signInButton.style.display = 'none';
-        signOutButton.style.display = 'inline-block';
-        userId = user.uid;
-        fetchUserCountry();
-    } else {
-        signInButton.style.display = 'inline-block';
-        signOutButton.style.display = 'none';
-        userId = null;
-        userCountry = 'Unknown';
-    }
-});
+        // Cerrar Sesión
+        signOutButton.addEventListener('click', () => {
+            auth.signOut()
+                .then(() => {
+                    console.log('Usuario cerró sesión.');
+                })
+                .catch((error) => {
+                    console.error('Error al cerrar sesión:', error);
+                });
+        });
 
-// Initial Leaderboard Load
-updateLeaderboard();
+        // Cambio de Estado de Autenticación
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                signInButton.style.display = 'none';
+                signOutButton.style.display = 'inline-block';
+                userId = user.uid;
+                fetchUserCountry();
+            } else {
+                signInButton.style.display = 'inline-block';
+                signOutButton.style.display = 'none';
+                userId = null;
+                userCountry = 'Unknown';
+                score = 0;
+                scoreSpan.textContent = score;
+            }
+        });
+
+        // Cargar Leaderboard Inicial
+        updateLeaderboard();
     </script>
 </body>
 </html>
