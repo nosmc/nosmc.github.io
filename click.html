@@ -6,7 +6,6 @@
     <title>Cat Click Game</title>
     <style>
         /* styles.css */
-
         body {
             margin: 0;
             padding: 0;
@@ -92,6 +91,22 @@
         .auth-buttons button:hover {
             background-color: #45a049;
         }
+
+        @media (max-width: 768px) {
+            .leaderboard {
+                display: none;
+            }
+
+            .game-container {
+                height: auto;
+                padding: 20px;
+            }
+
+            .auth-buttons {
+                right: 10px;
+                bottom: 10px;
+            }
+        }
     </style>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -106,14 +121,12 @@
         </ul>
     </div>
     <div class="game-container">
-        <!-- Enlaces a imágenes reales de gatos -->
-        <img src="https://i.imgur.com/z4d4kWk.png" alt="Cat Closed" id="cat-image">
-        <div class="score">Score: <span id="score">0</span></div>
+        <img src="https://i.imgur.com/z4d4kWk.png" alt="A cat you can click" id="cat-image" aria-label="A cat you can click">
+        <div class="score" aria-live="polite">Score: <span id="score">0</span></div>
     </div>
-    <!-- Sign-In/Sign-Out Buttons -->
     <div class="auth-buttons">
-        <button id="sign-in-button">Sign In with Google</button>
-        <button id="sign-out-button" style="display: none;">Sign Out</button>
+        <button id="sign-in-button" aria-label="Sign in with Google">Sign In with Google</button>
+        <button id="sign-out-button" style="display: none;" aria-label="Sign Out">Sign Out</button>
     </div>
 
     <script>
@@ -150,45 +163,49 @@
         const catOpenSrc = 'https://i.imgur.com/OdL0XPt.png';   // Imagen de gato abierto
 
         // Obtener País del Usuario
-        function fetchUserCountry() {
-            fetch('https://ipapi.co/json/')
-                .then(response => response.json())
-                .then(data => {
-                    userCountry = data.country_name || 'Unknown';
-                    // Después de obtener el país, configurar el documento del usuario
-                    if (userId) {
-                        setupUserDocument();
-                        fetchUserScore(); // Obtener el puntaje del usuario
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching country:', error);
-                });
+        async function fetchUserCountry() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                userCountry = data.country_name || 'Unknown';
+                if (userId) {
+                    setupUserDocument();
+                    fetchUserScore();
+                }
+            } catch (error) {
+                console.error('Error fetching country:', error);
+            }
         }
 
         // Configurar Documento del Usuario en Firestore
-        function setupUserDocument() {
-            const userRef = db.collection('users').doc(userId);
-            userRef.get().then(doc => {
+        async function setupUserDocument() {
+            try {
+                const userRef = db.collection('users').doc(userId);
+                const doc = await userRef.get();
                 if (!doc.exists) {
-                    userRef.set({
+                    await userRef.set({
                         country: userCountry,
                         count: 0
-                    }).catch(error => console.error('Error creating user document:', error));
+                    });
                 }
-            }).catch(error => console.error('Error fetching user document:', error));
+            } catch (error) {
+                console.error('Error creating user document:', error);
+            }
         }
 
         // Obtener Puntaje del Usuario
-        function fetchUserScore() {
-            const userRef = db.collection('users').doc(userId);
-            userRef.get().then(doc => {
+        async function fetchUserScore() {
+            try {
+                const userRef = db.collection('users').doc(userId);
+                const doc = await userRef.get();
                 if (doc.exists) {
                     const data = doc.data();
                     score = data.count || 0;
                     scoreSpan.textContent = score;
                 }
-            }).catch(error => console.error('Error fetching user score:', error));
+            } catch (error) {
+                console.error('Error fetching user score:', error);
+            }
         }
 
         // Obtener bandera del país
@@ -226,7 +243,6 @@
             if (!userId) return;
 
             const userRef = db.collection('users').doc(userId);
-
             userRef.update({
                 count: firebase.firestore.FieldValue.increment(1)
             }).catch(error => {
@@ -251,8 +267,6 @@
                 catImage.src = catClosedSrc;
             }
         });
-
-        // Autenticación de Firebase
 
         // Iniciar Sesión con Google
         signInButton.addEventListener('click', () => {
