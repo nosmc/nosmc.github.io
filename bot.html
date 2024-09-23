@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chatbot</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+}
+
+.chat-container {
+    width: 400px;
+    margin: 50px auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+}
+
+.chat-header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    border-bottom: 1px solid #ccc;
+}
+
+.chat-input {
+    display: flex;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-bottom-left-radius: 5px;
+}
+
+.chat-input button {
+    padding: 10px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-bottom-right-radius: 5px;
+}
+
+.chat-input button:hover {
+    background-color: #45a049;
+}
+
+.message {
+    margin: 10px 0;
+}
+
+.user-message {
+    text-align: right;
+    color: blue;
+}
+
+.bot-message {
+    text-align: left;
+    color: green;
+}
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Chatbot</h2>
+        </div>
+        <div class="chat-box" id="chatBox">
+            <!-- Chat messages will appear here -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Type your message here..." />
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const sendBtn = document.getElementById('sendBtn');
+const userInput = document.getElementById('userInput');
+const chatBox = document.getElementById('chatBox');
+
+const botResponses = {
+    "meow": "meow meow meow!",
+    // Add more predefined responses here
+};
+
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+
+function sendMessage() {
+    const message = userInput.value.trim();
+    if (message === "") return;
+
+    appendMessage(message, 'user');
+    userInput.value = '';
+
+    // Simulate processing time
+    setTimeout(() => {
+        const response = getBotResponse(message.toLowerCase());
+        appendMessage(response, 'bot');
+    }, 1000);
+}
+
+function appendMessage(message, sender) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+    if (sender === 'user') {
+        messageElement.classList.add('user-message');
+        messageElement.innerText = `You: ${message}`;
+    } else {
+        messageElement.classList.add('bot-message');
+        messageElement.innerText = `Bot: ${message}`;
+    }
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function getBotResponse(message) {
+    // Check if the message matches any predefined responses
+    if (botResponses[message]) {
+        return botResponses[message];
+    } else {
+        return "meow!";
+    }
+}
+    </script>
+</body>
+</html>
