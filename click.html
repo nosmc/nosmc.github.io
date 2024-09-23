@@ -1,116 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Click Game</title>
-    <style>
-        /* styles.css */
-
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f0f8ff;
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <title>Cat Clicker Game</title>
+  <style>
+    body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f8ff;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
-.game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    position: relative;
+.container {
+  text-align: center;
 }
 
-#cat-image {
-    width: 200px;
-    height: 200px;
-    cursor: pointer;
-    transition: transform 0.1s;
-}
-
-.score {
-    margin-top: 20px;
-    font-size: 24px;
+#cat {
+  width: 200px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.1s;
 }
 
 .leaderboard {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.9);
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 200px;
 }
 
 .leaderboard h2 {
-    margin-top: 0;
-    text-align: center;
+  margin-top: 0;
+  font-size: 18px;
 }
 
 .leaderboard ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .leaderboard li {
-    padding: 5px 0;
-    border-bottom: 1px solid #ddd;
+  margin-bottom: 5px;
+  font-size: 14px;
 }
 
-.leaderboard li:last-child {
-    border-bottom: none;
+.scoreboard {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255,255,255,0.9);
+  padding: 10px;
+  border-radius: 8px;
 }
 
-.auth-buttons {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
+.scoreboard h3 {
+  margin: 0;
+  font-size: 16px;
 }
-
-.auth-buttons button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.auth-buttons button:hover {
-    background-color: #45a049;
-}
-    </style>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  </style>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div class="leaderboard">
-        <h2>Leaderboard</h2>
-        <ul id="leaderboard-list">
-            <!-- Leaderboard entries will be inserted here -->
-        </ul>
-    </div>
-    <div class="game-container">
-        <img src="cat_closed.png" alt="Cat" id="cat-image">
-        <div class="score">Score: <span id="score">0</span></div>
-    </div>
-    <!-- Sign-In/Sign-Out Buttons -->
-    <div class="auth-buttons">
-        <button id="sign-in-button">Sign In with Google</button>
-        <button id="sign-out-button" style="display: none;">Sign Out</button>
-    </div>
-
-    <script>
-        // script.js
-
-// Firebase configuration
+  <div class="leaderboard" id="leaderboard">
+    <h2>Leaderboard</h2>
+    <ul id="leaderboard-list">
+      <!-- Leaderboard entries will be populated here -->
+    </ul>
+  </div>
+  
+  <div class="scoreboard">
+    <h3>Your Score: <span id="score">0</span></h3>
+  </div>
+  
+  <div class="container">
+    <img src="images/cat-closed.png" alt="Cat" id="cat">
+  </div>
+  
+  <script>
+    // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
     authDomain: "minecraft-generators.firebaseapp.com",
@@ -124,230 +106,94 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-const analytics = firebase.analytics();
+const database = firebase.database();
 
-// Elements
-const catImage = document.getElementById('cat-image');
-const scoreSpan = document.getElementById('score');
+// DOM Elements
+const cat = document.getElementById('cat');
+const scoreDisplay = document.getElementById('score');
 const leaderboardList = document.getElementById('leaderboard-list');
-const signInButton = document.getElementById('sign-in-button');
-const signOutButton = document.getElementById('sign-out-button');
 
 let score = 0;
+
+// Get User's Country
 let userCountry = 'Unknown';
-let userId = null;
 
-// Get User Country
-function fetchUserCountry() {
-    fetch('https://ipapi.co/json/')
-        .then(response => response.json())
-        .then(data => {
-            userCountry = data.country_name || 'Unknown';
-            // After fetching country, set up user document
-            if (userId) {
-                setupUserDocument();
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching country:', error);
-            showError('Failed to fetch your country information.');
-        });
+fetch('https://ipapi.co/json/')
+  .then(response => response.json())
+  .then(data => {
+    userCountry = data.country_name || 'Unknown';
+  })
+  .catch(error => {
+    console.error('Error fetching country:', error);
+  });
+
+// Update Personal Score Display
+function updateScoreDisplay() {
+  scoreDisplay.textContent = score;
 }
 
-// Set Up User Document in Firestore
-function setupUserDocument() {
-    const userRef = db.collection('users').doc(userId);
-    userRef.get().then(doc => {
-        if (!doc.exists) {
-            userRef.set({
-                country: userCountry,
-                count: 0
-            }).catch(error => console.error('Error creating user document:', error));
-        } else {
-            const data = doc.data();
-            score = data.count;
-            scoreSpan.textContent = score;
-        }
-    }).catch(error => console.error('Error fetching user document:', error));
-}
+// Handle Cat Click Events
+cat.addEventListener('mousedown', (e) => {
+  if (e.button === 0) { // Left click
+    cat.src = 'images/cat-open.png';
+    incrementScore();
+  }
+});
 
-// Update Leaderboard
-function updateLeaderboard() {
-    db.collection('leaderboard')
-        .orderBy('count', 'desc')
-        .limit(10)
-        .onSnapshot(snapshot => {
-            leaderboardList.innerHTML = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const li = document.createElement('li');
-                li.textContent = `${data.country}: ${data.count}`;
-                leaderboardList.appendChild(li);
-            });
-        });
-}
+cat.addEventListener('mouseup', (e) => {
+  if (e.button === 0) { // Left click
+    cat.src = 'images/cat-closed.png';
+  }
+});
 
-// Increment Score and Update Firestore
+// Increment Score and Update Firebase
 function incrementScore() {
-    if (!canClick) return; // Prevent rapid clicks
-    canClick = false;
-    setTimeout(() => {
-        canClick = true;
-    }, cooldown);
-
-    score += 1;
-    scoreSpan.textContent = score;
-
-    if (!userId) return;
-
-    const userRef = db.collection('users').doc(userId);
-
-    userRef.get().then(doc => {
-        if (doc.exists) {
-            userRef.update({
-                count: firebase.firestore.FieldValue.increment(1)
-            }).then(() => {
-                // Update leaderboard
-                updateLeaderboard();
-                // Also update the country score in leaderboard collection
-                const countryRef = db.collection('leaderboard').doc(userCountry);
-                countryRef.get().then(docCountry => {
-                    if (docCountry.exists) {
-                        countryRef.update({
-                            count: firebase.firestore.FieldValue.increment(1)
-                        });
-                    } else {
-                        countryRef.set({
-                            country: userCountry,
-                            count: 1
-                        });
-                    }
-                }).catch(error => {
-                    console.error('Error updating country score:', error);
-                    showError('Failed to update country score.');
-                });
-                // Log event
-                analytics.logEvent('cat_clicked', { userId: userId, country: userCountry });
-            }).catch(error => {
-                console.error('Error updating user score:', error);
-                showError('Failed to update your score.');
-            });
-        } else {
-            userRef.set({
-                country: userCountry,
-                count: 1
-            }).then(() => {
-                // Update leaderboard
-                updateLeaderboard();
-                // Update the country score
-                const countryRef = db.collection('leaderboard').doc(userCountry);
-                countryRef.get().then(docCountry => {
-                    if (docCountry.exists) {
-                        countryRef.update({
-                            count: firebase.firestore.FieldValue.increment(1)
-                        });
-                    } else {
-                        countryRef.set({
-                            country: userCountry,
-                            count: 1
-                        });
-                    }
-                }).catch(error => {
-                    console.error('Error updating country score:', error);
-                    showError('Failed to update country score.');
-                });
-                // Log event
-                analytics.logEvent('cat_clicked', { userId: userId, country: userCountry });
-            }).catch(error => {
-                console.error('Error creating user document:', error);
-                showError('Failed to create your score record.');
-            });
-        }
-    }).catch(error => {
-        console.error('Error reading user document:', error);
-        showError('Failed to read your score.');
-    });
+  score += 1;
+  updateScoreDisplay();
+  
+  // Update Personal Score
+  database.ref('users/' + getUserId()).set({
+    score: score,
+    country: userCountry,
+    timestamp: Date.now()
+  });
 }
 
-// Handle Mouse Events
-let isPressed = false;
-let canClick = true;
-const cooldown = 100; // milliseconds to prevent rapid clicking
+// Generate a Unique User ID (simple version)
+function getUserId() {
+  let userId = localStorage.getItem('userId');
+  if (!userId) {
+    userId = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    localStorage.setItem('userId', userId);
+  }
+  return userId;
+}
 
-catImage.addEventListener('mousedown', (e) => {
-    if (e.button === 0 && canClick) { // Left click
-        isPressed = true;
-        catImage.src = 'cat_open.png';
-        incrementScore();
-    }
-});
+// Listen for leaderboard updates
+database.ref('users').on('value', (snapshot) => {
+  const users = snapshot.val();
+  const leaderboard = {};
 
-document.addEventListener('mouseup', (e) => {
-    if (isPressed && e.button === 0) {
-        isPressed = false;
-        catImage.src = 'cat_closed.png';
-    }
-});
-
-// Firebase Authentication
-
-// Sign In with Google
-signInButton.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-        .then((result) => {
-            console.log('User signed in:', result.user);
-        })
-        .catch((error) => {
-            console.error('Error signing in:', error);
-            showError('Failed to sign in. Please try again.');
-        });
-});
-
-// Sign Out
-signOutButton.addEventListener('click', () => {
-    auth.signOut()
-        .then(() => {
-            console.log('User signed out.');
-            // Reset local score display
-            score = 0;
-            scoreSpan.textContent = score;
-        })
-        .catch((error) => {
-            console.error('Error signing out:', error);
-            showError('Failed to sign out. Please try again.');
-        });
-});
-
-// Auth State Change
-auth.onAuthStateChanged(user => {
-    if (user) {
-        signInButton.style.display = 'none';
-        signOutButton.style.display = 'inline-block';
-        userId = user.uid;
-        fetchUserCountry();
-        // Optionally, display user info
+  for (let userId in users) {
+    const user = users[userId];
+    if (user.country in leaderboard) {
+      leaderboard[user.country] += user.score;
     } else {
-        signInButton.style.display = 'inline-block';
-        signOutButton.style.display = 'none';
-        userId = null;
-        userCountry = 'Unknown';
-        // Reset score display if necessary
-        score = 0;
-        scoreSpan.textContent = score;
+      leaderboard[user.country] = user.score;
     }
+  }
+
+  // Convert leaderboard object to sorted array
+  const sortedLeaderboard = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
+
+  // Populate leaderboard UI
+  leaderboardList.innerHTML = '';
+  sortedLeaderboard.forEach(([country, totalScore]) => {
+    const li = document.createElement('li');
+    li.textContent = `${country}: ${totalScore}`;
+    leaderboardList.appendChild(li);
+  });
 });
-
-// Display Error Messages
-function showError(message) {
-    // Implement a better UI for error messages (e.g., modal or toast)
-    alert(message);
-}
-
-// Initial Leaderboard Load
-updateLeaderboard();
-    </script>
+  </script>
 </body>
 </html>
