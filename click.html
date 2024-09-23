@@ -6,6 +6,7 @@
     <title>Cat Click Game</title>
     <style>
         /* styles.css */
+
         body {
             margin: 0;
             padding: 0;
@@ -56,16 +57,8 @@
         }
 
         .leaderboard li {
-            display: flex;
-            align-items: center;
             padding: 5px 0;
             border-bottom: 1px solid #ddd;
-        }
-
-        .leaderboard li img {
-            width: 20px;
-            height: 15px;
-            margin-right: 10px;
         }
 
         .leaderboard li:last-child {
@@ -91,22 +84,6 @@
         .auth-buttons button:hover {
             background-color: #45a049;
         }
-
-        @media (max-width: 768px) {
-            .leaderboard {
-                display: none;
-            }
-
-            .game-container {
-                height: auto;
-                padding: 20px;
-            }
-
-            .auth-buttons {
-                right: 10px;
-                bottom: 10px;
-            }
-        }
     </style>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -115,21 +92,25 @@
 </head>
 <body>
     <div class="leaderboard">
-        <h2 id="leaderboard-title">Leaderboard</h2>
+        <h2>Leaderboard</h2>
         <ul id="leaderboard-list">
             <!-- Leaderboard entries will be inserted here -->
         </ul>
     </div>
     <div class="game-container">
-        <img src="https://i.imgur.com/z4d4kWk.png" alt="A cat you can click" id="cat-image" aria-label="A cat you can click">
-        <div class="score" aria-live="polite">Score: <span id="score">0</span></div>
+        <!-- Enlaces a imágenes reales de gatos -->
+        <img src="https://i.imgur.com/z4d4kWk.png" alt="Cat Closed" id="cat-image">
+        <div class="score">Score: <span id="score">0</span></div>
     </div>
+    <!-- Sign-In/Sign-Out Buttons -->
     <div class="auth-buttons">
-        <button id="sign-in-button" aria-label="Sign in with Google">Sign In with Google</button>
-        <button id="sign-out-button" style="display: none;" aria-label="Sign Out">Sign Out</button>
+        <button id="sign-in-button">Sign In with Google</button>
+        <button id="sign-out-button" style="display: none;">Sign Out</button>
     </div>
 
     <script>
+        // script.js
+    
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDzku7AoSdbF7GzZTJEtVj5beyl1MnrTAk",
@@ -140,12 +121,12 @@
             appId: "1:191346462383:web:6c8759e5ee2f676594ce5a",
             measurementId: "G-QJT1XPTPDZ"
         };
-
+    
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-
+    
         // Elements
         const catImage = document.getElementById('cat-image');
         const scoreSpan = document.getElementById('score');
@@ -153,66 +134,83 @@
         const signInButton = document.getElementById('sign-in-button');
         const signOutButton = document.getElementById('sign-out-button');
         const leaderboardTitle = document.getElementById('leaderboard-title');
-
+    
         let score = 0;
         let userCountry = 'Unknown';
         let userId = null;
-
+    
         // Imágenes de gato alternadas
         const catClosedSrc = 'https://i.imgur.com/z4d4kWk.png'; // Imagen de gato cerrado
         const catOpenSrc = 'https://i.imgur.com/OdL0XPt.png';   // Imagen de gato abierto
-
+    
+        // Detectar el idioma del navegador y cambiar el texto
+        const userLanguage = navigator.language || navigator.userLanguage;
+        const translations = {
+            en: {
+                leaderboard: "Leaderboard",
+                signIn: "Sign In",
+                signOut: "Sign Out",
+                score: "Score",
+            },
+            es: {
+                leaderboard: "Tabla de Clasificación",
+                signIn: "Iniciar Sesión",
+                signOut: "Cerrar Sesión",
+                score: "Puntuación",
+            },
+            // Add more languages as needed
+        };
+    
+        // Establece el idioma predeterminado en inglés si no se encuentra la traducción
+        const lang = translations[userLanguage.split('-')[0]] || translations['en'];
+    
+        // Cambiar el texto a la lengua del usuario
+        leaderboardTitle.textContent = lang.leaderboard;
+        signInButton.textContent = lang.signIn;
+        signOutButton.textContent = lang.signOut;
+    
         // Obtener País del Usuario
-        async function fetchUserCountry() {
-            try {
-                const response = await fetch('https://ipapi.co/json/');
-                const data = await response.json();
-                userCountry = data.country_name || 'Unknown';
-                if (userId) {
-                    setupUserDocument();
-                    fetchUserScore();
-                }
-            } catch (error) {
-                console.error('Error fetching country:', error);
-            }
+        function fetchUserCountry() {
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    userCountry = data.country_name || 'Unknown';
+                    // Después de obtener el país, configurar el documento del usuario
+                    if (userId) {
+                        setupUserDocument();
+                        fetchUserScore(); // Obtener el puntaje del usuario
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching country:', error);
+                });
         }
-
+    
         // Configurar Documento del Usuario en Firestore
-        async function setupUserDocument() {
-            try {
-                const userRef = db.collection('users').doc(userId);
-                const doc = await userRef.get();
+        function setupUserDocument() {
+            const userRef = db.collection('users').doc(userId);
+            userRef.get().then(doc => {
                 if (!doc.exists) {
-                    await userRef.set({
+                    userRef.set({
                         country: userCountry,
                         count: 0
-                    });
+                    }).catch(error => console.error('Error creating user document:', error));
                 }
-            } catch (error) {
-                console.error('Error creating user document:', error);
-            }
+            }).catch(error => console.error('Error fetching user document:', error));
         }
-
+    
         // Obtener Puntaje del Usuario
-        async function fetchUserScore() {
-            try {
-                const userRef = db.collection('users').doc(userId);
-                const doc = await userRef.get();
+        function fetchUserScore() {
+            const userRef = db.collection('users').doc(userId);
+            userRef.get().then(doc => {
                 if (doc.exists) {
                     const data = doc.data();
                     score = data.count || 0;
                     scoreSpan.textContent = score;
                 }
-            } catch (error) {
-                console.error('Error fetching user score:', error);
-            }
+            }).catch(error => console.error('Error fetching user score:', error));
         }
-
-        // Obtener bandera del país
-        function getCountryFlag(countryCode) {
-            return `https://flagcdn.com/16x12/${countryCode.toLowerCase()}.png`;
-        }
-
+    
         // Actualizar Leaderboard
         function updateLeaderboard() {
             db.collection('users')
@@ -223,36 +221,31 @@
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         const li = document.createElement('li');
-                        const flagImg = document.createElement('img');
-                        const countryCode = data.country_code || 'unknown';
-                        flagImg.src = getCountryFlag(countryCode);
-                        flagImg.alt = data.country;
-
-                        li.appendChild(flagImg);
-                        li.appendChild(document.createTextNode(`${data.country}: ${data.count}`));
+                        li.textContent = `${data.country}: ${data.count}`;
                         leaderboardList.appendChild(li);
                     });
                 });
         }
-
+    
         // Incrementar Puntaje y Actualizar Firestore
         function incrementScore() {
             score += 1;
             scoreSpan.textContent = score;
-
+    
             if (!userId) return;
-
+    
             const userRef = db.collection('users').doc(userId);
+    
             userRef.update({
                 count: firebase.firestore.FieldValue.increment(1)
             }).catch(error => {
                 console.error('Error updating score:', error);
             });
         }
-
+    
         // Manejar Eventos de Ratón
         let isPressed = false;
-
+    
         catImage.addEventListener('mousedown', (e) => {
             if (e.button === 0) { // Click izquierdo
                 isPressed = true;
@@ -260,14 +253,16 @@
                 incrementScore();
             }
         });
-
+    
         document.addEventListener('mouseup', (e) => {
             if (isPressed && e.button === 0) {
                 isPressed = false;
                 catImage.src = catClosedSrc;
             }
         });
-
+    
+        // Autenticación de Firebase
+    
         // Iniciar Sesión con Google
         signInButton.addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -279,7 +274,7 @@
                     console.error('Error al autenticar:', error);
                 });
         });
-
+    
         // Cerrar Sesión
         signOutButton.addEventListener('click', () => {
             auth.signOut()
@@ -290,7 +285,7 @@
                     console.error('Error al cerrar sesión:', error);
                 });
         });
-
+    
         // Cambio de Estado de Autenticación
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -307,36 +302,8 @@
                 scoreSpan.textContent = score;
             }
         });
-
-        // Cambiar el idioma del texto según el idioma del navegador
-        function setLanguageBasedContent() {
-            const userLang = navigator.language || 'en';
-            const translations = {
-                en: {
-                    leaderboard: 'Leaderboard',
-                    score: 'Score',
-                    signIn: 'Sign In with Google',
-                    signOut: 'Sign Out'
-                },
-                es: {
-                    leaderboard: 'Tabla de posiciones',
-                    score: 'Puntuación',
-                    signIn: 'Iniciar sesión con Google',
-                    signOut: 'Cerrar sesión'
-                },
-                // Add more languages as needed
-            };
-
-            const lang = translations[userLang.split('-')[0]] || translations['en'];
-
-            leaderboardTitle.textContent = lang.leaderboard;
-            document.querySelector('.score').firstChild.textContent = `${lang.score}: `;
-            signInButton.textContent = lang.signIn;
-            signOutButton.textContent = lang.signOut;
-        }
-
-        // Cargar Leaderboard Inicial y configurar idioma
-        setLanguageBasedContent();
+    
+        // Cargar Leaderboard Inicial
         updateLeaderboard();
     </script>
 </body>
