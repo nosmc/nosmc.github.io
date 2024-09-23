@@ -126,6 +126,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
+const analytics = firebase.analytics();
 
 // Elements
 const catImage = document.getElementById('cat-image');
@@ -151,6 +152,7 @@ function fetchUserCountry() {
         })
         .catch(error => {
             console.error('Error fetching country:', error);
+            showError('Failed to fetch your country information.');
         });
 }
 
@@ -163,13 +165,17 @@ function setupUserDocument() {
                 country: userCountry,
                 count: 0
             }).catch(error => console.error('Error creating user document:', error));
+        } else {
+            const data = doc.data();
+            score = data.count;
+            scoreSpan.textContent = score;
         }
     }).catch(error => console.error('Error fetching user document:', error));
 }
 
 // Update Leaderboard
 function updateLeaderboard() {
-    db.collection('users')
+    db.collection('leaderboard')
         .orderBy('count', 'desc')
         .limit(10)
         .onSnapshot(snapshot => {
@@ -185,6 +191,12 @@ function updateLeaderboard() {
 
 // Increment Score and Update Firestore
 function incrementScore() {
+    if (!canClick) return; // Prevent rapid clicks
+    canClick = false;
+    setTimeout(() => {
+        canClick = true;
+    }, cooldown);
+
     score += 1;
     scoreSpan.textContent = score;
 
@@ -192,18 +204,80 @@ function incrementScore() {
 
     const userRef = db.collection('users').doc(userId);
 
-    userRef.update({
-        count: firebase.firestore.FieldValue.increment(1)
+    userRef.get().then(doc => {
+        if (doc.exists) {
+            userRef.update({
+                count: firebase.firestore.FieldValue.increment(1)
+            }).then(() => {
+                // Update leaderboard
+                updateLeaderboard();
+                // Also update the country score in leaderboard collection
+                const countryRef = db.collection('leaderboard').doc(userCountry);
+                countryRef.get().then(docCountry => {
+                    if (docCountry.exists) {
+                        countryRef.update({
+                            count: firebase.firestore.FieldValue.increment(1)
+                        });
+                    } else {
+                        countryRef.set({
+                            country: userCountry,
+                            count: 1
+                        });
+                    }
+                }).catch(error => {
+                    console.error('Error updating country score:', error);
+                    showError('Failed to update country score.');
+                });
+                // Log event
+                analytics.logEvent('cat_clicked', { userId: userId, country: userCountry });
+            }).catch(error => {
+                console.error('Error updating user score:', error);
+                showError('Failed to update your score.');
+            });
+        } else {
+            userRef.set({
+                country: userCountry,
+                count: 1
+            }).then(() => {
+                // Update leaderboard
+                updateLeaderboard();
+                // Update the country score
+                const countryRef = db.collection('leaderboard').doc(userCountry);
+                countryRef.get().then(docCountry => {
+                    if (docCountry.exists) {
+                        countryRef.update({
+                            count: firebase.firestore.FieldValue.increment(1)
+                        });
+                    } else {
+                        countryRef.set({
+                            country: userCountry,
+                            count: 1
+                        });
+                    }
+                }).catch(error => {
+                    console.error('Error updating country score:', error);
+                    showError('Failed to update country score.');
+                });
+                // Log event
+                analytics.logEvent('cat_clicked', { userId: userId, country: userCountry });
+            }).catch(error => {
+                console.error('Error creating user document:', error);
+                showError('Failed to create your score record.');
+            });
+        }
     }).catch(error => {
-        console.error('Error updating score:', error);
+        console.error('Error reading user document:', error);
+        showError('Failed to read your score.');
     });
 }
 
 // Handle Mouse Events
 let isPressed = false;
+let canClick = true;
+const cooldown = 100; // milliseconds to prevent rapid clicking
 
 catImage.addEventListener('mousedown', (e) => {
-    if (e.button === 0) { // Left click
+    if (e.button === 0 && canClick) { // Left click
         isPressed = true;
         catImage.src = 'cat_open.png';
         incrementScore();
@@ -228,6 +302,7 @@ signInButton.addEventListener('click', () => {
         })
         .catch((error) => {
             console.error('Error signing in:', error);
+            showError('Failed to sign in. Please try again.');
         });
 });
 
@@ -236,9 +311,13 @@ signOutButton.addEventListener('click', () => {
     auth.signOut()
         .then(() => {
             console.log('User signed out.');
+            // Reset local score display
+            score = 0;
+            scoreSpan.textContent = score;
         })
         .catch((error) => {
             console.error('Error signing out:', error);
+            showError('Failed to sign out. Please try again.');
         });
 });
 
@@ -249,13 +328,23 @@ auth.onAuthStateChanged(user => {
         signOutButton.style.display = 'inline-block';
         userId = user.uid;
         fetchUserCountry();
+        // Optionally, display user info
     } else {
         signInButton.style.display = 'inline-block';
         signOutButton.style.display = 'none';
         userId = null;
         userCountry = 'Unknown';
+        // Reset score display if necessary
+        score = 0;
+        scoreSpan.textContent = score;
     }
 });
+
+// Display Error Messages
+function showError(message) {
+    // Implement a better UI for error messages (e.g., modal or toast)
+    alert(message);
+}
 
 // Initial Leaderboard Load
 updateLeaderboard();
