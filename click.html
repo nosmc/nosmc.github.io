@@ -135,16 +135,9 @@ const leaderboardList = document.getElementById('leaderboard-list');
 const signInButton = document.getElementById('sign-in-button');
 const signOutButton = document.getElementById('sign-out-button');
 
-// Initialize score from localStorage or set to 0
-let score = parseInt(localStorage.getItem('score')) || 0;
-scoreSpan.textContent = score;
-
-// Update score in localStorage whenever it changes
-function updateScore(newScore) {
-    score = newScore;
-    scoreSpan.textContent = score;
-    localStorage.setItem('score', score); // Store score in localStorage
-}
+let score = 0;
+let userCountry = 'Unknown';
+let userId = null;
 
 // Get User Country
 function fetchUserCountry() {
@@ -175,7 +168,7 @@ function setupUserDocument() {
         } else {
             const data = doc.data();
             score = data.count;
-            updateScore(score); // Update score using the new function
+            scoreSpan.textContent = score;
         }
     }).catch(error => console.error('Error fetching user document:', error));
 }
@@ -205,7 +198,7 @@ function incrementScore() {
     }, cooldown);
 
     score += 1;
-    updateScore(score); // Update score using the new function
+    scoreSpan.textContent = score;
 
     if (!userId) return;
 
@@ -318,9 +311,9 @@ signOutButton.addEventListener('click', () => {
     auth.signOut()
         .then(() => {
             console.log('User signed out.');
-            // Reset local score display but keep it in localStorage
-            // score = 0; // Remove this line
-            // scoreSpan.textContent = score; // Remove this line
+            // Reset local score display
+            score = 0;
+            scoreSpan.textContent = score;
         })
         .catch((error) => {
             console.error('Error signing out:', error);
@@ -342,8 +335,8 @@ auth.onAuthStateChanged(user => {
         userId = null;
         userCountry = 'Unknown';
         // Reset score display if necessary
-        // score = 0; // Remove this line
-        // scoreSpan.textContent = score; // Remove this line
+        score = 0;
+        scoreSpan.textContent = score;
     }
 });
 
